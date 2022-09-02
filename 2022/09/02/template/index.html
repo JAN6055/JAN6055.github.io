@@ -4,14 +4,14 @@
   <meta charset="utf-8">
   
   
-  <title>Hexo</title>
+  <title>C++模板详解 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="C++模板模板是一个非常强大的C++功能，STL的各种组件也是基于模板的。所以，无论是写程序了，还是读程序，都有必要了解一下C++的模板。 关于什么是模板或者模板的基本定义，这里就不讲述了，本篇文章主要罗列出在使用模板过程中的一些问题和模板一些令人头疼的语法，并配合简单的demo，如果你只是希望查阅语法或者了解一些知识点，这篇文章可能会帮到你。 声明：使用了using namespace std。">
+  <meta name="description" content="模板是一个非常强大的C++功能，STL的各种组件也是基于模板的。所以，无论是写程序了，还是读程序，都有必要了解一下C++的模板。 关于什么是模板或者模板的基本定义，这里就不讲述了，本篇文章主要罗列出在使用模板过程中的一些问题和模板一些令人头疼的语法，并配合简单的demo，如果你只是希望查阅语法或者了解一些知识点，这篇文章可能会帮到你。 声明：使用了using namespace std。对于应该包">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hexo">
+<meta property="og:title" content="C++模板详解">
 <meta property="og:url" content="http://example.com/2022/09/02/template/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="C++模板模板是一个非常强大的C++功能，STL的各种组件也是基于模板的。所以，无论是写程序了，还是读程序，都有必要了解一下C++的模板。 关于什么是模板或者模板的基本定义，这里就不讲述了，本篇文章主要罗列出在使用模板过程中的一些问题和模板一些令人头疼的语法，并配合简单的demo，如果你只是希望查阅语法或者了解一些知识点，这篇文章可能会帮到你。 声明：使用了using namespace std。">
+<meta property="og:description" content="模板是一个非常强大的C++功能，STL的各种组件也是基于模板的。所以，无论是写程序了，还是读程序，都有必要了解一下C++的模板。 关于什么是模板或者模板的基本定义，这里就不讲述了，本篇文章主要罗列出在使用模板过程中的一些问题和模板一些令人头疼的语法，并配合简单的demo，如果你只是希望查阅语法或者了解一些知识点，这篇文章可能会帮到你。 声明：使用了using namespace std。对于应该包">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==">
 <meta property="og:image" content="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==">
@@ -90,8 +90,8 @@
 <meta property="og:image" content="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==">
 <meta property="og:image" content="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==">
 <meta property="og:image" content="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==">
-<meta property="article:published_time" content="2022-09-02T08:59:49.260Z">
-<meta property="article:modified_time" content="2022-09-02T09:02:02.334Z">
+<meta property="article:published_time" content="2022-09-02T09:05:31.820Z">
+<meta property="article:modified_time" content="2022-09-02T09:05:31.820Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==">
@@ -154,16 +154,26 @@
         <section id="main"><article id="post-template" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2022/09/02/template/" class="article-date">
-  <time class="dt-published" datetime="2022-09-02T08:59:49.260Z" itemprop="datePublished">2022-09-02</time>
+  <time class="dt-published" datetime="2022-09-02T09:05:31.820Z" itemprop="datePublished">2022-09-02</time>
 </a>
     
   </div>
   <div class="article-inner">
     
     
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      C++模板详解
+    </h1>
+  
+
+      </header>
+    
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h2 id="C-模板"><a href="#C-模板" class="headerlink" title="C++模板"></a>C++模板</h2><p>模板是一个非常强大的C++功能，STL的各种组件也是基于模板的。所以，无论是写程序了，还是读程序，都有必要了解一下C++的模板。</p>
+        <p>模板是一个非常强大的C++功能，STL的各种组件也是基于模板的。所以，无论是写程序了，还是读程序，都有必要了解一下C++的模板。</p>
 <p>关于什么是模板或者模板的基本定义，这里就不讲述了，本篇文章主要罗列出在使用模板过程中的一些问题和模板一些令人头疼的语法，并配合简单的demo，如果你只是希望查阅语法或者了解一些知识点，这篇文章可能会帮到你。</p>
 <p>声明：使用了using namespace std。对于应该包含进来的头文件，不再显示的声明。文中所有demo均经过测试。本文章基于《C++ Primer Plus》和《C++ Prime》。</p>
 <hr>
@@ -641,7 +651,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2022/09/02/template/" data-id="cl7k900680002wi9sant74662" data-title="" class="article-share-link">Share</a>
+      <a data-url="http://example.com/2022/09/02/template/" data-id="cl7k957500002yx9s44ji1a3a" data-title="C++模板详解" class="article-share-link">Share</a>
       
       
       
@@ -651,10 +661,19 @@
     
 <nav id="article-nav">
   
+    <a href="/2022/09/02/pass%20val%20and%20use%20move/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          pass by value and use std::move
+        
+      </div>
+    </a>
   
-    <a href="/2022/09/02/pass%20val%20and%20use%20move/" id="article-nav-older" class="article-nav-link-wrap">
+  
+    <a href="/2022/09/02/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title"></div>
+      <div class="article-nav-title">Hello World</div>
     </a>
   
 </nav>
@@ -692,11 +711,11 @@
       <ul>
         
           <li>
-            <a href="/2022/09/02/template/">(no title)</a>
+            <a href="/2022/09/02/pass%20val%20and%20use%20move/">pass by value and use std::move</a>
           </li>
         
           <li>
-            <a href="/2022/09/02/pass%20val%20and%20use%20move/">(no title)</a>
+            <a href="/2022/09/02/template/">C++模板详解</a>
           </li>
         
           <li>
