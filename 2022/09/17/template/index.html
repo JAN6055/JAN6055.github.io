@@ -140,7 +140,7 @@
             
             <span class="tag">
                 
-                <a href="/tags/C/" style="color: #ffa2c4">
+                <a href="/tags/C/" style="color: #00bcd4">
                     C++
                 </a>
             </span>
@@ -458,24 +458,21 @@ bool func(const T t1, const T t2)
     func&lt;int&gt;(a,b);
 </code></pre>
 <p><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
-<p>这里的int转为cosnt int是允许的，因为这是按值传递，并且non-const 转为 cosnt也不会带来什么坏处。因此，编译器会执行这样的转换。</p>
+<p>这里的int转为const int是允许的，因为这是按值传递，并且non-const 转为 const也不会带来什么坏处。因此，编译器会执行这样的转换。</p>
 <p>我们不妨修改一下这个函数</p>
 <pre><code class="cpp">bool func(const T &amp; t1, const T &amp; t2);
 bool func(T &amp; t1, T &amp; t2);
 </code></pre>
 <p><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
 <p>上述第一个声明会正常调用——虽然是引用，和上面的是同样的道理。</p>
-<p>而第二个却不会正常调用——因为b是一个cosnt 将要转换为non-const，我中转换是不安全的，所以编译不允许这样的转换。</p>
+<p>而第二个却不会正常调用——因为b是一个const 将要转换为non-const，我中转换是不安全的，所以编译不允许这样的转换。</p>
 <p>假设我们这样调用两个函数</p>
 <pre><code class="cpp">func&lt;int&gt;(10,20);
 </code></pre>
 <p><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
-<p>同样的，对于第一个是允许的——虽然讲右值绑定到左值引用上，但是我们用const修饰形参，保证其不会改变，所以编译器同意这样的转换。</p>
+<p>同样的，对于第一个是允许的——虽然将右值绑定到左值引用上，但是我们用const修饰形参，保证其不会改变，所以编译器同意这样的转换。</p>
 <p>而对于第二个，编译器则不允许这样的转换，因为我们的形参是non-const的，不能保证不修改形参的值，形参正好又是一个引用，这样可以修改实参的值——恰好实参是一个右值——是不允许被修改的，所以编译器不允许这样的转换。</p>
 <p>基于上面的转换规则，我们可以知道，如果函数形参不是引用类型，则可以对数组或者函数类型的实参应用正常的指针转换。</p>
-<blockquote>
-<p>上面的是C++ Primer的原文，实际上笔者在学习的过程中，发现了其错误。</p>
-</blockquote>
 <p>先来看一下代码</p>
 <pre><code class="cpp">template &lt;typename T&gt; bool func(const T &amp; t1, const T &amp; t2);
 ...
@@ -483,24 +480,6 @@ int a[10];
 int b[10];
 func(a,b);
 </code></pre>
-<p><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
-<p>这样是可以的。那这样呢？</p>
-<pre><code class="cpp">template &lt;typename T&gt; T func(const T &amp; t1, const T &amp; t2);
-</code></pre>
-<p><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
-<pre><code class="cpp">template&lt;typename T1, typename T2, typename T3&gt;
-T1 sum(T2 t2, T3 t3)
-&#123;
-    return t2 + t3;
-&#125;
-
-...
-
-sum&lt;long long&gt;(10,200); //or sum&lt;long long, int, int&gt;();
-</code></pre>
-<p><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
-<p>就不可以了，这个声明对应着C++ Primer的声明。</p>
-<p>为什么一样的形参列表只有返回值不同编译器就会发出警告，这是为什么。</p>
 <p>其实我们到目前为止的讨论，都适用于普通函数，模板的本质其实也是模板为我们生成对应的版本，为了解开上面的疑惑，我们可以先来复习以下引用的知识。</p>
 <pre><code class="cpp">    int *&amp; ref_apple_point = &amp;apple; //error
     int * const &amp; ref_apple_point_const = &amp;apple; //ok
