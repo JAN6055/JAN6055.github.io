@@ -140,7 +140,7 @@
             
             <span class="tag">
                 
-                <a href="/tags/Modern-C/" style="color: #00a596">
+                <a href="/tags/Modern-C/" style="color: #03a9f4">
                     Modern C++
                 </a>
             </span>
@@ -158,7 +158,60 @@
     <div class="content" v-pre>
         <p>就拿vector举例子</p>
 <p>我们转到其代码</p>
-<p><img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20220917130246653.png" alt="image-20220917130246653"></p>
+<pre><code class="C++">  template&lt;typename _Container&gt;
+    inline _GLIBCXX17_CONSTEXPR auto
+    begin(_Container&amp; __cont) -&gt; decltype(__cont.begin())
+    &#123; return __cont.begin(); &#125;
+
+  /**
+   *  @brief  Return an iterator pointing to the first element of
+   *          the const container.
+   *  @param  __cont  Container.
+   */
+  template&lt;typename _Container&gt;
+    inline _GLIBCXX17_CONSTEXPR auto
+    begin(const _Container&amp; __cont) -&gt; decltype(__cont.begin())
+    &#123; return __cont.begin(); &#125;
+
+  /**
+   *  @brief  Return an iterator pointing to one past the last element of
+   *          the container.
+   *  @param  __cont  Container.
+   */
+  template&lt;typename _Container&gt;
+    inline _GLIBCXX17_CONSTEXPR auto
+    end(_Container&amp; __cont) -&gt; decltype(__cont.end())
+    &#123; return __cont.end(); &#125;
+
+  /**
+   *  @brief  Return an iterator pointing to one past the last element of
+   *          the const container.
+   *  @param  __cont  Container.
+   */
+  template&lt;typename _Container&gt;
+    inline _GLIBCXX17_CONSTEXPR auto
+    end(const _Container&amp; __cont) -&gt; decltype(__cont.end())
+    &#123; return __cont.end(); &#125;
+
+  /**
+   *  @brief  Return an iterator pointing to the first element of the array.
+   *  @param  __arr  Array.
+   */
+  template&lt;typename _Tp, size_t _Nm&gt;
+    inline _GLIBCXX14_CONSTEXPR _Tp*
+    begin(_Tp (&amp;__arr)[_Nm]) noexcept
+    &#123; return __arr; &#125;
+
+  /**
+   *  @brief  Return an iterator pointing to one past the last element
+   *          of the array.
+   *  @param  __arr  Array.
+   */
+  template&lt;typename _Tp, size_t _Nm&gt;
+    inline _GLIBCXX14_CONSTEXPR _Tp*
+    end(_Tp (&amp;__arr)[_Nm]) noexcept
+    &#123; return __arr + _Nm; &#125;
+</code></pre>
 <p>可以看见对于const的重载版本，返回的为const_iterator.</p>
 <h1 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h1><p>在Modern Effective C++中说到，在通用的代码中，优先选用非成员版的begin()&#x2F;end(),也正是因为如此。</p>
 <p>书中给出了cbegin()的一种实现方式。</p>
@@ -168,8 +221,7 @@ auto cbegin(const C &amp; c)-&gt; decltype(c.begin()) &#123;
 &#125;
 </code></pre>
 <p>因为对于具有const性质的容器（在标准库中的是这样，如果是其他库提供的容器，可能不会提供这样的行为），返回的迭代器是const_iterator,所以，这样做是正确的。</p>
-<p>对于数组来说，也是一样的。begin对于数组有特例化。</p>
-<p><img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20220917132258921.png" alt="image-20220917132258921"></p>
+<p>对于数组来说，也是一样的。begin对于数组有特例化。 上面的代码已经看到了。</p>
 <p>当数组具有const性质的时候，例如const int nums[10], _Tp会被推导为const int, 返回类型就是const int *, 就是数组的const_iterator</p>
 
     </div>
