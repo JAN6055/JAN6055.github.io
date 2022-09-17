@@ -55,6 +55,63 @@
 
   
     
+    <h3 class="article-title"><a href="/2022/09/17/const-container-s-iterator-is-const-iterator/"><span>const container&#39;s iterator is const_iterator</span></a></h3>
+    
+  
+
+  <div class="article-top-meta">
+    <span class="posted-on">
+      <a href="/2022/09/17/const-container-s-iterator-is-const-iterator/" rel="bookmark">
+        <time class="entry-date published" datetime="2022-09-17T05:33:39.000Z">
+          2022-09-17
+        </time>
+      </a>
+    </span>
+  </div>
+
+
+  
+
+  <div class="article-content">
+    <div class="entry">
+      
+        <p>就拿vector举例子</p>
+<p>我们转到其代码</p>
+<p><img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20220917130246653.png" alt="image-20220917130246653"></p>
+<p>可以看见对于const的重载版本，返回的为const_iterator.</p>
+<h1 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h1><p>在Modern Effective C++中说到，在通用的代码中，优先选用非成员版的begin()&#x2F;end(),也正是因为如此。</p>
+<p>书中给出了cbegin()的一种实现方式。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> C&gt;</span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">cbegin</span><span class="params">(<span class="type">const</span> C &amp; c)</span>-&gt; <span class="title">decltype</span><span class="params">(c.begin())</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> c.<span class="built_in">begin</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>因为对于具有const性质的容器（在标准库中的是这样，如果是其他库提供的容器，可能不会提供这样的行为），返回的迭代器是const_iterator,所以，这样做是正确的。</p>
+<p>对于数组来说，也是一样的。begin对于数组有特例化。</p>
+<p><img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20220917132258921.png" alt="image-20220917132258921"></p>
+<p>当数组具有const性质的时候，例如const int nums[10], _Tp会被推导为const int, 返回类型就是const int *, 就是数组的const_iterator</p>
+
+      
+    </div>
+
+  </div>
+
+  <div class="article-footer">
+    <div class="article-meta pull-left">
+
+    
+
+    
+
+    </div>
+
+    
+  </div>
+</article>
+
+
+
+  <article>
+
+  
+    
     <h3 class="article-title"><a href="/2022/09/17/pass-by-value-and-use-std-move/"><span>pass by value and use std::move</span></a></h3>
     
   
