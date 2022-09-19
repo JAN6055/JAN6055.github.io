@@ -285,7 +285,7 @@ private:
     int age&#123;&#125;;
 &#125;;
 </code></pre>
-<p>但是这个选择不够通用，如果对象没有移动语义，或者是POD类型，这样做性能反而会下降。你可以阅读这个博客‘link’来了解相关信息。</p>
+<p>但是这个选择不够通用，如果对象没有移动语义，或者是POD类型，这样做性能反而会下降。你可以阅读这个文章<a target="_blank" rel="noopener" href="https://jan6055.github.io/2022/09/17/pass-by-value-and-use-std-move/%E6%9D%A5%E4%BA%86%E8%A7%A3%E7%9B%B8%E5%85%B3%E4%BF%A1%E6%81%AF%E3%80%82">https://jan6055.github.io/2022/09/17/pass-by-value-and-use-std-move/来了解相关信息。</a></p>
 <h3 id="标签分派"><a href="#标签分派" class="headerlink" title="标签分派"></a><strong>标签分派</strong></h3><p>如果你看过一些STL的源代码，可能会熟悉这种方式，大致的思路是这样的，我们把构造函数委派给其他函数，这些函数做具体的实现，并且他们有不同的重载版本，分别接受构造所需要的参数和一个名为true_type&#x2F;false_type类型的对象</p>
 <blockquote>
 <p>true_type和false_type由标准库提供，仅仅是定义，并未添加任何数据和行为， 实现标签的效果。</p>
@@ -392,21 +392,21 @@ private:
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #00a596">
+            <a href="/tags/Modern-C/" style="color: #03a9f4">
                 Modern C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #00bcd4">
+            <a href="/tags/C/" style="color: #ffa2c4">
                 C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/TMP/" style="color: #00bcd4">
+            <a href="/tags/TMP/" style="color: #ffa2c4">
                 TMP
             </a>
         </span>
@@ -562,14 +562,14 @@ work(getFoo_6(10,10.3,&quot;hello&quot;));
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #ffa2c4">
+            <a href="/tags/Modern-C/" style="color: #03a9f4">
                 Modern C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #03a9f4">
+            <a href="/tags/C/" style="color: #00a596">
                 C++
             </a>
         </span>
@@ -1444,7 +1444,7 @@ void buffer_fun(Args &amp;&amp;... args)
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #ffa2c4">
+            <a href="/tags/C/" style="color: #03a9f4">
                 C++
             </a>
         </span>
@@ -1549,14 +1549,14 @@ auto cbegin(const C &amp; c)-&gt; decltype(c.begin()) &#123;
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #ff7d73">
+            <a href="/tags/Modern-C/" style="color: #00a596">
                 Modern C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #00a596">
+            <a href="/tags/C/" style="color: #03a9f4">
                 C++
             </a>
         </span>
@@ -1732,14 +1732,14 @@ operator=(&amp;)  //Clang-Tidy：将 std::move() 的结果作为 const 引用参
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #ffa2c4">
+            <a href="/tags/Modern-C/" style="color: #03a9f4">
                 Modern C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #03a9f4">
+            <a href="/tags/C/" style="color: #ff7d73">
                 C++
             </a>
         </span>
