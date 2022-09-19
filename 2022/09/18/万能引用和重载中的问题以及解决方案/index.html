@@ -1,0 +1,419 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+        <title>万能引用和重载中的问题以及解决方案 | Hello @You</title>
+        <meta name="author" content="Jan6055">
+        <meta name="description" content="">
+        <meta name="keywords" content="C++,Rust,Jan6055">
+        <link rel="icon" href="https://avatars.githubusercontent.com/u/94843786?s=400&u=3e0bac8cdc09c80d159d076c0503db566f8f0579&v=4">
+        <script src="https://cdn.staticfile.org/instant.page/5.1.0/instantpage.min.js" type="module"></script>
+        <script src="https://cdn.staticfile.org/font-awesome/6.1.1/js/all.min.js"></script>
+        
+        <link rel="stylesheet" href="/css/fonts.min.css">
+        <link rel="stylesheet" href="/css/particlex.css">
+        
+        <script src="https://cdn.staticfile.org/vue/3.2.33/vue.global.prod.min.js"></script>
+    <meta name="generator" content="Hexo 6.2.0"></head>
+    <body>
+        <div id="loading" style="height:100vh;width:100vw;position:fixed;display:flex;z-index:200;justify-content:space-between;background:#fff;transition:opacity 0.3s ease-out"><div style="position:fixed;height:100vh;width:100vw;display:flex;justify-content:center;align-items:center"><div id="loadcontent" style="width:50vmin;height:50vmin;padding:50px;border-radius:50%;display:flex;justify-content:center;align-items:center;border:solid 10px #a3ddfb;text-align:center"><div><h2>LOADING...</h2><p style="word-break:keep-all">加载过慢请开启缓存(浏览器默认开启)</p><div><img alt="loading" src="/loading.gif"></div></div></div></div></div>
+        <div id="layout">
+            <i data-fa-symbol="calendar-solid" class="fa-solid fa-calendar fa-fw"></i>
+            <i data-fa-symbol="bookmark-solid" class="fa-solid fa-bookmark fa-fw"></i>
+            <i data-fa-symbol="tags-solid" class="fa-solid fa-tags fa-fw"></i>
+            <transition name="into">
+                <div v-show="show_page" style="display: -not-none">
+                    <div id="menu_show">
+                         
+<nav id="menu">
+    <div class="desktop-menu">
+        <a href="/">
+            <span class="title">Hello @you</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;about</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;tags</span>
+        </a>
+        
+    </div>
+    <div :class="'phone-menu ' + menu_show" id="phone-menu">
+        <div class="curtain" @click="menu_show = !menu_show" v-show="menu_show"></div>
+        <div :class="'title'" @click="menu_show = !menu_show">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;Hello @you</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="menu_show">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">about</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+                    </div>
+                    <div id="main">
+                        
+<div class="article">
+    <div>
+        <h1>万能引用和重载中的问题以及解决方案 </h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
+            </span>
+            2022/9/18
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/Modern-C/" style="color: #00bcd4">
+                    Modern C++
+                </a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/C/" style="color: #ffa2c4">
+                    C++
+                </a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/TMP/" style="color: #03a9f4">
+                    TMP
+                </a>
+            </span>
+            
+        </span>
+        
+    </div>
+    <div class="content" v-pre>
+        <h1 id="使用万能引用来通用式的处理左值右值排列组合的情况"><a href="#使用万能引用来通用式的处理左值右值排列组合的情况" class="headerlink" title="使用万能引用来通用式的处理左值右值排列组合的情况"></a>使用万能引用来通用式的处理左值右值排列组合的情况</h1><p>我曾经在一次开发中遇到过这样的问题，我有一个User class，他里面有string：id, name, passward，以及其他内置类型.如果是在C++11之前，写出一个好的构造函数应当是很容易的，但是C++11之后，有了移动语义，写出一个完美的构造函数确实不容易。</p>
+<p>这样想，我想尽可能的利用好移动语义，假设我们的name等等成员不是一个短字符串，这时候移动语义对性能会有优化。现在又3个string类型的成员，考虑到每个成员的左值和右值，有8种构造函数的写法(不算默认构造)。要是这种可以进行移动的成员再多几个呢——这是一个指数级增长的趋势。这种写法显然是不行的。那就用模板——还要是万能模板。可以初步设计出这样的构造函数。</p>
+<pre><code class="C++">class User &#123;
+public:
+    template &lt;typename T&gt;
+    User(T &amp;&amp; _name, T &amp;&amp; _id, T &amp;&amp; _password) :
+        name(forward&lt;T&gt;(_name), forward&lt;T&gt;(_id),forward&lt;T&gt;(_password)) &#123; &#125;
+&#125;
+</code></pre>
+<p>这样哪个无论什么样的组合，我们均可用一个函数来完成。而且对于其他有移动语义的类型来书，再加上一个F &amp;&amp;即可，这是线性增加的，还算不错。</p>
+<h1 id="万能引用和重载会互相冲突"><a href="#万能引用和重载会互相冲突" class="headerlink" title="万能引用和重载会互相冲突"></a>万能引用和重载会互相冲突</h1><p>当形参只有一个的时候，会有些微妙的变化。</p>
+<p>现在假设User中只有一个string类型的name，如果你依旧考虑像上面一样实现构造函数，会有一些隐晦的错误。</p>
+<pre><code class="C++">class User &#123;
+public:
+    template&lt;typename T&gt;
+    User(T &amp;&amp; _name): name(std::forward&lt;T&gt;(_name)) &#123; &#125;
+private:
+    string name;
+&#125;;
+
+
+int main()
+&#123;
+    User user(&quot;hello&quot;); //很好，这个甚至是直接再类中用const char * 直接构造了一个字符串
+    User user1(user);       // error
+    return 0;
+&#125;
+</code></pre>
+<p>编译器会给出我们这样的一个错误</p>
+<blockquote>
+<p>No matching constructor for initialization of ‘std::string’ (aka ‘basic_string<char>‘)</p>
+</blockquote>
+<p>编译器说无法匹配string的构造函数，莫名奇妙有些。<br>实际上，编译器给出的错误一点问题也没有。</p>
+<p>我们先来回复一个拷贝构造的函数原型 <code>User(const User &amp; user)</code><br>我们传递的user不具有const性质，而模板会生成一个non-const的形参，看起来像这样<code>User(User &amp; _name): name(_name)</code>(此处省略forward,下同)，编译器觉得这个non-const的版本更加匹配，随后使用一个User对象来构造string，那肯定是不行的。<br>如果我们的user具有const性质，编译器就不会报错。</p>
+<pre><code class="C++">int main()
+&#123;
+    const User user(&quot;hello&quot;); 
+    User user1(user);       // 工作的很好
+    return 0;
+&#125;
+</code></pre>
+<p>这种和直觉上不服的行为肯定不是我们想要的，如果你留意编译器的警告，或者说是clang-tidy的静态分析，你会看见这样的警告</p>
+<blockquote>
+<p>Clang-Tidy: Constructor accepting a forwarding reference can hide the copy and move constructors</p>
+<p>Clang-Tidy：接受转发引用的构造函数可以隐藏复制和移动构造函数</p>
+</blockquote>
+<p>还有这样的情况，假设我们只需要构造一个int类型的数据成员，其他的数据成员都调用默认构造。</p>
+<pre><code class="C++">class User &#123;
+public:
+    template&lt;typename T&gt;
+    explicit User(T &amp;&amp; _name): name(std::forward&lt;T&gt;(_name)) &#123;
+        cout &lt;&lt; &quot;T&amp;&amp;&quot; &lt;&lt; endl;
+    &#125;
+    explicit User(int _age): age(_age), name() &#123; &#125;
+private:
+    string name;
+    int age;
+&#125;;
+int main()
+&#123;
+    User user(25);
+    //...假设这里经过算法的计算，得出的一个double类型来当作age， 我们也期望这种隐式转换double -&gt; int(即向下取整)
+    double ans = 18.63;
+    User user1(ans)
+    return 0;
+&#125;
+</code></pre>
+<p>不好了，编译器又给出了错误！</p>
+<p>原因是万能引用为我们实例化了一个<code>User (double &amp; _name): name(_name)</code>,精确度高于手写的int版本的构造函数——用一个double构造一个string，当然是不行的了。</p>
+<p>类似的成员函数应用万能模板也有这样的重载问题。</p>
+<h2 id="在继承体系中，这个问题也会出现，甚至更加错综复杂"><a href="#在继承体系中，这个问题也会出现，甚至更加错综复杂" class="headerlink" title="在继承体系中，这个问题也会出现，甚至更加错综复杂"></a>在继承体系中，这个问题也会出现，甚至更加错综复杂</h2><p>现在Reader继承User</p>
+<pre><code class="C++">class User &#123;
+public:
+    template&lt;typename T&gt;
+    explicit User(T &amp;&amp; _name): name(std::forward&lt;T&gt;(_name)) &#123;
+        cout &lt;&lt; &quot;T&amp;&amp;&quot; &lt;&lt; endl;
+    &#125;
+    explicit User(int _age): age(_age), name() &#123; &#125;
+    User(const User &amp; user) = default;
+private:
+    string name;
+    int age;
+&#125;;
+
+class Reader : public User &#123;
+public:
+    Reader(const Reader &amp; reader) :
+            User(reader), phone_number(reader.phone_number) &#123; &#125;
+private:
+    string phone_number;
+&#125;;
+</code></pre>
+<p>编译器依旧还是这个错误</p>
+<blockquote>
+<p>No matching constructor for initialization of ‘std::string’ (aka ‘basic_string<char>‘)</p>
+</blockquote>
+<p>原因是Reader &amp; cast -&gt; User &amp; 是一种隐式转换。</p>
+<p>万能引用又出来作怪，生成这样的版本<code>User(Reader &amp; _name): name(_name))</code></p>
+<p>显然，这个版本更加精确，使用Reader &amp; 构造 string当然不行。</p>
+<p>《Modern Effective C++》,对些情况是这样总结的</p>
+<ul>
+<li>把万能引用作为候选重载型别，几乎总会让该重载版本在始料未及的情况下被调用</li>
+<li>完美转发构造函数的问题尤为严重，因为对于非常量的左值型别而言，他们一般都会形成相对于复制构造函数的更加匹配，并且还会劫持派生类中对基类的复制和构造函数的调用。</li>
+</ul>
+<h1 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h1><p>解决这个问题的方法还是有很多的，我们可以权衡利弊的来考虑。</p>
+<h2 id="退而求其次"><a href="#退而求其次" class="headerlink" title="退而求其次"></a>退而求其次</h2><p>不是谁都有精力去学习复杂的Modern C++(这里大部分的意思是关于TMP)，使用一些简单的新特性也是不错的。我们可以完全不用万能引用，因为相比代码可读性极具下降而带来不稳定的性能提升，如果你不是一个完美主义者，代码可读性应当是应该的选择。</p>
+<h3 id="舍弃重载"><a href="#舍弃重载" class="headerlink" title="舍弃重载"></a><strong>舍弃重载</strong></h3><p>大可像Rust那样，舍弃重载，也是解决办法之一，但是由于语法问题，构造函数时语言固有的，或许你也可以麻烦一点，用static函数实现？就使用默认构造，然后一一修改值——这样效率反而低了，舍本逐末不可取。总之，舍弃重载可以暂时的解决问题，但不是一个长久之计。</p>
+<h3 id="传递const-T-amp"><a href="#传递const-T-amp" class="headerlink" title="传递const T &amp;"></a>传递const T &amp;</h3><p>这就是98时候的写法了，经典永不过时，这种写法简洁又不失高性能，并且不会又其他的问题出现，这种方式大家应当都很熟悉，还是很值得考虑的。</p>
+<h2 id="使用现代方法"><a href="#使用现代方法" class="headerlink" title="使用现代方法"></a><strong>使用现代方法</strong></h2><p>如果你选择了使用现代方法解决此问题，就代表了你踏进了Modern C++的大门，不仅仅是关于&amp;&amp;和&amp;的语法游戏，你必须具有TMP(模板元编程的基础),才可以游刃有余的写出奇妙的Modern C++代码，如果你还不具备这项技能，又想使用高级手法来解决问题，那你应当做好准备迎接一轮又一轮的新特性学习。</p>
+<blockquote>
+<p>题外话：我把Modern C++代码说做是“奇妙的”，而不是“精美的”、“简洁的”这类词是有原因的，一个基本的事实，Modern C++代码并不简洁，甚至是丑陋和复杂，但这些复杂的代码背后的工作原理，了解之后没有人不会惊叹，不会大呼奇妙。</p>
+</blockquote>
+<h3 id="传值"><a href="#传值" class="headerlink" title="传值"></a><strong>传值</strong></h3><p>可以使用值传递+移动构造的方式来代替万能引用和转发。如果对象的移动语义有较低的成本使用 pass by value and use std::move也是一个比较好的选择。</p>
+<p>比如说像这样</p>
+<pre><code class="C++">class User &#123;
+public:
+    template&lt;typename T&gt;
+    explicit User(string _name): name(std::move(_name)) &#123;
+    &#125;
+    explicit User(int _age): age(_age), name() &#123; &#125;
+    User(const User &amp; user) = default;
+private:
+    string name;
+    int age&#123;&#125;;
+&#125;;
+</code></pre>
+<p>但是这个选择不够通用，如果对象没有移动语义，或者是POD类型，这样做性能反而会下降。你可以阅读这个博客‘link’来了解相关信息。</p>
+<h3 id="标签分派"><a href="#标签分派" class="headerlink" title="标签分派"></a><strong>标签分派</strong></h3><p>如果你看过一些STL的源代码，可能会熟悉这种方式，大致的思路是这样的，我们把构造函数委派给其他函数，这些函数做具体的实现，并且他们有不同的重载版本，分别接受构造所需要的参数和一个名为true_type&#x2F;false_type类型的对象</p>
+<blockquote>
+<p>true_type和false_type由标准库提供，仅仅是定义，并未添加任何数据和行为， 实现标签的效果。</p>
+</blockquote>
+<p>判断T是不是整形，我们可以使用<code>std::is_integral</code>，但是考虑左值的情况，T被推断为int &amp;，我们应当先把引用性质给移除，可以使用<code>std::remove_reference</code>得出的代码就是这样<code>std::is_integral&lt;std::remove_reference_t&lt;T&gt;&gt;()</code>, 我们使用的_t后缀的模板（TMP中叫做元函数）来直接获得类型——这是C++14支持的，但是，别忘了使用<code>()</code>来生成一个对象，才可用于重载。</p>
+<p>具体的实现如下</p>
+<pre><code class="C++">class User &#123;
+public:
+    template&lt;typename T&gt;
+    explicit User(T &amp;&amp; arg) &#123;
+        init(std::forward&lt;T&gt;(arg),
+        typename std::is_integral&lt;std::remove_reference_t&lt;T&gt;&gt;()
+        );
+    &#125;
+
+    template&lt;typename T&gt;
+    void init(T &amp;&amp; _name, false_type) &#123;
+        name = std::forward&lt;T&gt;(_name);  //这里是赋值操作，如果使用这样的手法对于构造函数而言，就只能这样
+        age = 0;
+    &#125;
+    void init(int _age, true_type) &#123;
+        //name会隐式的初始化
+        age = _age;
+    &#125;
+    User(const User &amp; user) = default;
+private:
+    string name;
+    int age&#123;&#125;;
+&#125;;
+</code></pre>
+<p>这确实够复杂，先别放松，更复杂的还在后面！</p>
+<h3 id="使用TMP对万能模板做出限制"><a href="#使用TMP对万能模板做出限制" class="headerlink" title="使用TMP对万能模板做出限制"></a><strong>使用TMP对万能模板做出限制</strong></h3><p>先说明一点，你应当了解TMP并且熟悉其最基本构成，还应当知道SFINAE，如果你不知道，快去找相关书籍看吧，如果我把这里展开说明，并且把用到的TMP技巧细节全部说一遍，那就偏离主题了。并且，我也没有足够的能力讲清TMP中的所有细节和问题，这件事情你应当请教C++标准委员会(bushi</p>
+<p>我们可以让万能引用拒绝User类的对象，也拒绝int类的对象。在现代C++中，这是可以实现的——你甚至能在98里实现，但是需要点技巧。</p>
+<p>使用enable_if来让编译器类型替换失败，也就是SFINAE, 但是我们应当考虑到左值的情况T , T&amp;并不是一种类型，比如int, int&amp;, 还有<code>const T, volatile T, const volatileT</code> 这些和T均不是一种类型。可以使std::decay来去掉cvr性质。</p>
+<p>具体的实现是这样</p>
+<pre><code class="C++">class User &#123;
+public:
+    template&lt;typename T,
+             typename = typename std::enable_if&lt;!std::is_same&lt;User,std::decay_t&lt;T&gt;&gt;::value &amp;&amp;
+                                                !std::is_integral&lt;std::remove_reference&lt;T&gt;&gt;::value
+                                               &gt;::type&gt;
+    explicit User(T &amp;&amp; _name) : name(std::forward&lt;T&gt;(_name)) &#123; &#125;
+    explicit User(int _age) : age(_age), name()&#123; &#125;
+    User(const User &amp; user) = default;
+private:
+    string name;
+    int age&#123;&#125;;
+&#125;;
+</code></pre>
+<p>这样实现还真是复杂，如果没有C++14<code>_t</code>的元函数，那么将会更加复杂，感谢C++14!<br>大功告成了吗，并没有。对于继承关系来说，还是存在问题。如果子类中调用基类的构造函数，就是我们讨论过的哪个问题。在实例化的时候，在经过类型退化后，T被推断为Reader，这就又回到了我们之前所说的问题。</p>
+<p>好在STL中提供了<code>is_base_of</code>这个元函数，能够判断一个类型是否是另一个类型的基类,<code>is_base_of&lt;T,T&gt;::value = ture</code></p>
+<p>于是我们可以简单的修改一下代码。</p>
+<pre><code class="C++">class User &#123;
+public:
+    template&lt;typename T,
+             typename = typename std::enable_if&lt;!std::is_base_of&lt;User,std::decay_t&lt;T&gt;&gt;::value &amp;&amp;
+                                                !std::is_integral&lt;std::remove_reference&lt;T&gt;&gt;::value
+                                               &gt;::type&gt;
+    explicit User(T &amp;&amp; _name) : name(std::forward&lt;T&gt;(_name)) &#123; &#125;
+    explicit User(int _age) : age(_age), name()&#123; &#125;
+    User(const User &amp; user) = default;
+private:
+    string name;
+    int age&#123;&#125;;
+&#125;;
+
+class Reader : public User &#123;
+public:
+    Reader(const Reader &amp; reader) :
+            User(reader), phone_number(reader.phone_number) &#123; &#125;
+private:
+    string phone_number;
+&#125;;
+</code></pre>
+<p>问题迎刃而解！你现在是否感叹Modern C++的巧妙了呢？</p>
+<h1 id="万能模板的不足"><a href="#万能模板的不足" class="headerlink" title="万能模板的不足"></a>万能模板的不足</h1><p>你会说，能有什么不足呢？这么高级的技巧，多么的神奇。实际上，万能引用的强大如此，不足也是如此。回头看看经典版本</p>
+<pre><code class="C++">class User &#123;
+public:
+    explicit User(const string &amp; _name): name(_name) &#123; &#125;
+    explicit User(int _age) : age(_age), name() &#123; &#125;
+    User(const User &amp;) = default;
+private:
+    string name;
+    int age&#123;&#125;;
+&#125;;
+</code></pre>
+<p>正所谓洗去铅华只剩金，实现了同样的功能，难道我们要为性能舍弃掉如此的可读性和简洁性吗。同样的，如果是团队合作，小伙伴们可都不一定会这样的高级技巧。到头来还要你自己维护。如果没有注释，等个几天——你就不知道自己写的是什么啦，真是太棒了！</p>
+<p>使用模板的一个不可避免的问题就是当错误发生时，不好定位。你应该有没有按照规范使用过STL容器的经历，看见了编译器给你报告的错误。很吓人，如果没有经验的人看到这些错误（可能有几百行甚至几千行）。该怎么定位问题。虽然我们可以使用<code>statci_assert</code>来未雨绸缪。但也不是所有的时候情况都很客观。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>总之，要不要使用如此晦涩复杂的特性，还是取决于程序员本身，你也可以使用const &amp;快快乐乐的写代码，正因为</p>
+<blockquote>
+<p>你没有用到的东西，不应当给你增添任何负担，你用到的东西，没有什么比C++提供的更好了</p>
+</blockquote>
+<p>使用Modern C++也是你自己的选择，除非写库，很少有人能用到模板开发，真正把这些Modern C++特性用到生产环境的，并且用好的，我想都是在C++领域发光发热的大牛们吧。</p>
+
+    </div>
+    
+</div>
+                         
+<footer id="footer">
+    <div class="footer-wrap">
+        <div>
+            © 20xx - 2022 Hello @you
+            <span class="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            @Jan6055
+        </div>
+        <div></div>
+        <div>Based on the <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo Engine</a> & <a
+                target="_blank" rel="noopener" href="https://github.com/argvchs/hexo-theme-particlex">ParticleX Theme</a></div>
+        
+    </div>
+</footer>
+                    </div>
+                </div>
+            </transition>
+            <div id="img_show">
+                <img id="img_content" alt="img_show">
+            </div>
+        </div>
+        <script src="https://cdn.staticfile.org/highlight.js/11.5.1/highlight.min.js"></script>
+        <script src="/js/particlex.js"></script>
+        <script src="/js/showimg.js"></script>
+        
+
+    </body>
+</html>
