@@ -272,7 +272,7 @@
     &#125;
   &#125;;
 </code></pre>
-<p>__uniq_ptr_impl是实现部分，把这个类读懂，就读懂了unique_ptr的一半。unique_ptr的核心实现，全部在这个类中。没有复杂的逻辑，但是做到类型安全的实现方法，还是比较难的部分。__uniq_ptr_impl中没有复杂的关于类型安全的约束。比较的的约束在<code>uniqe_ptr&lt;T&gt;</code>和<code>unique_ptr&lt;T[]&gt;</code>中</p>
+<p>__uniq_ptr_impl是实现部分，把这个类读懂，就读懂了unique_ptr的一半。unique_ptr的核心实现，全部在这个类中。没有复杂的逻辑，但是做到类型安全的实现方法，还是比较难的部分。__uniq_ptr_impl中没有复杂的关于类型安全的约束。比较复杂的约束在<code>uniqe_ptr&lt;T&gt;</code>和<code>unique_ptr&lt;T[]&gt;</code>中</p>
 <pre><code class="C++">// Manages the pointer and deleter of a unique_ptr
 //_TP是指向的类型， _DP是删除器的类型
   template &lt;typename _Tp, typename _Dp&gt; class __uniq_ptr_impl &#123;
@@ -1004,21 +1004,21 @@ int main() &#123;
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #ffa2c4">
+            <a href="/tags/Modern-C/" style="color: #00a596">
                 Modern C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #03a9f4">
+            <a href="/tags/C/" style="color: #ffa2c4">
                 C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C-Library/" style="color: #00a596">
+            <a href="/tags/C-Library/" style="color: #ffa2c4">
                 C++ Library
             </a>
         </span>
@@ -1276,7 +1276,7 @@ private:
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #ff7d73">
+            <a href="/tags/Modern-C/" style="color: #ffa2c4">
                 Modern C++
             </a>
         </span>
@@ -1290,7 +1290,7 @@ private:
         
         <span class="tag">
             
-            <a href="/tags/TMP/" style="color: #ff7d73">
+            <a href="/tags/TMP/" style="color: #ffa2c4">
                 TMP
             </a>
         </span>
@@ -1446,14 +1446,14 @@ work(getFoo_6(10,10.3,&quot;hello&quot;));
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #ff7d73">
+            <a href="/tags/Modern-C/" style="color: #00a596">
                 Modern C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #00bcd4">
+            <a href="/tags/C/" style="color: #00a596">
                 C++
             </a>
         </span>
@@ -2328,7 +2328,7 @@ void buffer_fun(Args &amp;&amp;... args)
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #00a596">
+            <a href="/tags/C/" style="color: #03a9f4">
                 C++
             </a>
         </span>
@@ -2433,14 +2433,14 @@ auto cbegin(const C &amp; c)-&gt; decltype(c.begin()) &#123;
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #ff7d73">
+            <a href="/tags/Modern-C/" style="color: #03a9f4">
                 Modern C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #03a9f4">
+            <a href="/tags/C/" style="color: #ff7d73">
                 C++
             </a>
         </span>
@@ -2616,14 +2616,14 @@ operator=(&amp;)  //Clang-Tidy：将 std::move() 的结果作为 const 引用参
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #ffa2c4">
+            <a href="/tags/Modern-C/" style="color: #00bcd4">
                 Modern C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #03a9f4">
+            <a href="/tags/C/" style="color: #00bcd4">
                 C++
             </a>
         </span>

@@ -140,7 +140,7 @@
             
             <span class="tag">
                 
-                <a href="/tags/Modern-C/" style="color: #ffa2c4">
+                <a href="/tags/Modern-C/" style="color: #00bcd4">
                     Modern C++
                 </a>
             </span>
@@ -154,7 +154,7 @@
             
             <span class="tag">
                 
-                <a href="/tags/C-Library/" style="color: #00bcd4">
+                <a href="/tags/C-Library/" style="color: #ff7d73">
                     C++ Library
                 </a>
             </span>
@@ -276,7 +276,7 @@
     &#125;
   &#125;;
 </code></pre>
-<p>__uniq_ptr_impl是实现部分，把这个类读懂，就读懂了unique_ptr的一半。unique_ptr的核心实现，全部在这个类中。没有复杂的逻辑，但是做到类型安全的实现方法，还是比较难的部分。__uniq_ptr_impl中没有复杂的关于类型安全的约束。比较的的约束在<code>uniqe_ptr&lt;T&gt;</code>和<code>unique_ptr&lt;T[]&gt;</code>中</p>
+<p>__uniq_ptr_impl是实现部分，把这个类读懂，就读懂了unique_ptr的一半。unique_ptr的核心实现，全部在这个类中。没有复杂的逻辑，但是做到类型安全的实现方法，还是比较难的部分。__uniq_ptr_impl中没有复杂的关于类型安全的约束。比较复杂的约束在<code>uniqe_ptr&lt;T&gt;</code>和<code>unique_ptr&lt;T[]&gt;</code>中</p>
 <pre><code class="C++">// Manages the pointer and deleter of a unique_ptr
 //_TP是指向的类型， _DP是删除器的类型
   template &lt;typename _Tp, typename _Dp&gt; class __uniq_ptr_impl &#123;
