@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-        <title>ROV | Hello @You</title>
+        <title>Type-Traits源码分析(二) | Hello @You</title>
         <meta name="author" content="Jan6055">
         <meta name="description" content="">
         <meta name="keywords" content="C++,Rust,Jan6055">
@@ -122,14 +122,14 @@
                         
 <div class="article">
     <div>
-        <h1>ROV </h1>
+        <h1>Type-Traits源码分析(二) </h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
             </span>
-            2022/9/17
+            2022/9/26
         </span>
         
         
@@ -140,15 +140,22 @@
             
             <span class="tag">
                 
-                <a href="/tags/Modern-C/" style="color: #03a9f4">
+                <a href="/tags/Modern-C/" style="color: #ffa2c4">
                     Modern C++
                 </a>
             </span>
             
             <span class="tag">
                 
-                <a href="/tags/C/" style="color: #03a9f4">
+                <a href="/tags/C/" style="color: #00a596">
                     C++
+                </a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/C-Library/" style="color: #ff7d73">
+                    C++ Library
                 </a>
             </span>
             
@@ -156,125 +163,7 @@
         
     </div>
     <div class="content" v-pre>
-        <h1 id="返回值优化"><a href="#返回值优化" class="headerlink" title="返回值优化"></a>返回值优化</h1><p>我们有这样的一段代码</p>
-<pre><code class="C++">X getX() &#123;
-    X x;
-    //...
-    return x;
-&#125;
-</code></pre>
-<p>你可能会说，w在返回的时候需要进行拷贝一次。如果你还抱有这种想法，你应该拥向现代C++的怀抱了，现在的标准规定，针对这种情况以及类似的情况，编译器应当做返回值优化(return value optimmization)。使得调用getWidget就像直接在调用处构造了一个对象，而不用经过一次复制。</p>
-<h1 id="C-标准对于返回值的优化"><a href="#C-标准对于返回值的优化" class="headerlink" title="C++标准对于返回值的优化"></a>C++标准对于返回值的优化</h1><blockquote>
-<p>此处参考C++标准库中文第二版 P22-P23</p>
-</blockquote>
-<p>C++标准指出，对于以上的代码，有着这样的保证。</p>
-<ul>
-<li>如果X有一个可取的copy&#x2F;move构造函数，编译器可以选择忽略其中的copy版本。</li>
-<li>否则，如果X有一个move构造函数，X就被moved</li>
-<li>否则，如果X有一个copy构造函数，X就被copied</li>
-<li>否则，报告出一个编译器错误</li>
-</ul>
-<p>我们需要对上述的规则一一解释<br>按照惯例，我们依旧需要准备一个测试所用的类</p>
-<pre><code class="c++">#include &lt;iostream&gt;
-using namespace std;
-struct Foo &#123;
-    int a = 0;
-    double b = 0;
-    string c;
-    Foo() = default;
-    Foo(int _a, double _b, const string &amp; _c) : a(_a), b(_b), c(_c) &#123; &#125;
-    Foo(const Foo &amp; foo) : a(foo.a), b(foo.b), c(foo.c) &#123;
-        cout &lt;&lt;  &quot;call &amp;&quot; &lt;&lt; endl;
-    &#125;
-    Foo(Foo &amp;&amp; foo)  noexcept : a(foo.a), b(foo.b), c(std::move(foo.c))  &#123;
-        cout &lt;&lt; &quot;call &amp;&amp;&quot; &lt;&lt; endl;
-    &#125;
-
-&#125;;
-
-Foo getFoo_1(int a = 0, double b = 0, const string &amp; c = &#123; &#125;) &#123;
-    cout &lt;&lt; &quot;+++++&quot; &lt;&lt; endl;
-    Foo ret(a,b,c);
-    return ret;
-&#125;
-Foo getFoo_2(int a = 0, double b = 0, const string &amp; c = &#123; &#125;) &#123;
-    cout &lt;&lt; &quot;+++++&quot; &lt;&lt; endl;
-    Foo ret(a,b,c);
-    return std::move(ret);
-&#125;
-Foo getFoo_3() &#123;
-    cout &lt;&lt; &quot;+++++&quot; &lt;&lt; endl;
-    Foo ret;
-    ret.a = 10;
-    ret.a *= 20;
-    return ret;
-&#125;
-Foo getFoo_4() &#123;
-    cout &lt;&lt; &quot;+++++&quot; &lt;&lt; endl;
-    Foo ret;
-    Foo &amp; r_ret = ret;
-    return r_ret;
-&#125;
-
-Foo getFoo_5() &#123;
-    cout &lt;&lt; &quot;+++++&quot; &lt;&lt; endl;
-    static Foo ret;
-    return ret;
-&#125;
-void work(const Foo &amp; foo) &#123;
-&#125;
-int main()
-&#123;
-    work(getFoo_1(0,0,&quot;hello&quot;));
-    work(getFoo_2());
-    work(getFoo_3());
-    work(getFoo_4());
-    work(getFoo_5());
-    return 0;
-&#125;
-</code></pre>
-<p>测试的结果如下</p>
-<pre><code>+++++   //RVO
-+++++   
-call &amp;&amp; //我们的自作聪明，组织了编译器的优化，因为move将对象变为&amp;&amp;，则moved
-+++++   //RVO
-+++++   
-call &amp;  //这里我们返回了一个引用，编译器不再进行RVO而是copide
-+++++   
-call &amp;  //返回了一个static变量，move是不可行的，因此copide
-</code></pre>
-<h1 id="测试结果的思考"><a href="#测试结果的思考" class="headerlink" title="测试结果的思考"></a>测试结果的思考</h1><p>不难看出，编译器在很多的情况下都会为我们做返回值优化，即使我们在工厂函数中进行了一些额外的操作。</p>
-<p>我们自作聪明的move操作，反而会阻止编译器的RVO，如果对象的移动语义成本不低，我们会聪明反被聪明误。</p>
-<p>对于那些不可避免的copy，是没有办法规避的。</p>
-<h1 id="不要自作聪明"><a href="#不要自作聪明" class="headerlink" title="不要自作聪明"></a>不要自作聪明</h1><p>你也许会绞尽脑汁的想象出这样的代码，甚至还会很得意的以为自己解决的返回值优化的问题</p>
-<pre><code class="C++">X &amp;&amp; getX() &#123;
-    X x;
-    return x;
-&#125;
-</code></pre>
-<p>实际上这样的行为不可取，因为右值引用也是一个引用，返回局部对象的引用—-你是嫌弃debug时候消耗的精力还不够多吗。</p>
-<p>你可能又会反驳说，那我可以这样</p>
-<pre><code class="C++">X &amp;&amp; getX() &#123;
-    X x;
-    return std::move(x);
-&#125;
-</code></pre>
-<p>很遗憾，还是不可以，你大可可以自己试试，你一旦访问这样返回的对象，程序就会马上崩溃！！！同理的，你也不应当对要返回的局部对象实施forward.</p>
-<p>所以，不要自己耍小聪明了，该怎么写就怎么写，编译器会为优化做操劳。</p>
-<h1 id="对于参数包的优化"><a href="#对于参数包的优化" class="headerlink" title="对于参数包的优化"></a>对于参数包的优化</h1><p>对于参数的参数包的优化，也是一样的，你就把他当作和上面的情况一样就可以。</p>
-<pre><code class="C++">template&lt;typename ... Args&gt;
-Foo getFoo_6(Args &amp;&amp; ... args) &#123;
-    cout &lt;&lt; &quot;+++++&quot; &lt;&lt; endl;
-    Foo foo(std::forward&lt;Args&gt;(args)...);
-    return foo;
-&#125;
-
-...
-
-work(getFoo_6(10,10.3,&quot;hello&quot;));
-</code></pre>
-<p>你可以自己运行一下试试看。</p>
-
+        
     </div>
     
 </div>
