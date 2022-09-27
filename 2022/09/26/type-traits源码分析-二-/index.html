@@ -140,14 +140,14 @@
             
             <span class="tag">
                 
-                <a href="/tags/Modern-C/" style="color: #ffa2c4">
+                <a href="/tags/Modern-C/" style="color: #00bcd4">
                     Modern C++
                 </a>
             </span>
             
             <span class="tag">
                 
-                <a href="/tags/C/" style="color: #ffa2c4">
+                <a href="/tags/C/" style="color: #03a9f4">
                     C++
                 </a>
             </span>
@@ -163,7 +163,554 @@
         
     </div>
     <div class="content" v-pre>
-        <h2 id=""><a href="#" class="headerlink" title=""></a></h2>
+        <p>在一中，介绍了一些type_trait的基本设施, 很轻松，唯一比较复杂的就是is_pointer。在二中，将继续探索tyep_traits中的基本设施——这些设施在TMP中，撰写库的时候经常用到。这篇文章不会涉及到一些高级的技巧。这些技巧放在后面分析。</p>
+<h1 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h1><h2 id="元函数的实现技巧"><a href="#元函数的实现技巧" class="headerlink" title="元函数的实现技巧"></a>元函数的实现技巧</h2><p>在标准库中，或者自己想要撰写元函数，可以使用这样一种手法。例如想实现一个名为XXX的元函数。</p>
+<p>可以另外定义一个元函数叫做XXX_helper&#x2F;XXX_impl(随你的喜好，叫什么猫猫狗狗也没有问题)来解决核心的部分。</p>
+<p>而XXX这个元函数，做一些辅助性的操作，例如移除const，volatile。让后让XXX继承XXX_helper来实现功能。</p>
+<h2 id="is-void"><a href="#is-void" class="headerlink" title="is_void"></a>is_void</h2><p>传入一个类型，返回其是不是void，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<p>真正的实现是<code>__is_void_helper</code>，而<code>is_void</code>做一些辅助性的操作。</p>
+<pre><code class="C++">  template&lt;typename&gt;
+    struct __is_void_helper
+    : public false_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_void_helper&lt;void&gt;
+    : public true_type &#123; &#125;;
+
+  /// is_void
+  template&lt;typename _Tp&gt;
+    struct is_void
+    : public __is_void_helper&lt;__remove_cv_t&lt;_Tp&gt;&gt;::type //移除const volatile
+    &#123; &#125;;
+</code></pre>
+<h2 id="is-integral"><a href="#is-integral" class="headerlink" title="is_integral"></a>is_integral</h2><p>传入一个类型，返回其是不是integral，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<p><code>integral</code>可以理解为整形，包括无符号类型。或者随你怎么理解都行，只要你看到了实现，你就知道了他是什么意思。</p>
+<p>同样的<code>__is_integral_helper</code>做的具体的操作，有很多个特例化模板。你会说编写一个宏更方便不是吗？也许是的！</p>
+<pre><code class="C++"> template&lt;typename&gt;
+    struct __is_integral_helper
+    : public false_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_integral_helper&lt;bool&gt;
+    : public true_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_integral_helper&lt;char&gt;
+    : public true_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_integral_helper&lt;signed char&gt;
+    : public true_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_integral_helper&lt;unsigned char&gt;
+    : public true_type &#123; &#125;;
+
+  // We want is_integral&lt;wchar_t&gt; to be true (and make_signed/unsigned to work)
+  // even when libc doesn&#39;t provide working &lt;wchar.h&gt; and related functions,
+  // so check __WCHAR_TYPE__ instead of _GLIBCXX_USE_WCHAR_T.
+#ifdef __WCHAR_TYPE__
+  template&lt;&gt;
+    struct __is_integral_helper&lt;wchar_t&gt;
+    : public true_type &#123; &#125;;
+#endif
+
+#ifdef _GLIBCXX_USE_CHAR8_T
+  template&lt;&gt;
+    struct __is_integral_helper&lt;char8_t&gt;
+    : public true_type &#123; &#125;;
+#endif
+
+  template&lt;&gt;
+    struct __is_integral_helper&lt;char16_t&gt;
+    : public true_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_integral_helper&lt;char32_t&gt;
+    : public true_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_integral_helper&lt;short&gt;
+    : public true_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_integral_helper&lt;unsigned short&gt;
+    : public true_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_integral_helper&lt;int&gt;
+    : public true_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_integral_helper&lt;unsigned int&gt;
+    : public true_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_integral_helper&lt;long&gt;
+    : public true_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_integral_helper&lt;unsigned long&gt;
+    : public true_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_integral_helper&lt;long long&gt;
+    : public true_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_integral_helper&lt;unsigned long long&gt;
+    : public true_type &#123; &#125;;
+
+  // Conditionalizing on __STRICT_ANSI__ here will break any port that
+  // uses one of these types for size_t.
+#if defined(__GLIBCXX_TYPE_INT_N_0) //这些条件编译你大可忽略掉，有兴趣也可以看看。
+  template&lt;&gt;
+    struct __is_integral_helper&lt;__GLIBCXX_TYPE_INT_N_0&gt;
+    : public true_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_integral_helper&lt;unsigned __GLIBCXX_TYPE_INT_N_0&gt;
+    : public true_type &#123; &#125;;
+#endif
+#if defined(__GLIBCXX_TYPE_INT_N_1)
+  template&lt;&gt;
+    struct __is_integral_helper&lt;__GLIBCXX_TYPE_INT_N_1&gt;
+    : public true_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_integral_helper&lt;unsigned __GLIBCXX_TYPE_INT_N_1&gt;
+    : public true_type &#123; &#125;;
+#endif
+#if defined(__GLIBCXX_TYPE_INT_N_2)
+  template&lt;&gt;
+    struct __is_integral_helper&lt;__GLIBCXX_TYPE_INT_N_2&gt;
+    : public true_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_integral_helper&lt;unsigned __GLIBCXX_TYPE_INT_N_2&gt;
+    : public true_type &#123; &#125;;
+#endif
+#if defined(__GLIBCXX_TYPE_INT_N_3)
+  template&lt;&gt;
+    struct __is_integral_helper&lt;__GLIBCXX_TYPE_INT_N_3&gt;
+    : public true_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_integral_helper&lt;unsigned __GLIBCXX_TYPE_INT_N_3&gt;
+    : public true_type &#123; &#125;;
+#endif
+
+  /// is_integral
+  template&lt;typename _Tp&gt;
+    struct is_integral
+    : public __is_integral_helper&lt;__remove_cv_t&lt;_Tp&gt;&gt;::type //与is_void使用相同的手法
+    &#123; &#125;;
+</code></pre>
+<h2 id="is-floating-point"><a href="#is-floating-point" class="headerlink" title="is_floating_point"></a>is_floating_point</h2><p>传入一个类型，返回其是不是浮点类型，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<p>如果你会了is_integral,那么is_floating_point也无需多言了。</p>
+<pre><code class="C++"> template&lt;typename&gt;
+    struct __is_floating_point_helper
+    : public false_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_floating_point_helper&lt;float&gt;
+    : public true_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_floating_point_helper&lt;double&gt;
+    : public true_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_floating_point_helper&lt;long double&gt;
+    : public true_type &#123; &#125;;
+
+#if !defined(__STRICT_ANSI__) &amp;&amp; defined(_GLIBCXX_USE_FLOAT128) //同样是条件编译，可忽略
+  template&lt;&gt;
+    struct __is_floating_point_helper&lt;__float128&gt;
+    : public true_type &#123; &#125;;
+#endif
+
+  /// is_floating_point
+  template&lt;typename _Tp&gt;
+    struct is_floating_point
+    : public __is_floating_point_helper&lt;__remove_cv_t&lt;_Tp&gt;&gt;::type
+    &#123; &#125;;
+</code></pre>
+<h2 id="is-array"><a href="#is-array" class="headerlink" title="is_array"></a>is_array</h2><p>传入一个类型，返回其是不是数组(有界的&#x2F;无界的)，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<p>老方法了，主模板+偏特化。值得注意的是，T*不同于T[]和T[N]。例如</p>
+<pre><code class="C++">int main() &#123;
+    int nums[10] = &#123;1,2,3,4&#125;;
+    cout &lt;&lt; std::is_array&lt;decltype(nums)&gt;::value &lt;&lt; endl; //true
+    int * const p = nums;
+    cout &lt;&lt; std::is_array&lt;decltype(p)&gt;::value &lt;&lt; endl;	//false
+    return 0;
+&#125;
+</code></pre>
+<pre><code class="C++">    /// is_array
+    // 区别T *, T[], T[N]的不同
+  template&lt;typename&gt;
+    struct is_array
+    : public false_type &#123; &#125;;
+
+  template&lt;typename _Tp, std::size_t _Size&gt;
+    struct is_array&lt;_Tp[_Size]&gt;	//有界数组
+    : public true_type &#123; &#125;;
+
+  template&lt;typename _Tp&gt;
+    struct is_array&lt;_Tp[]&gt; //无界数组
+    : public true_type &#123; &#125;;
+</code></pre>
+<h2 id="is-pointer"><a href="#is-pointer" class="headerlink" title="is_pointer"></a>is_pointer</h2><p>传入一个类型，返回其是不是指针，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<p>注意<code>const *</code>,<code>* const</code>的不同，前者不是指针具有常量性质，后者才是。</p>
+<pre><code class="C++">template&lt;typename&gt;
+    struct __is_pointer_helper
+    : public false_type &#123; &#125;;
+
+  template&lt;typename _Tp&gt;
+    struct __is_pointer_helper&lt;_Tp*&gt;
+    : public true_type &#123; &#125;;
+
+  /// is_pointer
+  template&lt;typename _Tp&gt;
+    struct is_pointer
+    : public __is_pointer_helper&lt;__remove_cv_t&lt;_Tp&gt;&gt;::type //remove_cv
+    &#123; &#125;;
+</code></pre>
+<h2 id="is-complete-or-unbounded"><a href="#is-complete-or-unbounded" class="headerlink" title="__is_complete_or_unbounded"></a>__is_complete_or_unbounded</h2><p>传入一个类型，返回其是不是完整的或者无界的，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<p>因为这不是一个最终对外提供的接口。所以可以使用constexpr函数的方式来实现。</p>
+<p>首先我们应当知道的一个前置知识：如果是一个类型是非完整类型，或者无界类型，sizeof 会无法应用。例如</p>
+<pre><code class="C++">template&lt;typename T&gt;
+struct size_is &#123;
+    static constexpr size_t value = sizeof(T);
+&#125;;
+class A; //A仅有声明，是一个非完整类型
+int main() &#123;
+    cout &lt;&lt; size_is&lt;int&gt;::value &lt;&lt; endl; 	//ok
+    cout &lt;&lt; size_is&lt;int[]&gt;::value &lt;&lt; endl;	//error
+    cout &lt;&lt; size_is&lt;A&gt;::value &lt;&lt; endl;		//error
+    return 0;
+&#125;
+</code></pre>
+<p>一个无界&#x2F;不完整类型还包括</p>
+<ul>
+<li>引用</li>
+<li>函数</li>
+<li>void</li>
+<li>无界数组</li>
+</ul>
+<pre><code class="C++">// Helper functions that return false_type for incomplete classes,
+  // incomplete unions and arrays of known bound from those.
+//为不完整的类、不完整的联合和已知边界数组返回 false_type 的辅助函数。
+template &lt;typename _Tp, size_t = sizeof(_Tp)&gt; //如果是非完整类型，或者无界类型，sizeof 会无法应用
+    constexpr true_type __is_complete_or_unbounded(__type_identity&lt;_Tp&gt;) //由于我们只关心返回类型，所以不用返回值
+                    //或者说返回类型种隐含了返回值true_type::value==true;
+    &#123; return &#123;&#125;; &#125;
+
+  template &lt;typename _TypeIdentity,	
+      typename _NestedType = typename _TypeIdentity::type&gt;	//上面的模板匹配失败，转而匹配这个模板
+    constexpr typename __or_&lt; //是其中一个
+      is_reference&lt;_NestedType&gt;,
+      is_function&lt;_NestedType&gt;,
+      is_void&lt;_NestedType&gt;,
+      __is_array_unknown_bounds&lt;_NestedType&gt;	//这个tyep_traits还没有分析，仅仅知道如何用也不妨
+    &gt;::type __is_complete_or_unbounded(_TypeIdentity) //如果__or_种的元函数的返回类型皆为false_type，也就是说参数类型不是上面那些类型其中之一，最终结果就是false_type
+    &#123; return &#123;&#125;; &#125;
+</code></pre>
+<h2 id="is-enum-x2F-class-x2F-union"><a href="#is-enum-x2F-class-x2F-union" class="headerlink" title="is_enum&#x2F;class&#x2F;union"></a>is_enum&#x2F;class&#x2F;union</h2><p>传入一个类型，返回其是不是enum&#x2F;class&#x2F;union，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<p>编译器为我们内置了这三种type_traits。你只需要知道这是内置的就好。</p>
+<pre><code class="C++">  /// is_enum
+  template&lt;typename _Tp&gt;
+    struct is_enum
+    : public integral_constant&lt;bool, __is_enum(_Tp)&gt; //无法查看__is_enum的具体实现，下同
+    &#123; &#125;;
+
+  /// is_union
+  template&lt;typename _Tp&gt;
+    struct is_union
+    : public integral_constant&lt;bool, __is_union(_Tp)&gt;
+    &#123; &#125;;
+
+  /// is_class
+  template&lt;typename _Tp&gt;
+    struct is_class
+    : public integral_constant&lt;bool, __is_class(_Tp)&gt;
+    &#123; &#125;;
+</code></pre>
+<h2 id="is-trivial"><a href="#is-trivial" class="headerlink" title="is_trivial"></a>is_trivial</h2><p>传入一个类型，返回其是不是空指针，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<p>普通类型是其存储是连续的普通可复制的，并且仅支持静态默认初始化，无论是否为 cv 限定。它包括标量类型，琐碎类和任何此类类型的数组。其实现也是编译器内置的。</p>
+<pre><code class="C++"> /// is_trivial
+ template&lt;typename _Tp&gt;
+   struct is_trivial
+   : public integral_constant&lt;bool, __is_trivial(_Tp)&gt; //同上
+   &#123;
+     static_assert(std::__is_complete_or_unbounded(__type_identity&lt;_Tp&gt;&#123;&#125;), //这里的静态断言正如字面意思
+                                                       //是完整的或无界的
+&quot;template argument must be a complete class or an unbounded array&quot;);
+   &#125;;
+</code></pre>
+<p>is_trivial可以说是一个很大作用的type_traits，考虑std::copy的一种实现方式，对trivial type使用memmove,对非trivial type正常拷贝，可提高性能。</p>
+<h2 id="is-null-pointer"><a href="#is-null-pointer" class="headerlink" title="is_null_pointer"></a>is_null_pointer</h2><p>传入一个类型，返回其是不是空指针，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<p>空指针该如何做特例化。C++11有nullptr,是nullptr_t类型(nullptr_t是decltype(nullptr)的一个别名), 由于任何型别的指针类型都可以转换为nullptr_t，所以，对nullptr_t类型做特例化即可。</p>
+<p>关于以后的type_traits，如果还是老生常谈的设计手法。就不会再说了，就像这个type_traits一样。</p>
+<pre><code class="C++">  template&lt;typename&gt;
+    struct __is_null_pointer_helper
+    : public false_type &#123; &#125;;
+
+  template&lt;&gt;
+    struct __is_null_pointer_helper&lt;std::nullptr_t&gt;
+    : public true_type &#123; &#125;;
+
+  /// is_null_pointer (LWG 2247).
+  template&lt;typename _Tp&gt;
+    struct is_null_pointer
+    : public __is_null_pointer_helper&lt;__remove_cv_t&lt;_Tp&gt;&gt;::type
+    &#123; &#125;;
+</code></pre>
+<p>GCC还提供了一个不推荐使用的拓展。</p>
+<pre><code class="C++">  /// __is_nullptr_t (deprecated extension).
+  template&lt;typename _Tp&gt;
+    struct __is_nullptr_t
+    : public is_null_pointer&lt;_Tp&gt;
+    &#123; &#125; _GLIBCXX_DEPRECATED_SUGGEST(&quot;std::is_null_pointer&quot;); //这些宏实在是不想深究到底，令人厌烦的宏！
+</code></pre>
+<h2 id="is-arithmetic"><a href="#is-arithmetic" class="headerlink" title="is_arithmetic"></a>is_arithmetic</h2><p>传入一个类型，返回其是不是可运算的类型，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<p>整形类型和浮点类型被视作是可运算的类型，无论是否具有const性质。</p>
+<blockquote>
+<p>你可能会想到，如果自定义类型也支持+ - * &#x2F;等运算，是不是这个type_traits就不好使了呢？难道有bug吗？</p>
+<p>你可以将这个type_traits看作一个规定。并且，不要为任何自定义类型做任何的type_traits的特例化。永远不要，因为这是一个未定义的行为。有关更多， 请看<a target="_blank" rel="noopener" href="https://en.cppreference.com/w/cpp/types/is_arithmetic">std::is_arithmetic - cppreference.com</a></p>
+</blockquote>
+<pre><code class="C++">  /// is_arithmetic
+  template&lt;typename _Tp&gt;
+    struct is_arithmetic
+    : public __or_&lt;is_integral&lt;_Tp&gt;, is_floating_point&lt;_Tp&gt;&gt;::type
+    &#123; &#125;;
+</code></pre>
+<h2 id="is-fundamental"><a href="#is-fundamental" class="headerlink" title="is_fundamental"></a>is_fundamental</h2><p>传入一个类型，返回其是不是基本类型，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<p>可运算类型，void, nullptr_t被视作为基本类型，理由和注意事项同上。</p>
+<pre><code class="C++">  /// is_fundamental
+  template&lt;typename _Tp&gt;
+    struct is_fundamental
+    : public __or_&lt;is_arithmetic&lt;_Tp&gt;, is_void&lt;_Tp&gt;,
+           is_null_pointer&lt;_Tp&gt;&gt;::type
+    &#123; &#125;;
+</code></pre>
+<h2 id="is-compound"><a href="#is-compound" class="headerlink" title="is_compound"></a>is_compound</h2><p>传入一个类型，返回其是不是复合类型，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<p>只需要对is_fundamental的结果取反，也就是应用__not_即可</p>
+<pre><code class="C++">  /// is_compound
+  template&lt;typename _Tp&gt;
+    struct is_compound
+    : public __not_&lt;is_fundamental&lt;_Tp&gt;&gt;::type &#123; &#125;;
+</code></pre>
+<h2 id="is-object"><a href="#is-object" class="headerlink" title="is_object"></a>is_object</h2><p>传入一个类型，返回其是不是一个对象，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<p>这里的object指的是广义上的对象。例如int,double类型的实例皆算对象。例如但函数，引用，void类型不算在内。</p>
+<pre><code class="C++">struct A &#123;
+    int m_data = 0;
+&#125;;
+int main() &#123;
+    cout &lt;&lt; std::is_object&lt;int&gt;::value &lt;&lt; endl;			//true
+    cout &lt;&lt; std::is_object&lt;double&gt;::value &lt;&lt; endl;		//true
+    cout &lt;&lt; std::is_object&lt;int&amp;&gt;::value &lt;&lt; endl; 		//false
+    cout &lt;&lt; std::is_object&lt;A&gt;::value &lt;&lt; endl;			//true
+    cout &lt;&lt; std::is_object&lt;void(int,int)&gt;::value &lt;&lt; endl;//false
+    return 0;
+&#125;
+</code></pre>
+<p>实现</p>
+<pre><code class="C++">/// is_object
+template&lt;typename _Tp&gt;
+  struct is_object
+  : public __not_&lt;__or_&lt;is_function&lt;_Tp&gt;, is_reference&lt;_Tp&gt;,
+                        is_void&lt;_Tp&gt;&gt;&gt;::type
+  &#123; &#125;;
+</code></pre>
+<h2 id="is-scalar"><a href="#is-scalar" class="headerlink" title="is_scalar"></a>is_scalar</h2><p>传入一个类型，返回其是不是一个标量类型，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<blockquote>
+<p>标量类型包括算数类型，枚举类型，指针，成员指针，空指针.将在那些元函数应用于__or_即可</p>
+</blockquote>
+<pre><code class="C++">  /// is_scalar
+  template&lt;typename _Tp&gt;
+    struct is_scalar
+    : public __or_&lt;is_arithmetic&lt;_Tp&gt;, is_enum&lt;_Tp&gt;, is_pointer&lt;_Tp&gt;, 
+                   is_member_pointer&lt;_Tp&gt;, is_null_pointer&lt;_Tp&gt;&gt;::type
+    &#123; &#125;;
+</code></pre>
+<h2 id="is-compound-1"><a href="#is-compound-1" class="headerlink" title="is_compound"></a>is_compound</h2><p>传入一个类型，返回其是不是一个复合类型，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<pre><code class="C++">  /// is_compound
+  template&lt;typename _Tp&gt;
+    struct is_compound // 对is_fundamental取否定即可
+    : public __not_&lt;is_fundamental&lt;_Tp&gt;&gt;::type &#123; &#125;; 
+</code></pre>
+<h2 id="is-same"><a href="#is-same" class="headerlink" title="is_same"></a>is_same</h2><p>传入两个类型，返回其是不是相同类型，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<p>对&lt;_Tp, _Tp&gt;做特例化即可。</p>
+<pre><code class="C++">  /// is_same
+ //下面省略了一些条件编译
+  template&lt;typename _Tp, typename _Up&gt; //不同类型的时候
+    struct is_same
+    : public false_type
+    &#123; &#125;;
+
+  template&lt;typename _Tp&gt;
+    struct is_same&lt;_Tp, _Tp&gt; //相同类型的时候
+    : public true_type
+    &#123; &#125;;
+</code></pre>
+<h2 id="is-member-object-x2F-function-pointer"><a href="#is-member-object-x2F-function-pointer" class="headerlink" title="is_member_object&#x2F;function_pointer"></a>is_member_object&#x2F;function_pointer</h2><p>传入一个类型，返回其是不是指向类内非静态数据成员&#x2F;成员函数的指针，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<p>在文章的最后，我准备了一些更加酷的东西，当然，也更加的复杂。首先，我们应当了解一下基本的原理：</p>
+<p>如果A是一个类，那么可以有这样的一种指针<code>type A::*</code> 指向A中类型为type的数据成员(非静态的，下文省略)。类似的，还有成员函数指针。例如</p>
+<pre><code class="C++">struct A &#123;
+    int a = 10;
+    void inc_and_print() &#123;
+        ++a;
+        cout &lt;&lt; a &lt;&lt; endl;
+    &#125;
+&#125;;
+int main() &#123;
+    int A::* p = &amp;A::a;
+    //使用
+    A x;
+    x.*p = 10; //固定的语法形式
+    cout &lt;&lt; x.*p &lt;&lt; endl;   //10
+    cout &lt;&lt; x.a &lt;&lt; endl;    //10
+
+    using Fun = void (A::*)();
+//    void(A::*fun)();
+    Fun fun = &amp;A::inc_and_print;
+    (x.*fun)(); //such as call A::inc_and_print //a is 11
+    return 0;
+&#125;
+</code></pre>
+<p>C++还有这种语法？你会疑问，这是肯定的！但这无关紧要，在什么情况下才能用上这样的语法？貌似真的没有，除了TMP。</p>
+<p>你知道了解一点，如果T是一个类，则可以有<code>type T::*</code>这样的形式指向数据成员&#x2F;成员函数，不是类则没有。</p>
+<p>并且还要说明的是，不要纠结在这些语法的琐碎上，<strong>Bjarne Stroustrup</strong>也不会对所有的C++语法细节和标准全部一清二楚。不要陷入语法细节的深渊——C++在承受着巨大的历史包袱的同时，还要添加现代的语法特性，想学完C++————下辈子说不定可以！</p>
+<p>关于具体的实现，请看源代码，我会一点点说明。</p>
+<pre><code class="C++">template&lt;typename&gt;
+    struct __is_member_object_pointer_helper //主模板继承false_type
+    : public false_type &#123; &#125;;
+
+  template&lt;typename _Tp, typename _Cp&gt;
+    struct __is_member_object_pointer_helper&lt;_Tp _Cp::*&gt; //注意这里没有逗号，模板匹配的时候会将一个类型拆分成两个了类型的组合，好复杂的语法，可恶
+      //匹配到这个特例化模板可以是数据成员指针，也可以是成员函数指针。如果不是成员函数指针，就是数据成员指针了
+    : public __not_&lt;is_function&lt;_Tp&gt;&gt;::type &#123; &#125;; 
+
+  /// is_member_object_pointer
+  template&lt;typename _Tp&gt;
+    struct is_member_object_pointer 
+    : public __is_member_object_pointer_helper&lt;__remove_cv_t&lt;_Tp&gt;&gt;::type
+    &#123; &#125;;
+</code></pre>
+<p>太复杂了！你可能还是对上述代码中的哪个特例化有疑问，好吧！让我们一探究竟。我们对上述的代码改造一下。对于那个特例化，我们在其内部定义两个类型T1, T2为 _Tp, _Cp的别名，_Tp,_Cp到底被推断为什么类型。</p>
+<pre><code class="C++">#include &lt;iostream&gt;
+#include &lt;type_traits&gt;
+namespace jan &#123;
+    using std::__not_;
+    using std::true_type;
+      using std::false_type;
+      using std::is_function;
+     using std::__remove_cv_t;
+    template&lt;typename&gt;
+    struct __is_member_object_pointer_helper
+    : public false_type &#123; &#125;;
+
+     template&lt;typename _Tp, typename _Cp&gt;
+    struct __is_member_object_pointer_helper&lt;_Tp _Cp::*&gt; 
+    : public __not_&lt;is_function&lt;_Tp&gt;&gt;::type &#123; 
+        using T1 = _Tp;	//这里是我们添加的
+        using T2 = _Cp;
+    &#125;;
+
+  /// is_member_object_pointer
+  template&lt;typename _Tp&gt;
+    struct is_member_object_pointer
+    : public __is_member_object_pointer_helper&lt;__remove_cv_t&lt;_Tp&gt;&gt;::type
+    &#123; &#125;;
+&#125;
+
+class A &#123; &#125;;
+int main() &#123;
+     jan::is_member_object_pointer&lt;int A::*&gt;::type t;
+      return 0;
+&#125;
+</code></pre>
+<p>编译器会为我们生成这样的代码。</p>
+<pre><code class="C++">#include &lt;iostream&gt;
+#include &lt;type_traits&gt;
+namespace jan
+&#123;
+  using std::__not_;
+  template&lt;typename _Pp&gt;
+  
+  using std::true_type;
+  using std::false_type;
+  using std::is_function;
+  template&lt;typename _Tp&gt;
+  
+  using std::__remove_cv_t;
+  template&lt;typename std::_Tp&gt;
+  using std::__remove_cv_t = typename remove_cv&lt;_Tp&gt;::type;
+  
+  template&lt;typename type_parameter_0_0&gt;
+  struct __is_member_object_pointer_helper : public std::false_type
+  &#123;
+  &#125;;
+  /****************************************注意看这里******************************************/
+  /* First instantiated from: insights.cpp:23 */
+  #ifdef INSIGHTS_USE_TEMPLATE
+  template&lt;&gt;
+  struct __is_member_object_pointer_helper&lt;int A::*&gt; : public std::integral_constant&lt;bool, true&gt;
+  &#123;
+    using T1 = int; //_Tp is int
+    using T2 = A;   //_Cp is A
+  &#125;;
+  /******************************************************************************************/
+  #endif
+  template&lt;typename _Tp, typename _Cp&gt;
+  struct __is_member_object_pointer_helper&lt;_Tp _Cp::*&gt; : public __not_&lt;is_function&lt;_Tp&gt; &gt;::type
+  &#123;
+    using T1 = _Tp;
+    using T2 = _Cp;
+  &#125;;
+  
+  template&lt;typename _Tp&gt; //在这个例子中， _Tp us int A::*
+  struct is_member_object_pointer : public __is_member_object_pointer_helper&lt;__remove_cv_t&lt;_Tp&gt; &gt;::type
+  &#123;
+  &#125;;
+  
+  /* First instantiated from: insights.cpp:30 */
+  #ifdef INSIGHTS_USE_TEMPLATE
+  template&lt;&gt;
+  struct is_member_object_pointer&lt;int A::*&gt; : public std::integral_constant&lt;bool, true&gt;
+  &#123;
+  &#125;;
+  #endif 
+&#125;
+class A&#123; &#125;;
+int main()
+&#123;
+    std::integral_constant&lt;bool, true&gt; t = std::integral_constant&lt;bool, true&gt;(); //这里无关紧要
+     return 0;
+&#125;
+</code></pre>
+<p>恍然大悟了吧！</p>
+<p>类似的<code>is_member_function_pointer</code>有这样的实现。</p>
+<pre><code class="C++">  template&lt;typename&gt;
+    struct __is_member_function_pointer_helper
+    : public false_type &#123; &#125;;
+
+  template&lt;typename _Tp, typename _Cp&gt;
+    struct __is_member_function_pointer_helper&lt;_Tp _Cp::*&gt;
+//匹配到这个特例化模板可以是数据成员指针，也可以是成员函数指针。那就用is_function这个type_traits是不是一个函数即可
+    : public is_function&lt;_Tp&gt;::type &#123; &#125;; 
+
+  /// is_member_function_pointer
+  template&lt;typename _Tp&gt;
+    struct is_member_function_pointer
+    : public __is_member_function_pointer_helper&lt;__remove_cv_t&lt;_Tp&gt;&gt;::type
+    &#123; &#125;;
+</code></pre>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>本篇大部分的源码分析还是轻松的，除了个别的刺头。</p>
+<p>你听说过brainfuck这个语言吗？相比于brainfuck这个语言，C++才是真正的brainfunk! </p>
+<p>我的🧠要爆炸了！！！</p>
+
     </div>
     
 </div>
