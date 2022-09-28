@@ -140,7 +140,7 @@
             
             <span class="tag">
                 
-                <a href="/tags/Modern-C/" style="color: #ffa2c4">
+                <a href="/tags/Modern-C/" style="color: #00a596">
                     Modern C++
                 </a>
             </span>
@@ -154,7 +154,7 @@
             
             <span class="tag">
                 
-                <a href="/tags/C-Library/" style="color: #ffa2c4">
+                <a href="/tags/C-Library/" style="color: #ff7d73">
                     C++ Library
                 </a>
             </span>
@@ -399,7 +399,7 @@ struct is_reference 		//左值引用/右值引用
 <p>注意，对于&amp;&#x2F;&amp;&amp;is_const的返回类型是一个::false_type,就是所<code>std::is_const&lt;const int &amp;&gt;::value==false</code></p>
 <p>类似的，还有<code>const int *</code>也是一样。因为这样的语义表示的指向的对象是常量性质的，而不是引用&#x2F;指针本身是常量性质的。</p>
 <h2 id="is-volatile"><a href="#is-volatile" class="headerlink" title="is_volatile"></a>is_volatile</h2><p>传入一个类型，返回其是否具有volatile性质，如果具有，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
-<p>实现方式和is_const大同小异</p>
+<p>实现方式和is_const大同小异。注意的事项也和is_const是一样的。</p>
 <pre><code class="C++">  template&lt;typename&gt;
     struct is_volatile
     : public false_type &#123; &#125;;

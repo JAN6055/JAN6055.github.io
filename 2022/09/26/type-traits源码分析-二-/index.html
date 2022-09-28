@@ -140,14 +140,14 @@
             
             <span class="tag">
                 
-                <a href="/tags/Modern-C/" style="color: #00bcd4">
+                <a href="/tags/Modern-C/" style="color: #00a596">
                     Modern C++
                 </a>
             </span>
             
             <span class="tag">
                 
-                <a href="/tags/C/" style="color: #03a9f4">
+                <a href="/tags/C/" style="color: #00a596">
                     C++
                 </a>
             </span>
@@ -436,19 +436,6 @@ template &lt;typename _Tp, size_t = sizeof(_Tp)&gt; //如果是非完整类型�
     : public integral_constant&lt;bool, __is_class(_Tp)&gt;
     &#123; &#125;;
 </code></pre>
-<h2 id="is-trivial"><a href="#is-trivial" class="headerlink" title="is_trivial"></a>is_trivial</h2><p>传入一个类型，返回其是不是空指针，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
-<p>普通类型是其存储是连续的普通可复制的，并且仅支持静态默认初始化，无论是否为 cv 限定。它包括标量类型，琐碎类和任何此类类型的数组。其实现也是编译器内置的。</p>
-<pre><code class="C++"> /// is_trivial
- template&lt;typename _Tp&gt;
-   struct is_trivial
-   : public integral_constant&lt;bool, __is_trivial(_Tp)&gt; //同上
-   &#123;
-     static_assert(std::__is_complete_or_unbounded(__type_identity&lt;_Tp&gt;&#123;&#125;), //这里的静态断言正如字面意思
-                                                       //是完整的或无界的
-&quot;template argument must be a complete class or an unbounded array&quot;);
-   &#125;;
-</code></pre>
-<p>is_trivial可以说是一个很大作用的type_traits，考虑std::copy的一种实现方式，对trivial type使用memmove,对非trivial type正常拷贝，可提高性能。</p>
 <h2 id="is-null-pointer"><a href="#is-null-pointer" class="headerlink" title="is_null_pointer"></a>is_null_pointer</h2><p>传入一个类型，返回其是不是空指针，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
 <p>空指针该如何做特例化。C++11有nullptr,是nullptr_t类型(nullptr_t是decltype(nullptr)的一个别名), 由于任何型别的指针类型都可以转换为nullptr_t，所以，对nullptr_t类型做特例化即可。</p>
 <p>关于以后的type_traits，如果还是老生常谈的设计手法。就不会再说了，就像这个type_traits一样。</p>

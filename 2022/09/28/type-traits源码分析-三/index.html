@@ -1,0 +1,495 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+        <title>Type-Traits源码分析(三) | Hello @You</title>
+        <meta name="author" content="Jan6055">
+        <meta name="description" content="">
+        <meta name="keywords" content="C++,Rust,Jan6055">
+        <link rel="icon" href="https://avatars.githubusercontent.com/u/94843786?s=400&u=3e0bac8cdc09c80d159d076c0503db566f8f0579&v=4">
+        <script src="https://cdn.staticfile.org/instant.page/5.1.0/instantpage.min.js" type="module"></script>
+        <script src="https://cdn.staticfile.org/font-awesome/6.1.1/js/all.min.js"></script>
+        
+        <link rel="stylesheet" href="/css/fonts.min.css">
+        <link rel="stylesheet" href="/css/particlex.css">
+        
+        <script src="https://cdn.staticfile.org/vue/3.2.33/vue.global.prod.min.js"></script>
+    <meta name="generator" content="Hexo 6.2.0"></head>
+    <body>
+        <div id="loading" style="height:100vh;width:100vw;position:fixed;display:flex;z-index:200;justify-content:space-between;background:#fff;transition:opacity 0.3s ease-out"><div style="position:fixed;height:100vh;width:100vw;display:flex;justify-content:center;align-items:center"><div id="loadcontent" style="width:50vmin;height:50vmin;padding:50px;border-radius:50%;display:flex;justify-content:center;align-items:center;border:solid 10px #a3ddfb;text-align:center"><div><h2>LOADING...</h2><p style="word-break:keep-all">加载过慢请开启缓存(浏览器默认开启)</p><div><img alt="loading" src="/loading.gif"></div></div></div></div></div>
+        <div id="layout">
+            <i data-fa-symbol="calendar-solid" class="fa-solid fa-calendar fa-fw"></i>
+            <i data-fa-symbol="bookmark-solid" class="fa-solid fa-bookmark fa-fw"></i>
+            <i data-fa-symbol="tags-solid" class="fa-solid fa-tags fa-fw"></i>
+            <transition name="into">
+                <div v-show="show_page" style="display: -not-none">
+                    <div id="menu_show">
+                         
+<nav id="menu">
+    <div class="desktop-menu">
+        <a href="/">
+            <span class="title">Hello @you</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;about</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;tags</span>
+        </a>
+        
+    </div>
+    <div :class="'phone-menu ' + menu_show" id="phone-menu">
+        <div class="curtain" @click="menu_show = !menu_show" v-show="menu_show"></div>
+        <div :class="'title'" @click="menu_show = !menu_show">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;Hello @you</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="menu_show">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">about</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+                    </div>
+                    <div id="main">
+                        
+<div class="article">
+    <div>
+        <h1>Type-Traits源码分析(三) </h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
+            </span>
+            2022/9/28
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/Modern-C/" style="color: #03a9f4">
+                    Modern C++
+                </a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/C/" style="color: #00a596">
+                    C++
+                </a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/C-Library/" style="color: #00bcd4">
+                    C++ Library
+                </a>
+            </span>
+            
+        </span>
+        
+    </div>
+    <div class="content" v-pre>
+        <p>在第三章中，会有一些新的东西，不同于一二章，这章TMP开始加速了！你将会看见额外的一些元函数实现手法，你肯定会惊讶它的巧妙，特别是void_t类型。总之，做好准备，这章的难度可不同于以往了！</p>
+<h1 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h1><h2 id="is-one-of"><a href="#is-one-of" class="headerlink" title="__is_one_of"></a>__is_one_of</h2><p>传入一个类型T和一个参数包Ts，返回其T是不是Ts其中的一个类型，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<p>有了这个type_traits，可以更加轻松的实现其他type_traits。</p>
+<p>这个type_traits的实现方式也是比较的有意思。我们可以有很多种方式来实现<code>__is_one_of</code>这个元函数，包括使用模板递归继承的方式来实现。gcc则是采用的参数包模式展开的方式。</p>
+<pre><code class="C++">  template&lt;typename _Tp, typename... _Types&gt;
+    using __is_one_of = __or_&lt;is_same&lt;_Tp, _Types&gt;...&gt;; //用is_same这个模式来对参数包展开，相当于每个类型都和_Tp应用于is_same,再用作于__or_，即可获得结果。
+</code></pre>
+<h2 id="is-signed-x2F-unsinged-integer"><a href="#is-signed-x2F-unsinged-integer" class="headerlink" title="__is_signed&#x2F;unsinged_integer"></a>__is_signed&#x2F;unsinged_integer</h2><p>入一个类型，返回其是不是，如一个有符号&#x2F;无符号的整数果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<pre><code class="C++">  // Check if a type is one of the signed integer types.
+  template&lt;typename _Tp&gt;
+    using __is_signed_integer = __is_one_of&lt;__remove_cv_t&lt;_Tp&gt;, //继承__is_one_of&lt;符合要求的类型参数包&gt;
+      signed char, signed short, signed int, signed long,
+      signed long long
+#if defined(__GLIBCXX_TYPE_INT_N_0)			//条件编译大可忽略
+      , signed __GLIBCXX_TYPE_INT_N_0
+#endif
+#if defined(__GLIBCXX_TYPE_INT_N_1)
+      , signed __GLIBCXX_TYPE_INT_N_1
+#endif
+#if defined(__GLIBCXX_TYPE_INT_N_2)
+      , signed __GLIBCXX_TYPE_INT_N_2
+#endif
+#if defined(__GLIBCXX_TYPE_INT_N_3)
+      , signed __GLIBCXX_TYPE_INT_N_3
+#endif
+      &gt;;		
+</code></pre>
+<p>实现方式大同小异</p>
+<pre><code class="C++">  // Check if a type is one of the unsigned integer types.
+  template&lt;typename _Tp&gt;
+    using __is_unsigned_integer = __is_one_of&lt;__remove_cv_t&lt;_Tp&gt;,
+      unsigned char, unsigned short, unsigned int, unsigned long,
+      unsigned long long
+#if defined(__GLIBCXX_TYPE_INT_N_0)
+      , unsigned __GLIBCXX_TYPE_INT_N_0
+#endif
+#if defined(__GLIBCXX_TYPE_INT_N_1)
+      , unsigned __GLIBCXX_TYPE_INT_N_1
+#endif
+#if defined(__GLIBCXX_TYPE_INT_N_2)
+      , unsigned __GLIBCXX_TYPE_INT_N_2
+#endif
+#if defined(__GLIBCXX_TYPE_INT_N_3)
+      , unsigned __GLIBCXX_TYPE_INT_N_3
+#endif
+      &gt;;
+</code></pre>
+<h2 id="is-standard-integer"><a href="#is-standard-integer" class="headerlink" title="__is_standard_integer"></a>__is_standard_integer</h2><p>传入一个类型，返回其是不是标准定义的整数，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<p>这个type_traits是其他type_traits组合起来的一个别名。这也是元函数的一个实现手法。</p>
+<pre><code class="C++">  // Check if a type is one of the signed or unsigned integer types.
+  template&lt;typename _Tp&gt;
+    using __is_standard_integer
+      = __or_&lt;__is_signed_integer&lt;_Tp&gt;, __is_unsigned_integer&lt;_Tp&gt;&gt;;
+</code></pre>
+<h2 id="SFINAE"><a href="#SFINAE" class="headerlink" title="SFINAE"></a>SFINAE</h2><p>我并不打算详细的解释什么是SFINAE,你应当自己去寻找一些资料。我主要想说的是，一下的type_traits,皆基于SFINAE,虽然之前的文章中也说到过SFINE,但那更像是开胃小菜。</p>
+<h2 id="void-t"><a href="#void-t" class="headerlink" title="void_t"></a>void_t</h2><p>void_t，就是一个void的别名，但是带有类型参数。你会说：这不是脱裤子放屁吗？有什么用，我直接写void不好吗？</p>
+<p>实际上void_t是为TMP服务的，并不是让你当作返回值&#x2F;类型声明的。我们可以通过SFINE+void_t这种TMP的手法来实现看似不可能的元函数。你马上就会看到</p>
+<p>至于你说为什么叫void_t而不是叫其他类型，那你去问问C++委员会吧，顺便告诉我，我也想知道。</p>
+<pre><code class="C++">  // __void_t (std::void_t for C++11)
+  template&lt;typename...&gt; using __void_t = void;
+</code></pre>
+<h2 id="is-referenceable"><a href="#is-referenceable" class="headerlink" title="__is_referenceable"></a>__is_referenceable</h2><p>传入一个类型，返回其是不是可引用的，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
+<p>需要注意：一个类型T，如果已经是一个引用，无论是左值还是右值，均不可再添加&amp;，就是说没有<code>(int &amp;) &amp;</code>这样的语法，即引用的引用。但是在模板中，有引用的折叠，别把这件事情忘了。</p>
+<p>拿什么是不可引用的呢？</p>
+<ul>
+<li>void</li>
+<li>例如<code>int () const</code>这样的函数</li>
+</ul>
+<pre><code class="C++">  // Utility to detect referenceable types ([defns.referenceable]).
+
+  template&lt;typename _Tp, typename = void&gt; //第二个类型参数用于辅助，不需要有名字。
+    struct __is_referenceable
+    : public false_type
+    &#123; &#125;;
+
+  template&lt;typename _Tp&gt;
+    struct __is_referenceable&lt;_Tp, __void_t&lt;_Tp&amp;&gt;&gt; //如果是一个不可引用的类型，匹配这个特例化失败，转而匹配主模板
+    : public true_type
+    &#123; &#125;;
+</code></pre>
+<h2 id="一些特殊的类型"><a href="#一些特殊的类型" class="headerlink" title="一些特殊的类型"></a>一些特殊的类型</h2><p>C++中有一些类型，具有独特的语义。例如 无其他动作的构造。内存布局方式是标准的。无其他动作的拷贝。一个抽象基类，一个被final修饰的类,等等deng’den。想对这些类型实现type_traits不是不行，但是编译器为我们内置这样的功能可能会更好，编译速度也会更加快速。</p>
+<h3 id="trivial"><a href="#trivial" class="headerlink" title="trivial"></a>trivial</h3><p>一个trivial需要具有一下的性质</p>
+<ul>
+<li>有默认构造函数，编译器生成的，或者是显示的&#x3D;default，只能是这两种情况。</li>
+<li>内存空间是连续的</li>
+<li>不能包含虚函数和虚基类。</li>
+<li>成员可以具有不同的访问权限</li>
+<li>拥有平凡的拷贝构造函数和移动构造函数。默认的意思同上，也可以使用&#x3D;default。</li>
+<li>拥有平凡的拷贝赋值运算符和移动赋值运算符。</li>
+</ul>
+<h3 id="stand-layout"><a href="#stand-layout" class="headerlink" title="stand_layout"></a>stand_layout</h3><p>一个stand_layout的对象，需要满足以下几种性质</p>
+<ul>
+<li>所有非静态成员拥有相同的访问级别</li>
+<li>类中第一个非静态类型与基类不是同一个类型</li>
+<li>所有非静态数据成员都符合标准布局的要求</li>
+<li>没有虚类和虚基类</li>
+<li>继承时需要满足以下两个情况之一<ol>
+<li>派生类中有非静态类，那么这个派生类只能有且只有一个仅包含了静态成员的基类。</li>
+<li>基类有非静态成员，那么派生类中不允许有非静态成员。</li>
+</ol>
+</li>
+</ul>
+<p>ps：这里涉及到C++对象模型，感兴趣的可以自行学习。</p>
+<h3 id="pod"><a href="#pod" class="headerlink" title="pod"></a>pod</h3><p>pod类型需要满足两个要求</p>
+<ul>
+<li>是一个人trivial类型</li>
+<li>是一个stand_layout类型</li>
+</ul>
+<p>pod类型的一些优势&#x2F;特点</p>
+<ul>
+<li>POD类型兼容C内存布局，C++可以直接使用C库函数操作POD数据类型，POD类型在C和C++间的操作总是安全的</li>
+<li>POD类型可以直接使用字节赋值，使用C语言库函数进行二进制形式的数据交换，包括但不限于如下操作<code>memmove</code>,<code>memcpy</code>等</li>
+<li>静态初始化在很多时候可以提高程序性能，而POD类型的静态初始化非常简单（放入目标文件的<code>.bss</code>段，在初始化时直接赋0）</li>
+<li>虽然与C完全兼容，但是仍然可以有成员函数</li>
+<li>有更长的生命周期（从资源获取到资源释放），非POD类型的生命周期从构造函数结束到析构函数结束</li>
+<li>POD类型对象的前部没有填充字节，因此对象指针等于对象第一个成员的指针</li>
+</ul>
+<p>ps：还是涉及到C++对象模型，有点头秃，大伙看看就好，毕竟术业有专攻。编写应用层C++&#x2F;非底层库看看就好。</p>
+<blockquote>
+<p>STL的一些算法为了优化性能就会使用is_pod+标签分派的手法来优化性能。在一些很老的标准库中，你会看见对is_pod的手动实现</p>
+</blockquote>
+<h3 id="literal-type"><a href="#literal-type" class="headerlink" title="literal_type"></a>literal_type</h3><p>简单的说，就可以在用于编译期运算的对象。注意其和字面量的区别。</p>
+<h2 id="还有一些编译器为我们内置的type-traits"><a href="#还有一些编译器为我们内置的type-traits" class="headerlink" title="还有一些编译器为我们内置的type_traits"></a>还有一些编译器为我们内置的type_traits</h2><p>这些type_traits的共呢个正如他们的名字所言，你唯一搞不懂的，应当是什么是POD类型？什么又是trivially_copyable性质？</p>
+<pre><code class="C++"> /// is_trivial
+//普通类型是其存储是连续的普通可复制的，并且仅支持静态默认初始化，无论是否为 cv 限定。它包括标量类型，平凡类和任何此类类型的数组。其实现也是编译器内置的。
+  template&lt;typename _Tp&gt;
+    struct is_trivial 
+    : public integral_constant&lt;bool, __is_trivial(_Tp)&gt;
+    &#123;
+      static_assert(std::__is_complete_or_unbounded(__type_identity&lt;_Tp&gt;&#123;&#125;), //这里的静态断言，我们在前面说过了，不再解释，下同。
+    &quot;template argument must be a complete class or an unbounded array&quot;);
+    &#125;;
+
+  // is_trivially_copyable
+  template&lt;typename _Tp&gt;
+    struct is_trivially_copyable 	//是否具有平凡的拷贝
+    : public integral_constant&lt;bool, __is_trivially_copyable(_Tp)&gt;
+    &#123;
+      static_assert(std::__is_complete_or_unbounded(__type_identity&lt;_Tp&gt;&#123;&#125;),
+    &quot;template argument must be a complete class or an unbounded array&quot;);
+    &#125;;
+
+  /// is_standard_layout
+  template&lt;typename _Tp&gt;
+    struct is_standard_layout	//是否是一个标准布局
+    : public integral_constant&lt;bool, __is_standard_layout(_Tp)&gt;
+    &#123;
+      static_assert(std::__is_complete_or_unbounded(__type_identity&lt;_Tp&gt;&#123;&#125;),
+    &quot;template argument must be a complete class or an unbounded array&quot;);
+    &#125;;
+
+  /// is_pod (deprecated in C++20) C++20中已经废弃
+  // Could use is_standard_layout &amp;&amp; is_trivial instead of the builtin.
+  template&lt;typename _Tp&gt;	
+    struct
+    _GLIBCXX20_DEPRECATED(&quot;use is_standard_layout &amp;&amp; is_trivial instead&quot;)
+    is_pod
+    : public integral_constant&lt;bool, __is_pod(_Tp)&gt;
+    &#123;
+      static_assert(std::__is_complete_or_unbounded(__type_identity&lt;_Tp&gt;&#123;&#125;),
+    &quot;template argument must be a complete class or an unbounded array&quot;);
+    &#125;;
+
+  /// is_literal_type
+  //17开始 20弃用
+  template&lt;typename _Tp&gt;
+    struct
+    _GLIBCXX17_DEPRECATED
+    is_literal_type 		//是否是一个字面类型
+    : public integral_constant&lt;bool, __is_literal_type(_Tp)&gt;
+    &#123;
+      static_assert(std::__is_complete_or_unbounded(__type_identity&lt;_Tp&gt;&#123;&#125;),
+    &quot;template argument must be a complete class or an unbounded array&quot;);
+    &#125;;
+
+  /// is_empty
+  template&lt;typename _Tp&gt;
+    struct is_empty			//是否是一个空类型，即类中为空实现
+    : public integral_constant&lt;bool, __is_empty(_Tp)&gt;
+    &#123; &#125;;
+
+  /// is_polymorphic
+  template&lt;typename _Tp&gt;
+    struct is_polymorphic		// 是否是一个多态类
+    : public integral_constant&lt;bool, __is_polymorphic(_Tp)&gt;
+    &#123; &#125;;
+
+#if __cplusplus &gt;= 201402L
+#define __cpp_lib_is_final 201402L
+  /// is_final
+  template&lt;typename _Tp&gt;
+    struct is_final		
+    : public integral_constant&lt;bool, __is_final(_Tp)&gt;
+    &#123; &#125;;
+#endif
+
+  /// is_abstract
+  template&lt;typename _Tp&gt;
+    struct is_abstract
+    : public integral_constant&lt;bool, __is_abstract(_Tp)&gt;
+    &#123; &#125;;
+</code></pre>
+<h2 id="is-signed"><a href="#is-signed" class="headerlink" title="is_signed"></a>is_signed</h2><pre><code class="C++">template&lt;typename _Tp,
+  bool = is_arithmetic&lt;_Tp&gt;::value&gt; //默认参数是一个bool值,来判断书不是算数类型
+  struct __is_signed_helper
+  : public false_type &#123; &#125;;
+
+template&lt;typename _Tp&gt;
+  struct __is_signed_helper&lt;_Tp, true&gt;	//蕴含着是一个符号类型应当先是算数类型
+  : public integral_constant&lt;bool, _Tp(-1) &lt; _Tp(0)&gt;	//如果是一个有符号类型，那么_Tp(-1) &lt; _Tp(0)得到的结果将会是false，是一个无符号类型，-1，会下溢结果为true。
+  &#123; &#125;;
+
+/// is_signed
+template&lt;typename _Tp&gt;
+  struct is_signed
+  : public __is_signed_helper&lt;_Tp&gt;::type
+  &#123; &#125;
+</code></pre>
+<h2 id="is-unsigned"><a href="#is-unsigned" class="headerlink" title="is_unsigned"></a>is_unsigned</h2><pre><code class="C++">  /// is_unsigned
+  template&lt;typename _Tp&gt;
+    struct is_unsigned
+    : public __and_&lt;is_arithmetic&lt;_Tp&gt;/*也可以不加这个元函数，is_singed中有*/, __not_&lt;is_signed&lt;_Tp&gt;&gt;&gt; //算数类型的同时对is_singed取反
+    &#123; &#125;;
+</code></pre>
+<h2 id="decltype手法"><a href="#decltype手法" class="headerlink" title="decltype手法"></a>decltype手法</h2><p>C++11中新增了decltype关键字，目的就是解决TMP中的一些问题。decltype会对表达式求值，只会根据表达式来推导类型，这点牢记。我不打算说明decltype的所有细节，你可以查阅资料来了解相关知识。decltype为TMP的实现提供了更多的可能性。decltype+SFINAE也是TMP中的一种很巧妙的手法。</p>
+<h2 id="declval"><a href="#declval" class="headerlink" title="declval"></a>declval</h2><p>declval是一个函数，只有声明，没有实现，目的很简单，服务于TMP。因此，关于declval的所有操作，均在编译时期发生。</p>
+<pre><code class="C++">  /**
+   *  @brief  Utility to simplify expressions used in unevaluated operands
+   *  @ingroup utilities
+   */
+//提供了两个的重载版本
+  template&lt;typename _Tp, typename _Up = _Tp&amp;&amp;&gt;
+    _Up
+    __declval(int);
+
+  template&lt;typename _Tp&gt;
+    _Tp
+    __declval(long);
+
+  template&lt;typename _Tp&gt;
+    auto declval() noexcept -&gt; decltype(__declval&lt;_Tp&gt;(0)); //尾置返回类型
+</code></pre>
+<h2 id="extent"><a href="#extent" class="headerlink" title="extent"></a>extent</h2><p>如果T是数组类型，则提供成员常量等于数组第nth维的元素数。或者T是其他类型，或者数组的第0维数为无界的并且nth&#x3D;0，则值为0。</p>
+<p>你可能会疑惑为什么第0维是无界的时候值为0，第1，2，…维不行吗？别忘了C的语法——要确定数组的列数。</p>
+<pre><code class="C++">  /// extent
+  template&lt;typename, unsigned _Uint&gt;	
+    struct extent
+    : public integral_constant&lt;std::size_t, 0&gt; &#123; &#125;;	  //T不是数组类型，值为0
+
+  template&lt;typename _Tp, unsigned _Uint, std::size_t _Size&gt;
+    struct extent&lt;_Tp[_Size], _Uint&gt;
+    : public integral_constant&lt;std::size_t,
+                   _Uint == 0 ? _Size : extent&lt;_Tp,   //三目运算符
+                               _Uint - 1&gt;::value&gt;	//递归条件_Uint == 0，在_Uint==0的时候，编译器推断的size正好是nth的长度，实现很巧妙，多看几眼慢慢搞清顺序。
+    &#123; &#125;;
+
+  template&lt;typename _Tp, unsigned _Uint&gt;
+    struct extent&lt;_Tp[], _Uint&gt;				//如果是一个无界数组
+    : public integral_constant&lt;std::size_t,
+                   _Uint == 0 ? 0 : extent&lt;_Tp,	//如果是第0维，那么值就是0，否则就递归的继承，回到了上述的情况
+                               _Uint - 1&gt;::value&gt; 
+    &#123; &#125;;
+</code></pre>
+<p>用法：</p>
+<pre><code class="C++">int main() &#123;
+    int arr [][3][2] = &#123;&#125;;
+    cout &lt;&lt; std::extent&lt;int[][3][5],0&gt;::value &lt;&lt; endl;  //0
+    cout &lt;&lt; std::extent&lt;int[][3][5],1&gt;::value &lt;&lt; endl;  //3
+    cout &lt;&lt; std::extent&lt;int[][3][5],2&gt;::value &lt;&lt; endl;  //5
+    int arr1[1][2];
+    cout &lt;&lt; std::extent&lt;decltype(arr1),0&gt;::value &lt;&lt; endl;   //1
+    cout &lt;&lt; std::extent&lt;decltype(arr1),1&gt;::value &lt;&lt; endl;   //2
+    
+    //decltype(arr)的结果为什么超出我么的预期？gcc出bug了吗？
+    cout &lt;&lt; std::extent&lt;decltype(arr),0&gt;::value &lt;&lt; endl;    //0
+    cout &lt;&lt; std::extent&lt;decltype(arr),1&gt;::value &lt;&lt; endl;    //0
+    cout &lt;&lt; std::extent&lt;decltype(arr),2&gt;::value &lt;&lt; endl;    //0
+    return 0;
+&#125;
+</code></pre>
+<p>其实decltype的推导arr的结果为<code>[0][3][2]</code>。是不同于直接传递<code>int[][3][5]</code>的。decltype的推断出一个有界数组，而直接传递arr，arr被当作一个无界数组。</p>
+<h2 id="rank"><a href="#rank" class="headerlink" title="rank"></a>rank</h2><p>传入一个类型，返回其数组的维数。</p>
+<p>同样是使用递归+继承的方式来实现。</p>
+<pre><code class="C++">  /// rank
+  template&lt;typename&gt;
+    struct rank
+    : public integral_constant&lt;std::size_t, 0&gt; &#123; &#125;;
+
+  template&lt;typename _Tp, std::size_t _Size&gt;
+    struct rank&lt;_Tp[_Size]&gt;
+    : public integral_constant&lt;std::size_t, 1 + rank&lt;_Tp&gt;::value&gt; &#123; &#125;;
+
+  template&lt;typename _Tp&gt;
+    struct rank&lt;_Tp[]&gt;
+    : public integral_constant&lt;std::size_t, 1 + rank&lt;_Tp&gt;::value&gt; &#123; &#125;;
+</code></pre>
+
+    </div>
+    
+</div>
+                         
+<footer id="footer">
+    <div class="footer-wrap">
+        <div>
+            © 20xx - 2022 Hello @you
+            <span class="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            @Jan6055
+        </div>
+        <div></div>
+        <div>Based on the <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo Engine</a> & <a
+                target="_blank" rel="noopener" href="https://github.com/argvchs/hexo-theme-particlex">ParticleX Theme</a></div>
+        
+    </div>
+</footer>
+                    </div>
+                </div>
+            </transition>
+            <div id="img_show">
+                <img id="img_content" alt="img_show">
+            </div>
+        </div>
+        <script src="https://cdn.staticfile.org/highlight.js/11.5.1/highlight.min.js"></script>
+        <script src="/js/particlex.js"></script>
+        <script src="/js/showimg.js"></script>
+        
+
+    </body>
+</html>
