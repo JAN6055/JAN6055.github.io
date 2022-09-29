@@ -140,7 +140,7 @@
             
             <span class="tag">
                 
-                <a href="/tags/Modern-C/" style="color: #03a9f4">
+                <a href="/tags/Modern-C/" style="color: #00a596">
                     Modern C++
                 </a>
             </span>
@@ -154,7 +154,7 @@
             
             <span class="tag">
                 
-                <a href="/tags/C-Library/" style="color: #00bcd4">
+                <a href="/tags/C-Library/" style="color: #ffa2c4">
                     C++ Library
                 </a>
             </span>
@@ -163,7 +163,7 @@
         
     </div>
     <div class="content" v-pre>
-        <p>在第三章中，会有一些新的东西，不同于一二章，这章TMP开始加速了！你将会看见额外的一些元函数实现手法，你肯定会惊讶它的巧妙，特别是void_t类型。总之，做好准备，这章的难度可不同于以往了！</p>
+        <p>在第三章中，会有一些新的东西，不同于一二章，TMP开始加速了！你将会看见额外的一些元函数实现手法，你肯定会惊讶它的巧妙，特别是void_t类型。总之，做好准备，这章的难度可不同于以往了！</p>
 <h1 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h1><h2 id="is-one-of"><a href="#is-one-of" class="headerlink" title="__is_one_of"></a>__is_one_of</h2><p>传入一个类型T和一个参数包Ts，返回其T是不是Ts其中的一个类型，如果是，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
 <p>有了这个type_traits，可以更加轻松的实现其他type_traits。</p>
 <p>这个type_traits的实现方式也是比较的有意思。我们可以有很多种方式来实现<code>__is_one_of</code>这个元函数，包括使用模板递归继承的方式来实现。gcc则是采用的参数包模式展开的方式。</p>
@@ -217,7 +217,6 @@
     using __is_standard_integer
       = __or_&lt;__is_signed_integer&lt;_Tp&gt;, __is_unsigned_integer&lt;_Tp&gt;&gt;;
 </code></pre>
-<h2 id="SFINAE"><a href="#SFINAE" class="headerlink" title="SFINAE"></a>SFINAE</h2><p>我并不打算详细的解释什么是SFINAE,你应当自己去寻找一些资料。我主要想说的是，一下的type_traits,皆基于SFINAE,虽然之前的文章中也说到过SFINE,但那更像是开胃小菜。</p>
 <h2 id="void-t"><a href="#void-t" class="headerlink" title="void_t"></a>void_t</h2><p>void_t，就是一个void的别名，但是带有类型参数。你会说：这不是脱裤子放屁吗？有什么用，我直接写void不好吗？</p>
 <p>实际上void_t是为TMP服务的，并不是让你当作返回值&#x2F;类型声明的。我们可以通过SFINE+void_t这种TMP的手法来实现看似不可能的元函数。你马上就会看到</p>
 <p>至于你说为什么叫void_t而不是叫其他类型，那你去问问C++委员会吧，顺便告诉我，我也想知道。</p>
@@ -459,6 +458,9 @@ template&lt;typename _Tp&gt;
     struct rank&lt;_Tp[]&gt;
     : public integral_constant&lt;std::size_t, 1 + rank&lt;_Tp&gt;::value&gt; &#123; &#125;;
 </code></pre>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>本章更加深入的了解了type_traits的更加高阶的实现技巧。但这还只是TMP的冰山一角而已。无论难度如何，总之，还能够接受。介绍了一些维TMP服务的基本元函数，例如declval等，虽然定义很短，但是很复杂也巧妙。</p>
+<p>下一章，会更加深入的分析type_traits,前三章分析的type_traits的耦合度很低，很多的tyep_traits都相对独立。而后些章节。那些type_traits都需要很多的元函数做支撑。并且还会有更加复杂的TMP实现手法等着你。</p>
+<p>至此，type_traits的源码差不多分析的近900行，还有剩下的2000多行等待我们探索。</p>
 
     </div>
     

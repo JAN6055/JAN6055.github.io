@@ -1,0 +1,380 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+        <title>Rust字符串处理 | Hello @You</title>
+        <meta name="author" content="Jan6055">
+        <meta name="description" content="">
+        <meta name="keywords" content="C++,Rust,Jan6055">
+        <link rel="icon" href="https://avatars.githubusercontent.com/u/94843786?s=400&u=3e0bac8cdc09c80d159d076c0503db566f8f0579&v=4">
+        <script src="https://cdn.staticfile.org/instant.page/5.1.0/instantpage.min.js" type="module"></script>
+        <script src="https://cdn.staticfile.org/font-awesome/6.1.1/js/all.min.js"></script>
+        
+        <link rel="stylesheet" href="/css/fonts.min.css">
+        <link rel="stylesheet" href="/css/particlex.css">
+        
+        <script src="https://cdn.staticfile.org/vue/3.2.33/vue.global.prod.min.js"></script>
+    <meta name="generator" content="Hexo 6.2.0"></head>
+    <body>
+        <div id="loading" style="height:100vh;width:100vw;position:fixed;display:flex;z-index:200;justify-content:space-between;background:#fff;transition:opacity 0.3s ease-out"><div style="position:fixed;height:100vh;width:100vw;display:flex;justify-content:center;align-items:center"><div id="loadcontent" style="width:50vmin;height:50vmin;padding:50px;border-radius:50%;display:flex;justify-content:center;align-items:center;border:solid 10px #a3ddfb;text-align:center"><div><h2>LOADING...</h2><p style="word-break:keep-all">加载过慢请开启缓存(浏览器默认开启)</p><div><img alt="loading" src="/loading.gif"></div></div></div></div></div>
+        <div id="layout">
+            <i data-fa-symbol="calendar-solid" class="fa-solid fa-calendar fa-fw"></i>
+            <i data-fa-symbol="bookmark-solid" class="fa-solid fa-bookmark fa-fw"></i>
+            <i data-fa-symbol="tags-solid" class="fa-solid fa-tags fa-fw"></i>
+            <transition name="into">
+                <div v-show="show_page" style="display: -not-none">
+                    <div id="menu_show">
+                         
+<nav id="menu">
+    <div class="desktop-menu">
+        <a href="/">
+            <span class="title">Hello @you</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;about</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;tags</span>
+        </a>
+        
+    </div>
+    <div :class="'phone-menu ' + menu_show" id="phone-menu">
+        <div class="curtain" @click="menu_show = !menu_show" v-show="menu_show"></div>
+        <div :class="'title'" @click="menu_show = !menu_show">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;Hello @you</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="menu_show">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">about</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+                    </div>
+                    <div id="main">
+                        
+<div class="article">
+    <div>
+        <h1>Rust字符串处理 </h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
+            </span>
+            2022/9/29
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/Rust/" style="color: #00bcd4">
+                    Rust
+                </a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/Rust-Library/" style="color: #00bcd4">
+                    Rust Library
+                </a>
+            </span>
+            
+        </span>
+        
+    </div>
+    <div class="content" v-pre>
+        <h1 id="Rust中的字符串"><a href="#Rust中的字符串" class="headerlink" title="Rust中的字符串"></a>Rust中的字符串</h1><p>rust中的字符串是一个 UTF-8 编码的可增长字符串。</p>
+<p>String 类型是最常见的字符串类型，拥有对该字符串内容的所有权。它与其借用的对应物，原始的 str 有着密切的关系。</p>
+<p>rust中的字符串对新手非常的不友好。由于String是基于utf_8编码的，导致很多操作需要额外的中间层。文篇文章的目的在于理清String的各种处理法。</p>
+<h1 id="String的数据结构"><a href="#String的数据结构" class="headerlink" title="String的数据结构"></a>String的数据结构</h1><p>String内含一个Vec<u8>,所以String和Vec的结构完全相同。Vec的实现用了多层的嵌套。这里将String的数据结构直接抽象出来</p>
+<p>你可以将String理解为这样的数据结构</p>
+<ul>
+<li>一个ptr 指向u8数组</li>
+<li>len为String的长度</li>
+<li>capacity为String的容量。</li>
+</ul>
+<h1 id="如何处理string"><a href="#如何处理string" class="headerlink" title="如何处理string"></a>如何处理string</h1><h2 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h2><p>String提供了很多可以直接更新字符串的方法，例如<code>push</code>、<code>push_str</code>、<code>clean</code>、<code>pop</code>等。</p>
+<p>还有一些处理字符串的宏。</p>
+<p>这些方法和宏标准库文档都已经写的够好的了，或者你也可以看看rust程序语言设计这本书。我不相信我能比标准库撰写人员有着对标准库更好的解释。这一部分，可以直接阅标准库提供的文档或者书籍。</p>
+<p>这里列举出一些常用方法的函数原型</p>
+<blockquote>
+<p>pub fn <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/string/struct.String.html#method.trim">trim</a>(&amp;self) -&gt; &amp;<a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/primitive.str.html">str</a></p>
+<p>返回除去前导空格的字符串切片</p>
+</blockquote>
+<blockquote>
+<p>pub fn <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/string/struct.String.html#method.split">split</a>&lt;’a, P&gt;(&amp;’a self, pat: P) -&gt; <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/str/struct.Split.html">Split</a>&lt;’a, P&gt; where   P: <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/str/pattern/trait.Pattern.html">Pattern</a>&lt;’a&gt; </p>
+<p>在此字符串切片的子字符串上进行迭代的迭代器，该子字符串由模式匹配的字符分隔</p>
+</blockquote>
+<blockquote>
+<p>pub fn <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/string/struct.String.html#method.split_at">split_at</a>(&amp;self, mid: <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/primitive.usize.html">usize</a>) -&gt; <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/primitive.tuple.html">(</a>&amp;<a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/primitive.str.html">str</a>, &amp;<a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/primitive.str.html">str</a><a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/primitive.tuple.html">)</a> </p>
+<p>在索引处将一个字符串切片分成两个</p>
+</blockquote>
+<blockquote>
+<p>pub fn <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/string/struct.String.html#method.parse">parse</a><F>(&amp;self) -&gt; <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/result/enum.Result.html">Result</a>&lt;F, &lt;F as <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/str/trait.FromStr.html">FromStr</a>&gt;::<a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/str/trait.FromStr.html#associatedtype.Err">Err</a>&gt;where   F: <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/str/trait.FromStr.html">FromStr</a> </p>
+<p>将此字符串切片解析为另一种类型</p>
+</blockquote>
+<blockquote>
+<p>pub fn <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/string/struct.String.html#method.repeat">repeat</a>(&amp;self, n: <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/primitive.usize.html">usize</a>) -&gt; <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/string/struct.String.html">String </a>  </p>
+<p>通过重复字符串 <code>n</code> 次来创建新的 <a href="%5Chttps://rustwiki.org/zh-CN/std/string/struct.String.html"><code>String</code></a></p>
+</blockquote>
+<blockquote>
+<p>pub fn <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/string/struct.String.html#method.lines">lines</a>(&amp;self) -&gt; <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/str/struct.Lines.html">Lines</a>&lt;’_&gt; </p>
+<p>在字符串的各行上进行迭代的迭代器，作为字符串切片。</p>
+</blockquote>
+<blockquote>
+<p>pub fn <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/string/struct.String.html#method.replace">replace</a>&lt;’a, P&gt;(&amp;’a self, from: P, to: &amp;<a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/primitive.str.html">str</a>) -&gt; <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/string/struct.String.html">String</a>where   P: <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/str/pattern/trait.Pattern.html">Pattern</a>&lt;’a&gt; </p>
+<p>用另一个字符串替换模式的所有匹配项。</p>
+</blockquote>
+<blockquote>
+<p>pub fn <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/string/struct.String.html#method.replacen">replacen</a>&lt;’a, P&gt;(&amp;’a self, pat: P, to: &amp;<a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/primitive.str.html">str</a>, count: <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/primitive.usize.html">usize</a>) -&gt; <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/string/struct.String.html">String</a>where   P: <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/str/pattern/trait.Pattern.html">Pattern</a>&lt;’a&gt; </p>
+<p>用另一个字符串替换模式的前 N 个匹配项</p>
+</blockquote>
+<blockquote>
+<p>pub fn <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/string/struct.String.html#method.find">find</a>&lt;’a, P&gt;(&amp;’a self, pat: P) -&gt; <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/option/enum.Option.html">Option</a>&lt;usize&gt;where   P: <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/str/pattern/trait.Pattern.html">Pattern</a>&lt;’a&gt; </p>
+<p>返回此字符串切片中与模式匹配的第一个字符的字节索引</p>
+</blockquote>
+<blockquote>
+<p>pub fn <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/string/struct.String.html#method.get">get</a><I>(&amp;self, i: I) -&gt; <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/option/enum.Option.html">Option</a>&lt;&amp;&lt;I as <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/slice/trait.SliceIndex.html">SliceIndex</a>&lt;str&gt;&gt;::<a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/slice/trait.SliceIndex.html#associatedtype.Output">Output</a>&gt;  where I: SliceIndex&lt;str&gt; </p>
+<p>返回 <code>str</code> 的子切片</p>
+</blockquote>
+<p>还有他们的变体等等。例如<code>rfind</code>,<code>get_mut</code>,<code>rsplit</code>等。</p>
+<h2 id="结构化"><a href="#结构化" class="headerlink" title="结构化"></a>结构化</h2><p>由于String不能像C++中的std::string直接进行下标运算符，很多操作都需要将其转为vec来进行处理。我们需要这两个方法</p>
+<ul>
+<li><h4 id="pub-fn-into-bytes-self-gt-Vec-lt-u8-Global-gt"><a href="#pub-fn-into-bytes-self-gt-Vec-lt-u8-Global-gt" class="headerlink" title="pub fn into_bytes(self) -&gt; Vec&lt;u8, Global&gt;"></a>pub fn <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/string/struct.String.html#method.into_bytes">into_bytes</a>(self) -&gt; <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/vec/struct.Vec.html">Vec</a>&lt;<a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/primitive.u8.html">u8</a>, <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/alloc/struct.Global.html">Global</a>&gt;</h4></li>
+<li><h4 id="pub-fn-from-utf8-vec-Vec-lt-u8-Global-gt-gt-Result-lt-String-FromUtf8Error-gt"><a href="#pub-fn-from-utf8-vec-Vec-lt-u8-Global-gt-gt-Result-lt-String-FromUtf8Error-gt" class="headerlink" title="pub fn from_utf8(vec: Vec&lt;u8, Global&gt;) -&gt; Result&lt;String, FromUtf8Error&gt;"></a>pub fn <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/string/struct.String.html#method.from_utf8">from_utf8</a>(vec: <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/vec/struct.Vec.html">Vec</a>&lt;<a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/primitive.u8.html">u8</a>, <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/alloc/struct.Global.html">Global</a>&gt;) -&gt; <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/result/enum.Result.html">Result</a>&lt;<a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/string/struct.String.html">String</a>, <a target="_blank" rel="noopener" href="https://rustwiki.org/zh-CN/std/string/struct.FromUtf8Error.html">FromUtf8Error</a>&gt;</h4></li>
+</ul>
+<p>你可以点击链接看看标准库的文档。</p>
+<p>例如，我们要对输入的字符串只去回车，可以将String转为Vec&#x2F;u8数组，然后对Vec&#x2F;u8数组操作再转为String。</p>
+<pre><code class="rust">    let s = String::from(&quot;我爱你rust\n&quot;);
+    let mut vec: Vec&lt;u8&gt; = s.into_bytes();
+    if vec[vec.len()-1] == b&#39;\n&#39; &#123;
+        vec.remove(vec.len()-1);
+    &#125;
+    let s = String::from_utf8(vec).unwrap();
+    println!(&quot;&#123;:#?&#125;&quot;,s);
+</code></pre>
+<p>转换来转换去不会影响性能吗？不会的，你看这两个方法的函数签名。是所有权在转移而已，并没有复制内部的数据结构。</p>
+<p>对每个字符串中的字符之间插入空格</p>
+<pre><code class="rust">    let s = String::from(&quot;helloworld&quot;);
+    let mut vec: Vec&lt;u8&gt; = s.into_bytes();
+    let mut i = 1;
+    let mut n = vec.len()-1;
+    while n != 0 &#123;
+        vec.insert(i,b&#39; &#39;);
+        i += 2;
+        n -= 1;
+    &#125;
+    let s = String::from_utf8(vec).unwrap();
+    println!(&quot;&#123;:#?&#125;&quot;,s);
+</code></pre>
+<p>把字符串拆分为不同的单词</p>
+<pre><code class="rust">    let s = String::from(&quot;hello world hello rust&quot;);
+    let vec: Vec&lt;u8&gt; = s.into_bytes();
+    let mut words = vec![];
+    let mut f = 0;
+    let mut p = false;
+    for i in 0..vec.len() &#123;
+        if (b&#39;a&#39;..=b&#39;z&#39;).contains(&amp;vec[i]) &amp;&amp; !p &#123;
+            p = true;
+            f = i;
+        &#125; else if vec[i] == b&#39; &#39;&#123;
+            p = false;
+            words.push(String::from_utf8(Vec::from(&amp;vec[f..i])).unwrap());
+        &#125; else if i == vec.len()-1 &#123;
+            words.push(String::from_utf8(Vec::from(&amp;vec[f..=i])).unwrap());
+        &#125;
+    &#125;
+    for word in words &#123;
+        println!(&quot;&#123;&#125;&quot;,word);
+    &#125;
+</code></pre>
+<p>好家伙，就是为了这点醋才包的饺子。</p>
+<h2 id="函数式"><a href="#函数式" class="headerlink" title="函数式"></a>函数式</h2><p>rust使用迭代器+闭包的形式来支持函数式编程。还是上述拆分字符串为单词的问题。我们使用函数式会很好的解决。</p>
+<pre><code class="rust">    let s = String::from(&quot;hello word hello rust&quot;);
+    let words = s.split(&#39; &#39;)
+        .map(|s| s.to_string())
+        .collect::&lt;Vec&lt;String&gt;&gt;();
+    for word in words &#123;
+        println!(&quot;&#123;&#125;&quot;,word);
+    &#125;
+</code></pre>
+<p>就是两个字，优雅！</p>
+<p>类似的，还有<code>filter</code>,<code>folder</code>,<code>take_while</code>等很多的FP方法。</p>
+<p>删除字符串中的所有回车+空格，我们可以使用retain方法。</p>
+<pre><code class="C++">    let mut s = String::from(&quot;hello _world \n \n _hello _rust &quot;);
+    s.retain(|ch| ![&#39;\n&#39;,&#39; &#39;].contains(&amp;ch));
+    println!(&quot;&#123;&#125;&quot;,s);
+</code></pre>
+<p>还是TM的优雅。如果是用C写相同的功能需要多少倍的代码和时间。</p>
+<p>可以看出，函数式编程是一个很好的处理问题的方式，不单单是在处理String中。</p>
+<h2 id="结构化-函数式"><a href="#结构化-函数式" class="headerlink" title="结构化+函数式"></a>结构化+函数式</h2><p>你可以将结构化编程和函数式编程组合起来。也是一个不错的选择。还是上述的问题。我们可以这样解决。</p>
+<pre><code class="C++">    let s = String::from(&quot;hello word hello rust&quot;);
+    let mut words = vec![];
+    for word in s.split(&#39; &#39;) &#123;
+        words.push(word.to_string());
+    &#125;
+    for word in words &#123;
+        println!(&quot;&#123;&#125;&quot;,word);
+    &#125;
+</code></pre>
+<p>也是同样的优雅。</p>
+<h2 id="处理字"><a href="#处理字" class="headerlink" title="处理字"></a>处理字</h2><p>我们里的字，并不是指的计算机系统中的字。而是日常生活中的字。比如’中’是一个字。</p>
+<p>可以使用chars这个迭代器来迭代字。</p>
+<pre><code class="C++">    let s = String::from(&quot;春江潮水连海平&quot;);
+    for word in s.chars() &#123;
+        println!(&quot;&#123;&#125;&quot;,word);
+    &#125;
+</code></pre>
+<p>注意用chars处理英文字母的时候，得到的是字符。有或者是处理其他像英文那样的语言。得到的都是单个字符。</p>
+<h2 id="处理原始字节"><a href="#处理原始字节" class="headerlink" title="处理原始字节"></a>处理原始字节</h2><p>可以使用bytes来迭代String内部的字节数组</p>
+<pre><code class="C++">let s = String::from(&quot;hello _world \n \n _hello _rust &quot;);
+for byte in s.bytes() &#123;
+    print!(&quot;&#123;&#125; &quot;,byte);
+&#125;
+</code></pre>
+<p>输出：</p>
+<blockquote>
+<p>104 101 108 108 111 32 95 119 111 114 108 100 32 10 32 10 32 95 104 101 108 108 111 32 95 114 117 115 116 32 </p>
+</blockquote>
+<h2 id="字符串拼接"><a href="#字符串拼接" class="headerlink" title="字符串拼接"></a>字符串拼接</h2><p>一提到字符串的拼接，你第一印象是怎么处理。直接使用+？你可能是一个C++程序员。调用方法？那你可能是一个java程序员。</p>
+<p>rust对于上述的两种方式都有提供。</p>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用+"></a>使用+</h3><p>我们看一看std::ops::Add这个trait的定义</p>
+<pre><code class="rust">pub trait Add&lt;Rhs = Self&gt; &#123;
+    /// The resulting type after applying the `+` operator.
+    type Output;	//关联类型
+    fn add(self, rhs: Rhs) -&gt; Self::Output; //必须定义的add方法，zhu
+&#125;
+</code></pre>
+<p>标准库为String实现了类似这样的Add trait<code>fn add(self, s: &amp;str) -&gt; String</code>。</p>
+<p>我们不能直接将两个String类型的对象相加，但是可以String+字符串面量。并且消耗self。</p>
+<p>也就是说，我们进行连+的时候，应当这样写。</p>
+<pre><code class="C++">    let hello = String::from(&quot;hello&quot;);
+    let world = String::from(&quot;world&quot;);
+    let rust = String::from(&quot;rust&quot;);
+    // let s = hello + world; error
+    //整个表达式从左向右求值。
+    let s = hello + &quot; &quot; + &amp;world + &quot; hello &quot; + &amp;rust;		//&amp;String -&gt; &amp;str,隐式的解引用类型转换
+    println!(&quot;&#123;s&#125;&quot;);
+</code></pre>
+<p>这语法也是没谁了。怎么会有这样的不一致性。对String进行+操作左右类型还不一样。所有权还会丢失。</p>
+<p>但实际想想标准库这样做是有依据的。</p>
+<ul>
+<li>左值转移所有权给返回值，这样做可以避免拷贝。</li>
+<li>提供了更加统一的接口</li>
+</ul>
+<h3 id="使用宏"><a href="#使用宏" class="headerlink" title="使用宏"></a>使用宏</h3><p>format！可以拼接String</p>
+<pre><code class="C++">    let hello = String::from(&quot;hello&quot;);
+    let world = String::from(&quot;world&quot;);
+    let rust = String::from(&quot;rust&quot;);
+    let s = format!(&quot;&#123;&#125; &#123;&#125; &#123;&#125; &#123;&#125;&quot;,hello,world,&quot;hello&quot;,rust);
+    println!(&quot;&#123;s&#125;&quot;);
+</code></pre>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>总而言之，字符串还是很复杂的。不同的语言选择了不同的向开发者展示其复杂性的方式。Rust 选择了以准确的方式处理 <code>String</code> 数据作为所有 Rust 程序的默认行为，这意味着开发者们必须更多的思考如何预先处理 UTF-8 数据。这种权衡取舍相比其他语言更多的暴露出了字符串的复杂性，不过也使你在开发生命周期后期免于处理涉及非 ASCII 字符的错误。	————rust程序语言设计</p>
+<p>其实学习如何处理字符串，就是在学习如何使用标准库。如果你对标准库中的一些宏和函数了如指掌。处理字符串对你来说也应当是小菜一碟。</p>
+
+    </div>
+    
+</div>
+                         
+<footer id="footer">
+    <div class="footer-wrap">
+        <div>
+            © 20xx - 2022 Hello @you
+            <span class="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            @Jan6055
+        </div>
+        <div></div>
+        <div>Based on the <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo Engine</a> & <a
+                target="_blank" rel="noopener" href="https://github.com/argvchs/hexo-theme-particlex">ParticleX Theme</a></div>
+        
+    </div>
+</footer>
+                    </div>
+                </div>
+            </transition>
+            <div id="img_show">
+                <img id="img_content" alt="img_show">
+            </div>
+        </div>
+        <script src="https://cdn.staticfile.org/highlight.js/11.5.1/highlight.min.js"></script>
+        <script src="/js/particlex.js"></script>
+        <script src="/js/showimg.js"></script>
+        
+
+    </body>
+</html>
