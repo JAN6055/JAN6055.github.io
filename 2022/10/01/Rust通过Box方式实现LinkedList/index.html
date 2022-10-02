@@ -417,6 +417,7 @@ impl &lt;&#39;a, T&gt; Iterator for IterMut&lt;&#39;a, T&gt; &#123;
 <p>很好，栈没有溢出。</p>
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>如果谁犯下了大罪。我一定让他试试在不看资料的情况下手写一个Option+Box的链表。</p>
 <p>玩笑归玩笑，好好的看清楚上面的实现，还是能对所有权和借用和声明周期的理解更上一层楼的。</p>
+<p>对于peek,peek_mut等函数，你也可以使用map来实现，但是使用map会获得所所有权，又需要额外的处理。本文保留了match方法。</p>
 
     </div>
     
