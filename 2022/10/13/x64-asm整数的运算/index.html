@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-        <title>区别&amp; Mut; Mut &amp;; Mut &amp; Mut | Hello @You</title>
+        <title>X64-Asm整数的运算 | Hello @You</title>
         <meta name="author" content="Jan6055">
         <meta name="description" content="">
         <meta name="keywords" content="C++,Rust,Jan6055">
@@ -122,14 +122,14 @@
                         
 <div class="article">
     <div>
-        <h1>区别&amp; Mut; Mut &amp;; Mut &amp; Mut </h1>
+        <h1>X64-Asm整数的运算 </h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
             </span>
-            2022/10/1
+            2022/10/13
         </span>
         
         
@@ -140,15 +140,8 @@
             
             <span class="tag">
                 
-                <a href="/tags/Rust/" style="color: #00bcd4">
-                    Rust
-                </a>
-            </span>
-            
-            <span class="tag">
-                
-                <a href="/tags/Effective-Rust/" style="color: #00a596">
-                    Effective Rust
+                <a href="/tags/x64-asm-asm/" style="color: #00bcd4">
+                    x64-asm asm
                 </a>
             </span>
             
@@ -156,64 +149,46 @@
         
     </div>
     <div class="content" v-pre>
-        <p>这里讨论的问题就像C++中的<code>const *</code>,<code>* const</code>,<code>const * const</code>一样，你完全可以类比。</p>
-<pre><code class="rust">#[allow(unused)]
-fn work_2() &#123;
-    let mut a = 10;
-    &#123;
-        let b = 20;
-        let ref_a = &amp;a; // -&gt; &amp;i32
-        ref_a = &amp;b;            //将引用指向b不可以
-        let mut mut_ref_a = &amp;a; //mut &amp;i32
-        *mut_ref_a = 20;       //更改变量本身，不可以
-        mut_ref_a = &amp;b;        //将引用指向b，可以
-    &#125;
-    let ref_mut_a = &amp;mut a; // -&gt; &amp;mut i32
-    *ref_mut_a = 20;  //更改变量本身的值，可以
-&#125;
-</code></pre>
-<ul>
-<li>&amp; mut代表着对一个变量的可变引用，引用的变量是可变的，但是引用本身是不可变的，也就是说当我确定引用一个变量的时候，就不能再引用其他变量了。</li>
-<li>mut &amp;代表着引用本身是可变的，即这个引用既可以引用a，又可以引用b，但是引用的变量是不可变的。</li>
-<li>&amp; mut &amp; 即代表着上述两者的结合，引用本身是可变的，并且引用的变量也是可变的。</li>
-</ul>
-<pre><code class="error">jan@jan:~/code/rust/option_$ cargo run
-   Compiling option_ v0.1.0 (/home/jan/code/rust/option_)
-error[E0384]: cannot assign twice to immutable variable `ref_a`
-  --&gt; src/main.rs:24:9
-   |
-23 |         let ref_a = &amp;a; // -&gt; &amp;i32
-   |             -----
-   |             |
-   |             first assignment to `ref_a`
-   |             help: consider making this binding mutable: `mut ref_a`
-24 |         ref_a = &amp;b;            //将引用指向b不可以
-   |         ^^^^^^^^^^ cannot assign twice to immutable variable
- 
-error[E0594]: cannot assign to `*mut_ref_a`, which is behind a `&amp;` reference
-  --&gt; src/main.rs:26:9
-   |
-25 |         let mut mut_ref_a = &amp;a; //mut &amp;i32
-   |                             -- help: consider changing this to be a mutable reference: `&amp;mut a`
-26 |         *mut_ref_a = 20;       //更改变量本身，不可以
-   |         ^^^^^^^^^^^^^^^ `mut_ref_a` is a `&amp;` reference, so the data it refers to cannot be written
- 
-Some errors have detailed explanations: E0384, E0594.
-For more information about an error, try `rustc --explain E0384`.
-error: could not compile `option_` due to 2 previous errors
-</code></pre>
-<p>mut &amp;可以用来充当指针的位置，例如输出一个Box+Option的链表。</p>
-<p>为了简便，不实现Display Trait,而是用一个方法</p>
-<pre><code class="rust">impl &lt;T:Display&gt; LinkedList&lt;T&gt; &#123;
-    pub fn display(&amp;self) &#123;
-        let mut curr = &amp;self.head; //curr: mut &amp;Link
-        while let Some(node) = curr &#123;
-            println!(&quot;&#123;&#125;&quot;,node.data);
-            curr = &amp;node.next;
-        &#125;
-    &#125;
-&#125;
-</code></pre>
+        <table>
+<thead>
+<tr>
+<th>操作</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>add</td>
+<td>用于加法，会设置CF,OF,SF,ZF。可用于无符号和有符号</td>
+</tr>
+<tr>
+<td>sub</td>
+<td>用于减法，会设置CF,OF,SF,ZF。可用于无符号和有符号</td>
+</tr>
+<tr>
+<td>inc</td>
+<td>自增1，不会影响标志寄存器</td>
+</tr>
+<tr>
+<td>dec</td>
+<td>自减1，不会影响标志寄存器</td>
+</tr>
+<tr>
+<td>sal</td>
+<td>左移</td>
+</tr>
+<tr>
+<td>sar</td>
+<td>算数右移</td>
+</tr>
+<tr>
+<td>imul</td>
+<td>有符号数相乘。得到的结果需要用两个寄存器来保存（qword x qword），地位放在rax中，高位放在rdx中。</td>
+</tr>
+<tr>
+<td>idiv</td>
+<td>无符号除法。得到的结果放在rax中，余数放在rdx中。</td>
+</tr>
+</tbody></table>
 
     </div>
     

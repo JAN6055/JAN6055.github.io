@@ -1,0 +1,326 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+        <title>Rust Raw-Ptr | Hello @You</title>
+        <meta name="author" content="Jan6055">
+        <meta name="description" content="">
+        <meta name="keywords" content="C++,Rust,Jan6055">
+        <link rel="icon" href="https://avatars.githubusercontent.com/u/94843786?s=400&u=3e0bac8cdc09c80d159d076c0503db566f8f0579&v=4">
+        <script src="https://cdn.staticfile.org/instant.page/5.1.0/instantpage.min.js" type="module"></script>
+        <script src="https://cdn.staticfile.org/font-awesome/6.1.1/js/all.min.js"></script>
+        
+        <link rel="stylesheet" href="/css/fonts.min.css">
+        <link rel="stylesheet" href="/css/particlex.css">
+        
+        <script src="https://cdn.staticfile.org/vue/3.2.33/vue.global.prod.min.js"></script>
+    <meta name="generator" content="Hexo 6.2.0"></head>
+    <body>
+        <div id="loading" style="height:100vh;width:100vw;position:fixed;display:flex;z-index:200;justify-content:space-between;background:#fff;transition:opacity 0.3s ease-out"><div style="position:fixed;height:100vh;width:100vw;display:flex;justify-content:center;align-items:center"><div id="loadcontent" style="width:50vmin;height:50vmin;padding:50px;border-radius:50%;display:flex;justify-content:center;align-items:center;border:solid 10px #a3ddfb;text-align:center"><div><h2>LOADING...</h2><p style="word-break:keep-all">加载过慢请开启缓存(浏览器默认开启)</p><div><img alt="loading" src="/loading.gif"></div></div></div></div></div>
+        <div id="layout">
+            <i data-fa-symbol="calendar-solid" class="fa-solid fa-calendar fa-fw"></i>
+            <i data-fa-symbol="bookmark-solid" class="fa-solid fa-bookmark fa-fw"></i>
+            <i data-fa-symbol="tags-solid" class="fa-solid fa-tags fa-fw"></i>
+            <transition name="into">
+                <div v-show="show_page" style="display: -not-none">
+                    <div id="menu_show">
+                         
+<nav id="menu">
+    <div class="desktop-menu">
+        <a href="/">
+            <span class="title">Hello @you</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;about</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;tags</span>
+        </a>
+        
+    </div>
+    <div :class="'phone-menu ' + menu_show" id="phone-menu">
+        <div class="curtain" @click="menu_show = !menu_show" v-show="menu_show"></div>
+        <div :class="'title'" @click="menu_show = !menu_show">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;Hello @you</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="menu_show">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">about</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+                    </div>
+                    <div id="main">
+                        
+<div class="article">
+    <div>
+        <h1>Rust Raw-Ptr </h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
+            </span>
+            2022/10/2
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/Rust/" style="color: #03a9f4">
+                    Rust
+                </a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/Unsafe-Rust/" style="color: #ffa2c4">
+                    Unsafe Rust
+                </a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/Effective-Rust/" style="color: #00a596">
+                    Effective Rust
+                </a>
+            </span>
+            
+        </span>
+        
+    </div>
+    <div class="content" v-pre>
+        <h1 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h1><p>提到指针，就一定避免不了谈到引用。因为引用时指针的封装。引用总能指向一个有效的对象，并在指向一个动态对象的时候有着大小的保证。引用的好处有如下几点</p>
+<ul>
+<li>总能保证引用有效数据</li>
+<li>引用与usize大小的倍数对其</li>
+<li>引用可以为动态类型大小提供上述保障</li>
+</ul>
+<p>我们可以使用{:p}的格式来表示要打印指针</p>
+<pre><code class="rust">    let a = 10;
+    println!(&quot;&#123;:p&#125;&quot;,&amp;a);
+</code></pre>
+<p>可以看见&amp;a这里被当作了一个指针。</p>
+<p>同样的，还能取得数组的首地址。</p>
+<pre><code class="rust">    let nums = [10; 5];
+    println!(&quot;&#123;:p&#125;&quot;,&amp;nums);
+</code></pre>
+<p>本应是引用，却有了取地址的意思。一定程度上，把引用和指针一视同仁，把引用看作封装后的指针。</p>
+<p>现在再来看解引用操作。</p>
+<pre><code class="rust">    let a = 10;
+    let ra = &amp;10;
+    println!(&quot;&#123;&#125;&quot;,*ra);
+</code></pre>
+<p>恍然大悟了！虽然ra可以自动解引用，也可以手动解引用。这不就是C吗？取地址和解引用。</p>
+<h1 id="指针"><a href="#指针" class="headerlink" title="指针"></a>指针</h1><p>rust更倾向于把指针封装起来，毕竟为了安全嘛。原始指针我们叫做<code>raw-ptr</code>。</p>
+<p>什么时<code>raw-ptr</code>呢？就是一个引用呗。那肯定也支持指针算数操作。比如加法运算。</p>
+<pre><code class="rust">    let a = 10;
+    let ra = &amp;10;
+    let b = ra + 1;
+    println!(&quot;&#123;b&#125;&quot;);
+</code></pre>
+<p>很不幸，b是11。因为标准库为我们实现了&amp;i32 i32的Add trait。这样操作就相当于两个i32相加。</p>
+<h2 id="raw指针类型"><a href="#raw指针类型" class="headerlink" title="raw指针类型"></a>raw指针类型</h2><p>众所周知C&#x2F;C++中有<code>T*</code>类型，例如<code>int *; double *</code>等。Rust同样的也提供了这样的类型。写法和C&#x2F;C++颇有不同。</p>
+<pre><code class="rust">    let a = 10;
+    let pa: * const i32 = &amp;a;
+    println!(&quot;&#123;:p&#125;&quot;,pa);
+    let pa = &amp;a as * const i32;
+    println!(&quot;&#123;:p&#125;&quot;,pa);
+</code></pre>
+<p>Rust中的raw-ptr分为<code>const</code>, <code>mut</code>两种性质。意思为指向的对象不可变，指向的对象可变。</p>
+<p>对raw-ptr执行解引用操作需要在unsafe中进行。</p>
+<pre><code class="rust">    let a = 10;
+    let pa: * const i32 = &amp;a;
+    unsafe &#123;
+        // *pa = 20; //error
+    &#125;
+    println!(&quot;&#123;:p&#125;&quot;,pa);
+    let pa = &amp;a as * const i32 as * mut i32;
+    unsafe &#123;
+        *pa = 20;
+    &#125;
+    assert_eq!(20, a);
+    println!(&quot;&#123;:p&#125;&quot;,pa);
+</code></pre>
+<p>从一个&amp;T来到*mut T需要额外的转换，要先转换为<code>*const</code>,再转换为<code>*mut</code>。但是可以从&amp;mut T直接转换为一个<code>*mut</code>指针。</p>
+<pre><code class="rust">    let mut a = 10;
+    let pa = &amp;mut a as *mut i32;
+</code></pre>
+<h2 id="raw指针会破坏rust的借用和所有权规则"><a href="#raw指针会破坏rust的借用和所有权规则" class="headerlink" title="raw指针会破坏rust的借用和所有权规则"></a>raw指针会破坏rust的借用和所有权规则</h2><p>你可能看见了a是一个非mut的变量，却经过*mut指针之手改变为20，使用的时候要注意。rust的不可变性，也不是那么的不可变啊。</p>
+<p>这样太容易带来歧义了。按照rust的说法，非mut的，就是不可变，维度指针打破了这种规则。如果指针操作的一个变量可能改变，请生命为mut避免带来歧义。</p>
+<h2 id="mut隐式的转换为-const"><a href="#mut隐式的转换为-const" class="headerlink" title="*mut隐式的转换为*const"></a>*mut隐式的转换为*const</h2><pre><code class="rust">   let p: *mut i32 = ptr::null_mut();
+   let q: *const i32 = p; //隐式转换
+</code></pre>
+<h1 id="空指针null"><a href="#空指针null" class="headerlink" title="空指针null"></a>空指针null</h1><p>大多数的C&#x2F;C++错误，空指针是罪魁祸首。rust在safe中没有提供空指针。而是使用Option的None枚举来代表空语义。</p>
+<p>现在设计到的raw-ptr,讨论空指针是不可避免的。</p>
+<h2 id="ptr-null"><a href="#ptr-null" class="headerlink" title="ptr::null()"></a>ptr::null()</h2><p>但是null这个关键字并没有被rust引入。如果你想获得一个空指针，可以用<code>ptr::null()</code></p>
+<pre><code class="rust">let p: * const i32 = ptr::null();
+</code></pre>
+<p>单纯的对空指针解引用则是一个未定义的行为。在windows上可能会得到一个error,在linux上可能会段错误。</p>
+<pre><code class="rust">    unsafe &#123;
+        println!(&quot;&#123;&#125;&quot;,*p);
+    &#125;
+</code></pre>
+<p>用<code>ptr_null()</code>获得的指针是不可变的(指向的对象)。</p>
+<pre><code class="rust">    let mut p: * const i32 = ptr::null();
+    let a = 10;
+    p = &amp;a as *const i32;
+    unsafe &#123;
+        *p = 20; //error
+    &#125;
+</code></pre>
+<h2 id="ptr-mut-null"><a href="#ptr-mut-null" class="headerlink" title="ptr::mut_null()"></a>ptr::mut_null()</h2><p>同样是获得指针，但是是可变的(指向的对象)</p>
+<pre><code class="rust">    let mut p: * mut i32 = ptr::null_mut();
+    let mut a = 10;
+    p = &amp;a as *const i32 as *mut i32;
+    unsafe &#123;
+        *p = 20; //ok
+    &#125;
+</code></pre>
+<h2 id="is-null"><a href="#is-null" class="headerlink" title="is_null()"></a>is_null()</h2><p>你可以使用is_null来判断一个指针是否为空。</p>
+<pre><code class="rust">    let p: * const i32 = ptr::null();
+    assert!(p.is_null());
+</code></pre>
+<h1 id="使用raw-ptr迭代容器"><a href="#使用raw-ptr迭代容器" class="headerlink" title="使用raw-ptr迭代容器"></a>使用raw-ptr迭代容器</h1><p>rust肯定不推荐使用raw-ptr来迭代容器。毕竟标准库已经为我们提供了那么多用于迭代的方法。rust也内置了<code>for in</code>来进行迭代。如果不是为学习&#x2F;系统编程。没人会这样做。对raw-ptr的操作要放在unsafe里，这是不安全的。但最主要的是——不要有现成的工具不用而跑去当猴子。</p>
+<h2 id="迭代"><a href="#迭代" class="headerlink" title="迭代"></a>迭代</h2><p>例如用raw-ptr迭代一个C风格个字符串。</p>
+<pre><code class="rust">static c_string: [u8; 8] = [97,98,99,100,101,102,103,b&#39;\0&#39;];
+fn main() &#123;
+    let mut curr = &amp;c_string as *const u8;
+    unsafe &#123;
+        while *curr != b&#39;\0&#39; &#123;
+            print!(&quot;&#123;&#125; &quot;,*curr as char);
+            curr = curr.add(1);
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>rust对于裸指针的+操作，并没有直接用加号。而是提供了一个add()方法。类似的，还提供了一个名为sub()方法，代替-。</p>
+<h2 id="回文字符串"><a href="#回文字符串" class="headerlink" title="回文字符串"></a>回文字符串</h2><p>给定一个String，判断这个String是否是回文。假定String中的字符全为英文字母。</p>
+<pre><code class="rust">fn main() &#123;
+    let s = String::from(&quot;helloolleh&quot;);
+    println!(&quot;&#123;&#125;&quot;,is_palindrome(&amp;s));
+&#125;
+
+//判断一个s: &amp;str是否是回文
+fn is_palindrome(s: &amp;str) -&gt; bool &#123;
+    let mut first = s.as_ptr();
+    unsafe &#123;
+        let mut last = s.as_ptr().add(s.len()-1);
+        while first &lt; last &#123;
+            if *first != *last &#123;
+                return false;
+            &#125;
+            first = first.add(1);
+            last = last.sub(1);
+        &#125;
+    &#125;
+    true
+&#125;
+</code></pre>
+<h1 id="unsafe链表"><a href="#unsafe链表" class="headerlink" title="unsafe链表"></a>unsafe链表</h1>
+    </div>
+    
+</div>
+                         
+<footer id="footer">
+    <div class="footer-wrap">
+        <div>
+            © 20xx - 2022 Hello @you
+            <span class="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            @Jan6055
+        </div>
+        <div></div>
+        <div>Based on the <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo Engine</a> & <a
+                target="_blank" rel="noopener" href="https://github.com/argvchs/hexo-theme-particlex">ParticleX Theme</a></div>
+        
+    </div>
+</footer>
+                    </div>
+                </div>
+            </transition>
+            <div id="img_show">
+                <img id="img_content" alt="img_show">
+            </div>
+        </div>
+        <script src="https://cdn.staticfile.org/highlight.js/11.5.1/highlight.min.js"></script>
+        <script src="/js/particlex.js"></script>
+        <script src="/js/showimg.js"></script>
+        
+
+    </body>
+</html>
