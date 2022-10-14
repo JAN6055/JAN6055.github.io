@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-        <title>Tags | Hello @You</title>
+        <title>X64-Asm浮点数操作 | Hello @You</title>
         <meta name="author" content="Jan6055">
         <meta name="description" content="">
         <meta name="keywords" content="C++,Rust,Jan6055">
@@ -119,135 +119,174 @@
 </nav>
                     </div>
                     <div id="main">
-                         
-<div class="categories-tags">
+                        
+<div class="article">
+    <div>
+        <h1>X64-Asm浮点数操作 </h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
+            </span>
+            2022/10/14
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/x64-asm-asm/" style="color: #00bcd4">
+                    -x64-asm -asm
+                </a>
+            </span>
+            
+        </span>
+        
+    </div>
+    <div class="content" v-pre>
+        <h1 id="XMM寄存器"><a href="#XMM寄存器" class="headerlink" title="XMM寄存器"></a>XMM寄存器</h1><p>xmm寄存器一共有个，每个xmm寄存器128位。他们的编号分别是xmm0-xmm15.可用于浮点数的操作。</p>
+<h1 id="浮点数编码"><a href="#浮点数编码" class="headerlink" title="浮点数编码"></a>浮点数编码</h1><p>计算机中浮点数使用IEEE编码。单精度为32位，双精度位64位。</p>
+<h1 id="浮点数编程"><a href="#浮点数编程" class="headerlink" title="浮点数编程"></a>浮点数编程</h1><p>对于浮点数使用移动指令，不能使用mov，要使用movsd——表示移动一个单精度浮点数。类似的add等操作也需要做出相应的改变。</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>movsd</td>
+<td>移动一个双精度浮点数</td>
+</tr>
+<tr>
+<td>movss</td>
+<td>移动一个单精度浮点数</td>
+</tr>
+<tr>
+<td>addsd</td>
+<td>将两个双精度浮点数相加</td>
+</tr>
+<tr>
+<td>addss</td>
+<td>将单个双精度浮点数相加</td>
+</tr>
+<tr>
+<td>subsd</td>
+<td>将两个双精度浮点数相减</td>
+</tr>
+<tr>
+<td>subss</td>
+<td>将单个双精度浮点数相减</td>
+</tr>
+<tr>
+<td>mulsd</td>
+<td>将两个双精度浮点数相乘</td>
+</tr>
+<tr>
+<td>mulss</td>
+<td>将两个单精度浮点数相乘</td>
+</tr>
+<tr>
+<td>divsd</td>
+<td>将两个双精度浮点数相除</td>
+</tr>
+<tr>
+<td>divss</td>
+<td>将单个双精度浮点数相除</td>
+</tr>
+<tr>
+<td>sqrtsd</td>
+<td>对双精度浮点数求平方根</td>
+</tr>
+<tr>
+<td>sqrtss</td>
+<td>对单精度浮点数求平方根</td>
+</tr>
+</tbody></table>
+<p>下满的代码时对浮点数进行+-*&#x2F;和平方根运算。</p>
+<pre><code class="asm">;fcalc.asm
+
+extern printf
+section .data
+        number1         dq 9.0
+        number2         dq 73.0
+        fmt                     db &quot;The numbers are %f and %f&quot;,10,0
+
+        fmtfloat        db &quot;%s %f&quot;,10,0
+        f_sum           db &quot;The float sum of %f and %f is %f&quot;,10,0
+        f_dif           db &quot;The float difference of %f and %f is %f&quot;,10,0
+        f_mul           db &quot;The float product of %f and %f is %f&quot;,10,0
+        f_div           db &quot;The float division of %f and %f is %f&quot;,10,0
+        f_sqrt          db &quot;The float squareroot of %f is %f&quot;,10,0
+section .bss
+section .text
+        global main
+main:
+        push rbp
+        mov rbp, rsp
+
+        ;打印数字
+        movsd xmm0, [number1] ;movsd表示移动一个双精度浮点数,8位
+        movsd xmm1, [number2]
+        mov rdi, fmt
+        mov rax, 2 ;用到两个xmm寄存器
+        call printf
+
+        ;sum
+        movsd xmm2, [number1]
+        addsd xmm2, [number2] ;number1+number2结果放在xmm2中
+
+        mov rdi, f_sum
+        mov rax, 3
+        call printf
+
+        ;difference
+        movsd xmm2, [number1]
+        subsd xmm2, [number2]
+        movsd xmm0, [number1] ;movsd表示移动一个双精度浮点数,8位
+        movsd xmm1, [number2]
+        mov rdi, f_dif
+        mov rax, 3
+        call printf
+
+        ;mul
+        movsd xmm2, [number1]
+        mulsd xmm2, [number2]
+        movsd xmm0, [number1] ;movsd表示移动一个双精度浮点数,8位
+        movsd xmm1, [number2]
+        mov rdi, f_mul
+        mov rax, 3
+        call printf
+
+        ;division
+        movsd xmm2, [number1]
+        divsd xmm2, [number2]
+        movsd xmm0, [number1] ;movsd表示移动一个双精度浮点数,8位
+        movsd xmm1, [number2]
+        mov rdi, f_div
+        mov rax, 3
+        call printf
+
+        ;squareroot
+        sqrtsd xmm1, [number1]
+        movsd xmm0, [number1]
+        mov rdi, f_sqrt
+        mov rax, 2
+        call printf
+        ;exit
+
+        mov rsp, rbp
+        pop rbp
+        ret
+</code></pre>
+
+    </div>
     
-    <div class="all-s">
-        
-        
-        <span>
-            <a href="/tags/Modern-C/" style="background: #03a9f4">
-                <span class="icon">
-                    <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-                </span>
-                Modern C++
-            </a>
-        </span>
-        
-        
-        <span>
-            <a href="/tags/C/" style="background: #03a9f4">
-                <span class="icon">
-                    <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-                </span>
-                C++
-            </a>
-        </span>
-        
-        
-        <span>
-            <a href="/tags/Rust/" style="background: #ffa2c4">
-                <span class="icon">
-                    <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-                </span>
-                Rust
-            </a>
-        </span>
-        
-        
-        <span>
-            <a href="/tags/Rust-Library/" style="background: #03a9f4">
-                <span class="icon">
-                    <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-                </span>
-                Rust Library
-            </a>
-        </span>
-        
-        
-        <span>
-            <a href="/tags/Unsafe-Rust/" style="background: #00bcd4">
-                <span class="icon">
-                    <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-                </span>
-                Unsafe Rust
-            </a>
-        </span>
-        
-        
-        <span>
-            <a href="/tags/Effective-Rust/" style="background: #ff7d73">
-                <span class="icon">
-                    <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-                </span>
-                Effective Rust
-            </a>
-        </span>
-        
-        
-        <span>
-            <a href="/tags/C-Library/" style="background: #ff7d73">
-                <span class="icon">
-                    <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-                </span>
-                C++ Library
-            </a>
-        </span>
-        
-        
-        <span>
-            <a href="/tags/x64-asm-asm/" style="background: #00a596">
-                <span class="icon">
-                    <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-                </span>
-                x64-asm asm
-            </a>
-        </span>
-        
-        
-        <span>
-            <a href="/tags/x64-asm-asm/" style="background: #ff7d73">
-                <span class="icon">
-                    <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-                </span>
-                -x64-asm -asm
-            </a>
-        </span>
-        
-        
-        <span>
-            <a href="/tags/x64-asm/" style="background: #03a9f4">
-                <span class="icon">
-                    <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-                </span>
-                x64-asm
-            </a>
-        </span>
-        
-        
-        <span>
-            <a href="/tags/asm/" style="background: #ff7d73">
-                <span class="icon">
-                    <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-                </span>
-                asm
-            </a>
-        </span>
-        
-        
-        <span>
-            <a href="/tags/TMP/" style="background: #ffa2c4">
-                <span class="icon">
-                    <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-                </span>
-                TMP
-            </a>
-        </span>
-        
-    </div>
-    <div id="archives">
-        
-    </div>
 </div>
                          
 <footer id="footer">

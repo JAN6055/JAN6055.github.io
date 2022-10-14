@@ -144,6 +144,225 @@
             
 
 <div class="post">
+    <a href="/2022/10/14/x64-asm浮点数操作/">
+        <h2 class="post-title">X64-Asm浮点数操作</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="date">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
+            </span>
+            2022/10/14
+        </span>
+    </div>
+    <div class="excerpt">
+        <div class="content" v-pre>
+            
+            <h1 id="XMM寄存器"><a href="#XMM寄存器" class="headerlink" title="XMM寄存器"></a>XMM寄存器</h1><p>xmm寄存器一共有个，每个xmm寄存器128位。他们的编号分别是xmm0-xmm15.可用于浮点数的操作。</p>
+<h1 id="浮点数编码"><a href="#浮点数编码" class="headerlink" title="浮点数编码"></a>浮点数编码</h1><p>计算机中浮点数使用IEEE编码。单精度为32位，双精度位64位。</p>
+<h1 id="浮点数编程"><a href="#浮点数编程" class="headerlink" title="浮点数编程"></a>浮点数编程</h1><p>对于浮点数使用移动指令，不能使用mov，要使用movsd——表示移动一个单精度浮点数。类似的add等操作也需要做出相应的改变。</p>
+<table>
+<thead>
+<tr>
+<th>操作</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>movsd</td>
+<td>移动一个双精度浮点数</td>
+</tr>
+<tr>
+<td>movss</td>
+<td>移动一个单精度浮点数</td>
+</tr>
+<tr>
+<td>addsd</td>
+<td>将两个双精度浮点数相加</td>
+</tr>
+<tr>
+<td>addss</td>
+<td>将单个双精度浮点数相加</td>
+</tr>
+<tr>
+<td>subsd</td>
+<td>将两个双精度浮点数相减</td>
+</tr>
+<tr>
+<td>subss</td>
+<td>将单个双精度浮点数相减</td>
+</tr>
+<tr>
+<td>mulsd</td>
+<td>将两个双精度浮点数相乘</td>
+</tr>
+<tr>
+<td>mulss</td>
+<td>将两个单精度浮点数相乘</td>
+</tr>
+<tr>
+<td>divsd</td>
+<td>将两个双精度浮点数相除</td>
+</tr>
+<tr>
+<td>divss</td>
+<td>将单个双精度浮点数相除</td>
+</tr>
+<tr>
+<td>sqrtsd</td>
+<td>对双精度浮点数求平方根</td>
+</tr>
+<tr>
+<td>sqrtss</td>
+<td>对单精度浮点数求平方根</td>
+</tr>
+</tbody></table>
+<p>下满的代码时对浮点数进行+-*&#x2F;和平方根运算。</p>
+<pre><code class="asm">;fcalc.asm
+
+extern printf
+section .data
+        number1         dq 9.0
+        number2         dq 73.0
+        fmt                     db &quot;The numbers are %f and %f&quot;,10,0
+
+        fmtfloat        db &quot;%s %f&quot;,10,0
+        f_sum           db &quot;The float sum of %f and %f is %f&quot;,10,0
+        f_dif           db &quot;The float difference of %f and %f is %f&quot;,10,0
+        f_mul           db &quot;The float product of %f and %f is %f&quot;,10,0
+        f_div           db &quot;The float division of %f and %f is %f&quot;,10,0
+        f_sqrt          db &quot;The float squareroot of %f is %f&quot;,10,0
+section .bss
+section .text
+        global main
+main:
+        push rbp
+        mov rbp, rsp
+
+        ;打印数字
+        movsd xmm0, [number1] ;movsd表示移动一个双精度浮点数,8位
+        movsd xmm1, [number2]
+        mov rdi, fmt
+        mov rax, 2 ;用到两个xmm寄存器
+        call printf
+
+        ;sum
+        movsd xmm2, [number1]
+        addsd xmm2, [number2] ;number1+number2结果放在xmm2中
+
+        mov rdi, f_sum
+        mov rax, 3
+        call printf
+
+        ;difference
+        movsd xmm2, [number1]
+        subsd xmm2, [number2]
+        movsd xmm0, [number1] ;movsd表示移动一个双精度浮点数,8位
+        movsd xmm1, [number2]
+        mov rdi, f_dif
+        mov rax, 3
+        call printf
+
+        ;mul
+        movsd xmm2, [number1]
+        mulsd xmm2, [number2]
+        movsd xmm0, [number1] ;movsd表示移动一个双精度浮点数,8位
+        movsd xmm1, [number2]
+        mov rdi, f_mul
+        mov rax, 3
+        call printf
+
+        ;division
+        movsd xmm2, [number1]
+        divsd xmm2, [number2]
+        movsd xmm0, [number1] ;movsd表示移动一个双精度浮点数,8位
+        movsd xmm1, [number2]
+        mov rdi, f_div
+        mov rax, 3
+        call printf
+
+        ;squareroot
+        sqrtsd xmm1, [number1]
+        movsd xmm0, [number1]
+        mov rdi, f_sqrt
+        mov rax, 2
+        call printf
+        ;exit
+
+        mov rsp, rbp
+        pop rbp
+        ret
+</code></pre>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        <span class="icon">
+            <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
+        </span>
+        
+        
+        <span class="tag">
+            
+            <a href="/tags/x64-asm-asm/" style="color: #ffa2c4">
+                -x64-asm -asm
+            </a>
+        </span>
+        
+    </div>
+    <a href="/2022/10/14/x64-asm浮点数操作/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post">
+    <a href="/2022/10/13/x64-asm调用printf/">
+        <h2 class="post-title">X64-Asm调用printf</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="date">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
+            </span>
+            2022/10/13
+        </span>
+    </div>
+    <div class="excerpt">
+        <div class="content" v-pre>
+            
+            <p>使用extent来导入c函数</p>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        <span class="icon">
+            <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
+        </span>
+        
+        
+        <span class="tag">
+            
+            <a href="/tags/x64-asm/" style="color: #ffa2c4">
+                x64-asm
+            </a>
+        </span>
+        
+        <span class="tag">
+            
+            <a href="/tags/asm/" style="color: #ff7d73">
+                asm
+            </a>
+        </span>
+        
+    </div>
+    <a href="/2022/10/13/x64-asm调用printf/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post">
     <a href="/2022/10/13/x64-asm整数的运算/">
         <h2 class="post-title">X64-Asm整数的运算</h2>
     </a>
@@ -212,7 +431,7 @@
         
         <span class="tag">
             
-            <a href="/tags/x64-asm-asm/" style="color: #ffa2c4">
+            <a href="/tags/x64-asm-asm/" style="color: #00bcd4">
                 x64-asm asm
             </a>
         </span>
@@ -377,14 +596,14 @@ fn is_palindrome(s: &amp;str) -&gt; bool &#123;
         
         <span class="tag">
             
-            <a href="/tags/Rust/" style="color: #ffa2c4">
+            <a href="/tags/Rust/" style="color: #00a596">
                 Rust
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/Unsafe-Rust/" style="color: #ff7d73">
+            <a href="/tags/Unsafe-Rust/" style="color: #03a9f4">
                 Unsafe Rust
             </a>
         </span>
@@ -487,14 +706,14 @@ error: could not compile `option_` due to 2 previous errors
         
         <span class="tag">
             
-            <a href="/tags/Rust/" style="color: #00a596">
+            <a href="/tags/Rust/" style="color: #ffa2c4">
                 Rust
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/Effective-Rust/" style="color: #ffa2c4">
+            <a href="/tags/Effective-Rust/" style="color: #03a9f4">
                 Effective Rust
             </a>
         </span>
@@ -801,7 +1020,7 @@ impl &lt;&#39;a, T&gt; Iterator for IterMut&lt;&#39;a, T&gt; &#123;
         
         <span class="tag">
             
-            <a href="/tags/Rust/" style="color: #00bcd4">
+            <a href="/tags/Rust/" style="color: #ffa2c4">
                 Rust
             </a>
         </span>
@@ -1370,21 +1589,21 @@ template&lt;typename _Tp&gt;
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #00bcd4">
+            <a href="/tags/Modern-C/" style="color: #03a9f4">
                 Modern C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #ffa2c4">
+            <a href="/tags/C/" style="color: #ff7d73">
                 C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C-Library/" style="color: #00bcd4">
+            <a href="/tags/C-Library/" style="color: #00a596">
                 C++ Library
             </a>
         </span>
@@ -1956,21 +2175,21 @@ int main()
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #ffa2c4">
+            <a href="/tags/Modern-C/" style="color: #ff7d73">
                 Modern C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #00bcd4">
+            <a href="/tags/C/" style="color: #03a9f4">
                 C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C-Library/" style="color: #ff7d73">
+            <a href="/tags/C-Library/" style="color: #03a9f4">
                 C++ Library
             </a>
         </span>
@@ -2311,14 +2530,14 @@ int main()
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #03a9f4">
+            <a href="/tags/Modern-C/" style="color: #ffa2c4">
                 Modern C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #ffa2c4">
+            <a href="/tags/C/" style="color: #ff7d73">
                 C++
             </a>
         </span>
@@ -2332,1162 +2551,6 @@ int main()
         
     </div>
     <a href="/2022/09/26/type-traits源码分析-一-/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post">
-    <a href="/2022/09/22/unique-ptr源码解析/">
-        <h2 class="post-title">Unique_ptr源码解析</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
-            </span>
-            2022/9/22
-        </span>
-    </div>
-    <div class="excerpt">
-        <div class="content" v-pre>
-            
-            <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>这篇博客是对unique_ptr源代码的分析，本文使用的编译器是MinGW</p>
-<p>本篇文章不保证能够说明清楚unique_ptr实现的所有细节以及原因，但会尽可能的做到这样</p>
-<p>需要读者有TMP的基础，例如熟悉std::enable_if, std::remove_referene等等的元函数</p>
-<p>本篇文章不是一个unique_ptr的使用教程，但是会提及到一些使用中的细节</p>
-<h2 id="术语约定"><a href="#术语约定" class="headerlink" title="术语约定"></a>术语约定</h2><ul>
-<li>对内置指针有时候称其为raw-pointer&#x2F;裸指针</li>
-<li>对于unique_ptr的指向堆区对象的指针，有时候称其为内部指针，有时候称其为指向堆区的指针，或者其他称呼。请联系上下文判别于内置指针的区别。</li>
-<li>对于类型需要满足的条件，我们称其为约束条件</li>
-</ul>
-<h2 id="描述约定"><a href="#描述约定" class="headerlink" title="描述约定"></a>描述约定</h2><ul>
-<li>对于大部分的篇幅，都会使用源代码+注释的方式来描述。如果一个问题使用注释描述篇幅过大，会单独拿出来说明</li>
-<li>对于所有的源码注释，均保留</li>
-</ul>
-<h1 id="unique-ptr概述"><a href="#unique-ptr概述" class="headerlink" title="unique_ptr概述"></a>unique_ptr概述</h1><p>unique_ptr是比rew-pointer更为好的选择，标准库实现unique_ptr使接口尽可能的接近原生指针。不同的编译器对其实现有所不同。</p>
-<p>gcc编译器对 unique_ptr的实现，大概分为以下几部分</p>
-<ul>
-<li>defaule_delete 定义的默认删除器，其中没有任何数据成员，是unique_ptr的默认删除器</li>
-<li>__uniq_ptr_impl unique_ptr的核心部分</li>
-<li>__uniq_ptr_data unique_ptr 和 __uniq_ptr_impl的中间层，unique_ptr内含一个__uniq_ptr_data</li>
-<li>unique_ptr<T>     非数组版本，也是最常用的版本</li>
-<li>unique_ptr&lt;T[]&gt;   数组版本，一般情况下有更好的替代(vector,array等) </li>
-<li>std::make_unique，unique_ptr的配套函数，用于创建unique_ptr</li>
-</ul>
-<h1 id="需要了解的前置知识"><a href="#需要了解的前置知识" class="headerlink" title="需要了解的前置知识"></a>需要了解的前置知识</h1><h2 id="类型安全"><a href="#类型安全" class="headerlink" title="类型安全"></a>类型安全</h2><p>C++支持OOP,这就涉及到的多态，本章的主题是指针，如果想放心的对于unique_ptr的使用就像使用内置指针一样(某些部分)，需要做类型安全的约束。包括但不限于</p>
-<ul>
-<li>基类和派生类的指针转换</li>
-<li>数组和指针的转换</li>
-<li>删除器的转换(读者看到删除器的实现就会知道了)</li>
-</ul>
-<p>为什么需要额外的类型安全，而不是靠编译器的检擦？</p>
-<p>因为C++是一个弱类型语言，就是说在不同的类型之间可以实现隐式的类型转换——这种转换有时候很便利。但有更多的时候会产生副作用。例如精度丢失，数据溢出，甚至是内存泄漏和未定义行为。</p>
-<h2 id="区别T-和T"><a href="#区别T-和T" class="headerlink" title="区别T[]和T*"></a>区别T[]和T*</h2><p>在C中<code>T[]</code>和<code>T*</code>可以看作是等价的类型，但是在C++的模板中，请将<code>T[]</code>和<code>T*</code>看作不同类型<br>例如std::is_array的实现</p>
-<pre><code class="C++">template&lt;typename&gt;
-    struct is_array
-    : public false_type &#123; &#125;;
-
-  template&lt;typename _Tp, std::size_t _Size&gt;
-    struct is_array&lt;_Tp[_Size]&gt;
-    : public true_type &#123; &#125;;
-
-  template&lt;typename _Tp&gt;
-    struct is_array&lt;_Tp[]&gt;
-    : public true_type &#123; &#125;;
-</code></pre>
-<p>类似的如果想用unique_ptr存放数组<code>unique_ptr&lt;T[]&gt;</code>是正确的,而<code>unique_ptr&lt;T*&gt;</code>是不正确的</p>
-<h1 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h1><p>gcc对于unique_ptr的实现放在了unique_ptr.h中</p>
-<p>本篇文章将按照源文件从上至下的顺序来剖析unique_ptr的实现</p>
-<h2 id="unique-ptr定义的默认删除器"><a href="#unique-ptr定义的默认删除器" class="headerlink" title="unique_ptr定义的默认删除器"></a>unique_ptr定义的默认删除器</h2><pre><code class="c++">//基本的默认删除器实现
-/// Primary template of default_delete, used by unique_ptr for single objects
-  template &lt;typename _Tp&gt; struct default_delete &#123;
-    /// Default constructor
-    constexpr default_delete() noexcept = default;
-
-    /** @brief Converting constructor.
-     *
-     * Allows conversion from a deleter for objects of another type, `_Up`,
-     * only if `_Up*` is convertible to `_Tp*`.
-     */
-     // 正如注释所说，如果底层指针允许准换，则允许删除器转换
-     // 空实现目的是做类型约束
-     // 使用_Requires检查_Up * 能否转换为_TP *
-     // 例如能用基类指针来析构一个派生类对像，却不能用派生类指针析构基类对象(先通过语法再说)
-    template &lt;typename _Up, typename = _Require&lt;is_convertible&lt;_Up *, _Tp *&gt;&gt;&gt;
-    default_delete(const default_delete&lt;_Up&gt; &amp;) noexcept &#123;&#125;
-
-    //重载的调用运算符，接受一个_Tp指针，对其进行delete
-    /// Calls `delete __ptr`
-    void operator()(_Tp *__ptr) const &#123;
-        //如果是一个非完整类型，例如只声明没有定义，会断言失败
-      static_assert(!is_void&lt;_Tp&gt;::value,
-                    &quot;can&#39;t delete pointer to incomplete type&quot;);
-      static_assert(sizeof(_Tp) &gt; 0, &quot;can&#39;t delete pointer to incomplete type&quot;);
-      delete __ptr;
-    &#125;
-  &#125;;
-// _GLIBCXX_RESOLVE_LIB_DEFECTS
-  // DR 740 - omit specialization for array objects with a compile time length
-
-  /// Specialization of default_delete for arrays, used by `unique_ptr&lt;T[]&gt;`
-  template &lt;typename _Tp&gt; struct default_delete&lt;_Tp[]&gt; &#123;
-  public:
-    /// Default constructor
-    constexpr default_delete() noexcept = default;
-
-    /** @brief Converting constructor.
-     *
-     * Allows conversion from a deleter for arrays of another type, such as
-     * a const-qualified version of `_Tp`.
-     *
-     * Conversions from types derived from `_Tp` are not allowed because
-     * it is undefined to `delete[]` an array of derived types through a
-     * pointer to the base type.
-     */
-     //允许删除其转换为另一种类型的数组，例如转换为_TP的const限定版本
-     //但是不允许从子类转换为父类，不要用多态的方式处理数组，通过基类指针删除由派生类的数组是未定义的
-     //所以禁止这种转换
-     //具体的信息请参考《More Effective C++》条款5
-    template &lt;typename _Up,
-              typename = _Require&lt;is_convertible&lt;_Up (*)[], _Tp (*)[]&gt;&gt;&gt;
-    default_delete(const default_delete&lt;_Up[]&gt; &amp;) noexcept &#123;&#125;
-
-    /// Calls `delete[] __ptr`
-    template &lt;typename _Up&gt;
-    typename enable_if&lt;is_convertible&lt;_Up (*)[], _Tp (*)[]&gt;::value&gt;::type //注意这里的类型是数组的指针
-                                    //虽然允许派生类指针隐式的转换为基类指针，为了检查这种转换，我们要写成这样
-                                    //例如可以从non-const 转换为const，但不能从derived ** 转换为 base **
-    operator()(_Up *__ptr) const &#123;
-      static_assert(sizeof(_Tp) &gt; 0, &quot;can&#39;t delete pointer to incomplete type&quot;);
-      //调用delete[]
-      delete[] __ptr;
-    &#125;
-  &#125;;
-</code></pre>
-<p>__uniq_ptr_impl是实现部分，把这个类读懂，就读懂了unique_ptr的一半。unique_ptr的核心实现，全部在这个类中。没有复杂的逻辑，但是做到类型安全的实现方法，还是比较难的部分。__uniq_ptr_impl中没有复杂的关于类型安全的约束。比较复杂的约束在<code>uniqe_ptr&lt;T&gt;</code>和<code>unique_ptr&lt;T[]&gt;</code>中</p>
-<pre><code class="C++">// Manages the pointer and deleter of a unique_ptr
-//_TP是指向的类型， _DP是删除器的类型
-  template &lt;typename _Tp, typename _Dp&gt; class __uniq_ptr_impl &#123;
-    
-    //这里做了一个type_traits
-    //_Up实际上是_Tp, _Ep实际上是_Dp
-    //指向堆区对象指针的的类型为_Up *
-    template &lt;typename _Up, typename _Ep, typename = void&gt; struct _Ptr &#123;
-      using type = _Up *;
-    &#125;;
-
-    //如果删除器中声明了删除的指针类型，有优先考虑这个指针类型
-    //如果没有，类型替换失败，转而匹配上面的_Ptr
-    //这样做的原因，想想一种情况
-    //class B; class D : public B;
-    //删除器中接受B*而实际存储的对象为D类型对象，在删除器中定义了pointer为B*
-    template &lt;typename _Up, typename _Ep&gt;
-    struct _Ptr&lt;_Up, _Ep,
-                __void_t&lt;typename remove_reference&lt;_Ep&gt;::type::pointer&gt;&gt; &#123;
-      //这里假定了给定的_Ep有type类型，并且type下有pointer类型
-      using type = typename remove_reference&lt;_Ep&gt;::type::pointer;
-    &#125;;
-
-  public:
-    //这里做了一个约束条件
-    //只是简单的别名定义，std::enable_if::没有取type
-    //用到的地方再unique_ptr中
-    //这个模板别名目的是为了约束_Dp也就是删除器，不能是一个指针，并且要求具有默认构造函数
-    using _DeleterConstraint = enable_if&lt;
-        __and_&lt;__not_&lt;is_pointer&lt;_Dp&gt;&gt;, is_default_constructible&lt;_Dp&gt;&gt;::value&gt;;
-
-    //pointer为_Tp, _Ep经过 _Ptr类型萃取后的的别名
-    //::type萃取出来一个指针类型
-    //我们把pointer 这个类型直接当作raw-pointer类型
-    using pointer = typename _Ptr&lt;_Tp, _Dp&gt;::type;
-
-    //正如断言所言，unique_ptr的删除其必须是一个函数对象或者一个左值引用
-    //如果是一个右值引用, !value == false,断言失败
-    static_assert(!is_rvalue_reference&lt;_Dp&gt;::value,
-                  &quot;unique_ptr&#39;s deleter type must be a function object type&quot;
-                  &quot; or an lvalue reference type&quot;);
-
-    __uniq_ptr_impl() = default; // =defalut是调用tuple的默认构造，tuple中的默认构造会为每个对象给定一个初值
-                                 //例如int等类型会被初始化为0，而指针类型会被初始化为nullptr
-    __uniq_ptr_impl(pointer __p) : _M_t() &#123; _M_ptr() = __p; &#125;
-
-    //通过裸指针+删除器的方式构造
-    //删除器使用万能引用+转发的形式传递
-    template &lt;typename _Del&gt;
-    __uniq_ptr_impl(pointer __p, _Del &amp;&amp;__d)
-        : _M_t(__p, std::forward&lt;_Del&gt;(__d)) &#123;&#125;
-
-    //移动构造
-    //注意如果类型没有移动构造函数情况就是拷贝构造
-    __uniq_ptr_impl(__uniq_ptr_impl &amp;&amp;__u) noexcept
-    //将u下的_M_t直接移动给自己
-        : _M_t(std::move(__u._M_t)) &#123;
-      __u._M_ptr() = nullptr; //滞空u下的_M_ptr
-    &#125;
-
-    //移动赋值运算符
-    __uniq_ptr_impl &amp;operator=(__uniq_ptr_impl &amp;&amp;__u) noexcept &#123;
-      reset(__u.release());
-      _M_deleter() = std::forward&lt;_Dp&gt;(__u._M_deleter()); //将删除器转发过去 为什么用转发??
-      return *this;
-    &#125;
-
-    //_M_ptr获得指向堆区内存的指针
-    pointer &amp;_M_ptr() &#123; return std::get&lt;0&gt;(_M_t); &#125;
-    //对于const的版本，我们按值返回即可，因为按值返回pointer的耗费较小
-    pointer _M_ptr() const &#123; return std::get&lt;0&gt;(_M_t); &#125;
-    //_M_ptr获得删除器
-    _Dp &amp;_M_deleter() &#123; return std::get&lt;1&gt;(_M_t); &#125;
-    //对于删除其，使用const &amp;方式返回，因为删除器是可能是函数对象——这种情值返回可能耗费较大
-    //并且删除器有可能不支持拷贝操作
-    const _Dp &amp;_M_deleter() const &#123; return std::get&lt;1&gt;(_M_t); &#125;
-
-    //reset调用删除器析构raw-pointer指向的空间，并重新赋值为__p
-    //假定不会抛出异常 使用noexcept
-    void reset(pointer __p) noexcept &#123;
-      const pointer __old_p = _M_ptr();
-      _M_ptr() = __p;
-      //不为nullptr, 进行析构操作
-      if (__old_p)
-        _M_deleter()(__old_p);
-    &#125;
-
-    //并不析构指针指向的内存，而是返回指针
-    //并且将指向堆区部分的指针赋值为nullptr
-    pointer release() noexcept &#123;
-      pointer __p = _M_ptr();
-      _M_ptr() = nullptr;
-      return __p;
-    &#125;
-
-    //对于两个unique_ptr的swap，只需要交换其指针部分和删除器部分即可
-    void swap(__uniq_ptr_impl &amp;__rhs) noexcept &#123;
-      //这里的using std::swap请参考《Effective C++》条款25
-      using std::swap;
-      swap(this-&gt;_M_ptr(), __rhs._M_ptr());
-      swap(this-&gt;_M_deleter(), __rhs._M_deleter());
-    &#125;
-
-  private:
-    //使用一个tuple来存储具体指向对象的指针和删除器,便于实现，上面默认构造函数中有解释
-    //并且，tuple具有空间压缩的功能(模板递归继承)
-    //这种方式为什么能够压缩空间,是另一个问题了,参考《深度探索C++对象模型》
-    tuple&lt;pointer, _Dp&gt; _M_t;
-  &#125;;
-</code></pre>
-<h3 id="关于删除器的约束"><a href="#关于删除器的约束" class="headerlink" title="关于删除器的约束"></a>关于删除器的约束</h3><p>我们可以测试一下。正如我们所说在默认构造一个智能指针的情况下，不允许是一个函数指针，</p>
-<p>这是由于内置指针在初始化的时候，也就是删除器初始化的时候，是一个nullptr。所以，在默认构造的情况下，不允许删除器是一个指针类型</p>
-<p>如果把指针类型的删除器（函数指针）当作类型参数，编译器会说我找不到默认的构造函数，这是因为unique_ptr的默认构造函数进行了如此的约束，类型替换失败，于是找不到默认构造函数。如果析构器是函数对象或者lambda，就不会有这样的情况</p>
-<pre><code class="C++">namespace jan &#123;
-    template&lt;typename _Dp&gt;
-    using _DeleterConstraint = enable_if&lt;
-            __and_&lt;__not_&lt;is_pointer&lt;_Dp&gt;&gt;, is_default_constructible&lt;_Dp&gt;&gt;::value&gt;;
-&#125;
-void fun() &#123; &#125;
-struct Foo &#123;
-    Foo() = delete;
-&#125;;
-int main() &#123;
-    typename jan::_DeleterConstraint&lt;decltype(fun)&gt;::type; //error
-    typename jan::_DeleterConstraint&lt;int&gt;::type;    //ok
-    typename jan::_DeleterConstraint&lt;Foo&gt;::type;    //error
-    return 0;
-&#125;
-</code></pre>
-<h3 id="关于-Ptr萃取指针的说明"><a href="#关于-Ptr萃取指针的说明" class="headerlink" title="关于_Ptr萃取指针的说明"></a>关于_Ptr萃取指针的说明</h3><p>从源代码中可以看出,如果删除器中定义了一个pointer型别，_Ptr会有限萃取出删除器::pointer作为unique_ptr的raw-pointer类型。我们想象这样一种情况。</p>
-<pre><code class="C++">class A &#123; &#125;;
-class B : public A &#123; &#125;;
-class C : public B &#123; &#125;;
-
-struct BDel &#123;
-    using pointer = B*;
-    void operator()(pointer p) &#123;
-        delete p;
-    &#125;
-&#125;;
-struct ADel&#123;
-//    using pointer = B*;
-    void operator()(A* p) &#123;
-        //do something
-        //但是和BDel做的事情不一样
-        delete p;
-    &#125;
-&#125;;
-
-int main() &#123;
-    unique_ptr&lt;C,BDel&gt; p (new C, BDel&#123;&#125;);
-    return 0;
-&#125;
-</code></pre>
-<p>指定Bel为删除器类型，就表明，我们要处理的类型&#x2F;要删除的类型，是B类型或者B的派生类。记者OOP中的一条规则吗?面向接口编程，而不是面向实例编程。这这个情况中，尽管是个C对象，但是仍当作B类型处理。如果没有_Ptr萃取，unique_ptr::pointer就是C*，无法应用于B对象。</p>
-<p>就是说尽管我们这样写<code>unique_ptr&lt;C,BDel&gt; p (new C, BDel&#123;&#125;);</code>,仍是可以应用于B对象，就像这样<code>unique_ptr&lt;C,BDel&gt; p (new B, BDel&#123;&#125;)</code></p>
-<p>是有一些莫名其妙！！！</p>
-<h2 id="uniq-ptr-data"><a href="#uniq-ptr-data" class="headerlink" title="__uniq_ptr_data"></a>__uniq_ptr_data</h2><p>在__uniq_ptr_impl和unique_ptr，又加上了一个中间层，目的是根据删除器是否有移动构造或者移动赋值属性，<br>部分特例化，来匹配不同的情况</p>
-<pre><code class="C++">// Defines move construction + assignment as either defaulted or deleted.
-  template &lt;typename _Tp, typename _Dp,
-            bool = is_move_constructible&lt;_Dp&gt;::value,
-            bool = is_move_assignable&lt;_Dp&gt;::value&gt;
-  struct __uniq_ptr_data : __uniq_ptr_impl&lt;_Tp, _Dp&gt; &#123;
-    //uisng 使用__uniq_ptr_impl的构造函数，下同
-    using __uniq_ptr_impl&lt;_Tp, _Dp&gt;::__uniq_ptr_impl;
-    __uniq_ptr_data(__uniq_ptr_data &amp;&amp;) = default;
-    __uniq_ptr_data &amp;operator=(__uniq_ptr_data &amp;&amp;) = default;
-  &#125;;
-
-  template &lt;typename _Tp, typename _Dp&gt;
-  struct __uniq_ptr_data&lt;_Tp, _Dp, true, false&gt; : __uniq_ptr_impl&lt;_Tp, _Dp&gt; &#123;
-    using __uniq_ptr_impl&lt;_Tp, _Dp&gt;::__uniq_ptr_impl;
-    __uniq_ptr_data(__uniq_ptr_data &amp;&amp;) = default;
-    __uniq_ptr_data &amp;operator=(__uniq_ptr_data &amp;&amp;) = delete;
-  &#125;;
-
-  template &lt;typename _Tp, typename _Dp&gt;
-  struct __uniq_ptr_data&lt;_Tp, _Dp, false, true&gt; : __uniq_ptr_impl&lt;_Tp, _Dp&gt; &#123;
-    using __uniq_ptr_impl&lt;_Tp, _Dp&gt;::__uniq_ptr_impl;
-    __uniq_ptr_data(__uniq_ptr_data &amp;&amp;) = delete;
-    __uniq_ptr_data &amp;operator=(__uniq_ptr_data &amp;&amp;) = default;
-  &#125;;
-
-  template &lt;typename _Tp, typename _Dp&gt;
-  struct __uniq_ptr_data&lt;_Tp, _Dp, false, false&gt; : __uniq_ptr_impl&lt;_Tp, _Dp&gt; &#123;
-    using __uniq_ptr_impl&lt;_Tp, _Dp&gt;::__uniq_ptr_impl;
-    __uniq_ptr_data(__uniq_ptr_data &amp;&amp;) = delete;
-    __uniq_ptr_data &amp;operator=(__uniq_ptr_data &amp;&amp;) = delete;
-  &#125;;
-</code></pre>
-<h2 id="千呼万唤始出来，犹抱琵琶半遮面"><a href="#千呼万唤始出来，犹抱琵琶半遮面" class="headerlink" title="千呼万唤始出来，犹抱琵琶半遮面"></a>千呼万唤始出来，犹抱琵琶半遮面</h2><pre><code class="C++">/// 20.7.1.2 unique_ptr for single objects.
-  template &lt;typename _Tp, typename _Dp = default_delete&lt;_Tp&gt;&gt; class unique_ptr &#123;
-    template &lt;typename _Up&gt;
-    //如果不符合 __uniq_ptr_impl&lt;_Tp, _Up&gt;::_DeleterConstraint中的约束条件
-    //enable_if&lt;false&gt;不会取到type这个类型，类型替换失败
-    using _DeleterConstraint =
-        typename __uniq_ptr_impl&lt;_Tp, _Up&gt;::_DeleterConstraint::type;
-
-    //内涵一个_uniq_ptr_data来实现unique_ptr
-    __uniq_ptr_data&lt;_Tp, _Dp&gt; _M_t;
-
-  public:
-    //简单的型别别名
-    using pointer = typename __uniq_ptr_impl&lt;_Tp, _Dp&gt;::pointer;
-    using element_type = _Tp;   //被指向元素类型
-    using deleter_type = _Dp;   //删除器类型
-
-  private:
-    // helper template for detecting a safe conversion from another unique_ptr
-    //帮助模板推到是否是安全的转换从另一个unique_ptr
-    template &lt;typename _Up, typename _Ep&gt;
-    using __safe_conversion_up =
-        //先推导两个unique_ptr的内部指针转换是否安全，再看_Up是否是一个数组(数组可以退化为指针,这样的转换是不安全的)
-        //约束_Up不能是一个数组
-        __and_&lt;is_convertible&lt;typename unique_ptr&lt;_Up, _Ep&gt;::pointer, pointer&gt;,
-               __not_&lt;is_array&lt;_Up&gt;&gt;&gt;;
-
-  public:
-    //关于unique_ptr的方法功能，可以看见已经有很好的说明了，所以这里我不再说明
-    // Constructors.
-
-    /// Default constructor, creates a unique_ptr that owns nothing.
-    //模板约束再这里使用，因为这里的删除器约束条件是impl中的约束条件::type
-    //相当于对std::enable_if取type
-    //如果删除器是一个指针类型，或者没有默认构造函数，会编译失败
-    template &lt;typename _Del = _Dp, typename = _DeleterConstraint&lt;_Del&gt;&gt;
-    constexpr unique_ptr() noexcept : _M_t() &#123;&#125;
-
-
-    /** Takes ownership of a pointer.
-     *
-     * @param __p  A pointer to an object of @c element_type
-     *
-     * The deleter will be value-initialized.
-     */
-     //同上
-    template &lt;typename _Del = _Dp, typename = _DeleterConstraint&lt;_Del&gt;&gt;
-    explicit unique_ptr(pointer __p) noexcept : _M_t(__p) &#123;&#125;
-
-    /** Takes ownership of a pointer.
-     *
-     * @param __p  A pointer to an object of @c element_type
-     * @param __d  A reference to a deleter.
-     *
-     * The deleter will be initialized with @p __d
-     */
-     //这里做的删除器类型约束为：需要能拷贝构造
-    template &lt;typename _Del = deleter_type,
-              typename = _Require&lt;is_copy_constructible&lt;_Del&gt;&gt;&gt;
-    unique_ptr(pointer __p, const deleter_type &amp;__d) noexcept
-        : _M_t(__p, __d) &#123;&#125;
-
-    /** Takes ownership of a pointer.
-     *
-     * @param __p  A pointer to an object of @c element_type
-     * @param __d  An rvalue reference to a (non-reference) deleter.
-     *
-     * The deleter will be initialized with @p std::move(__d)
-     */
-     //这里做的删除器类型约束为：需要能拷贝构造
-    template &lt;typename _Del = deleter_type,
-              typename = _Require&lt;is_move_constructible&lt;_Del&gt;&gt;&gt;
-    unique_ptr(
-        pointer __p,
-        //约束为不能是一个左值引用
-        __enable_if_t&lt;!is_lvalue_reference&lt;_Del&gt;::value, _Del &amp;&amp;&gt; __d) noexcept
-        : _M_t(__p, std::move(__d)) &#123;&#125;
-
-    //删除器类型是左值引用，并且对于传入的删除器是一个右值，是不允许的所以  =delete
-    template &lt;typename _Del = deleter_type,
-              typename _DelUnref = typename remove_reference&lt;_Del&gt;::type&gt;
-    unique_ptr(pointer,
-               __enable_if_t&lt;is_lvalue_reference&lt;_Del&gt;::value, _DelUnref &amp;&amp;&gt;) =
-        delete;
-
-    //对于nullptr,也就是std::nullptr_t类型的构造函数例如unique_ptr&lt;Foo&gt; p(nullptr);
-    /// Creates a unique_ptr that owns nothing.
-    template &lt;typename _Del = _Dp, typename = _DeleterConstraint&lt;_Del&gt;&gt;
-    constexpr unique_ptr(nullptr_t) noexcept : _M_t() &#123;&#125;
-
-
-    /// Move constructor.
-    //仅仅是=default
-    unique_ptr(unique_ptr &amp;&amp;) = default;
-
-    /** @brief Converting constructor from another type
-     *
-     * Requires that the pointer owned by @p __u is convertible to the
-     * type of pointer owned by this object, @p __u does not own an array,
-     * and @p __u has a compatible deleter type.
-     */
-     //正如注释所言，从一个unique_ptr构造一个unique_ptr,要求拥有的指针能够转换并且不是数组类型
-     //并且要求__u的删除器能够兼容this的删除器
-    template &lt;
-        typename _Up, typename _Ep,
-        typename = _Require&lt;
-            __safe_conversion_up&lt;_Up, _Ep&gt;, //看看内部指针能不能安全转换
-            typename conditional&lt;is_reference&lt;_Dp&gt;::value, 
-                                 is_same&lt;_Ep, _Dp&gt;, //看看删除器是不是一个引用类型，是，需要相同类型
-                                 is_convertible&lt;_Ep, _Dp&gt;&gt;::type&gt;&gt; //不是需要_Ep(__u的删除器类型)能够转换为_Dp
-    unique_ptr(unique_ptr&lt;_Up, _Ep&gt; &amp;&amp;__u) noexcept
-        : _M_t(__u.release(), std::forward&lt;_Ep&gt;(__u.get_deleter())) &#123;&#125;
-
-#if _GLIBCXX_USE_DEPRECATED
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored &quot;-Wdeprecated-declarations&quot;
-    /// Converting constructor from @c auto_ptr
-    //因为auto_ptr是废弃的特性，所以这个函数不说明了，有兴趣的话读者可以自己分析一下
-    template &lt;typename _Up,
-              typename = _Require&lt;is_convertible&lt;_Up *, _Tp *&gt;,
-                                  is_same&lt;_Dp, default_delete&lt;_Tp&gt;&gt;&gt;&gt;
-    unique_ptr(auto_ptr&lt;_Up&gt; &amp;&amp;__u) noexcept;
-#pragma GCC diagnostic pop
-#endif
-
-    /// Destructor, invokes the deleter if the stored pointer is not null.
-    ~unique_ptr() noexcept &#123;
-      //如果删除器不是可调用的，会断言失败
-      //__is_invocable具体的实现，这里不说明
-      static_assert(__is_invocable&lt;deleter_type &amp;, pointer&gt;::value,
-                    &quot;unique_ptr&#39;s deleter must be invocable with a pointer&quot;);
-      auto &amp;__ptr = _M_t._M_ptr(); //先缓存指针
-      if (__ptr != nullptr)        //如果不是空，使用删除器删除
-        get_deleter()(std::move(__ptr)); 
-      __ptr = pointer();   
-    &#125;
-
-    // Assignment.
-
-    /** @brief Move assignment operator.
-     *
-     * Invokes the deleter if this object owns a pointer.
-     */
-     //同样的，简单是使用default
-    unique_ptr &amp;operator=(unique_ptr &amp;&amp;) = default;
-
-    /** @brief Assignment from another type.
-     *
-     * @param __u  The object to transfer ownership from, which owns a
-     *             convertible pointer to a non-array object.
-     *
-     * Invokes the deleter if this object owns a pointer.
-     */
-     //涉及到类型的转换，这个问题上面已经看到过了
-     //可以类似的如法炮制
-    template &lt;typename _Up, typename _Ep&gt;
-    typename enable_if&lt;__and_&lt;__safe_conversion_up&lt;_Up, _Ep&gt;,
-                              is_assignable&lt;deleter_type &amp;, _Ep &amp;&amp;&gt;&gt;::value,
-                       unique_ptr &amp;&gt;::type
-    operator=(unique_ptr&lt;_Up, _Ep&gt; &amp;&amp;__u) noexcept &#123;
-      reset(__u.release());
-      get_deleter() = std::forward&lt;_Ep&gt;(__u.get_deleter());
-      return *this;
-    &#125;
-
-    /// Reset the %unique_ptr to empty, invoking the deleter if necessary.
-    //对于nullptr_t的赋值操作
-    unique_ptr &amp;operator=(nullptr_t) noexcept &#123;
-      reset();
-      return *this;
-    &#125;
-
-    // Observers.
-
-    /// Dereference the stored pointer.
-    //对element_type添加一个左值引用
-    //在type_traits中定义的add_lvalue_reference的实现细节，在这里并不想多说
-    //我可以负责任的告诉你,add_lvalue_reference会对T, T&amp;&amp;变为T &amp;,对T &amp; 不变
-    typename add_lvalue_reference&lt;element_type&gt;::type operator*() const &#123;
-      __glibcxx_assert(get() != pointer());
-      return *get();
-    &#125;
-
-    /// Return the stored pointer.
-    //-&gt;运算符，不用多说，看一下就懂
-    pointer operator-&gt;() const noexcept &#123;
-      _GLIBCXX_DEBUG_PEDASSERT(get() != pointer());
-      return get();
-    &#125;
-
-    /// Return the stored pointer.
-    pointer get() const noexcept &#123; return _M_t._M_ptr(); &#125;
-
-    /// Return a reference to the stored deleter.
-    deleter_type &amp;get_deleter() noexcept &#123; return _M_t._M_deleter(); &#125;
-
-    /// Return a reference to the stored deleter.
-    const deleter_type &amp;get_deleter() const noexcept &#123;
-      return _M_t._M_deleter();
-    &#125;
-
-    //隐式转换为bool，可以用在这种场景，例如
-    //unique_ptr&lt;Foo&gt; a;
-    //if(a) &#123;...&#125;
-    /// Return @c true if the stored pointer is not null.
-    explicit operator bool() const noexcept &#123;
-      return get() == pointer() ? false : true;
-    &#125;
-
-    // Modifiers.
-
-    /// Release ownership of any stored pointer.
-    pointer release() noexcept &#123; return _M_t.release(); &#125;
-
-    /** @brief Replace the stored pointer.
-     *
-     * @param __p  The new pointer to store.
-     *
-     * The deleter will be invoked if a pointer is already owned.
-     */
-    void reset(pointer __p = pointer()) noexcept &#123;
-      static_assert(__is_invocable&lt;deleter_type &amp;, pointer&gt;::value,
-                    &quot;unique_ptr&#39;s deleter must be invocable with a pointer&quot;);
-      _M_t.reset(std::move(__p));
-    &#125;
-
-    /// Exchange the pointer and deleter with another object.
-    void swap(unique_ptr &amp;__u) noexcept &#123;
-        //断言检查删除器是否右可交换的能力
-      static_assert(__is_swappable&lt;_Dp&gt;::value, &quot;deleter must be swappable&quot;);
-      //调用_M_t的swap，实际上是__uniq_ptr_impl中的swap
-      _M_t.swap(__u._M_t);
-    &#125;
-
-    // Disable copy from lvalue.
-    //拷贝构造和赋值运算符是删除的
-    unique_ptr(const unique_ptr &amp;) = delete;
-    unique_ptr &amp;operator=(const unique_ptr &amp;) = delete;
-  &#125;;
-</code></pre>
-<p>对于非数组版本的unique_ptr我们已经分析完成了，下面是对于数组版本的特例化</p>
-<p>相对于非数组版本，数组版本主要修改了</p>
-<ul>
-<li>默认删除器做delete[]动作</li>
-<li>重载[]</li>
-</ul>
-<pre><code class="C++">  /// 20.7.1.3 unique_ptr for array objects with a runtime length
-  // [unique.ptr.runtime]
-  // _GLIBCXX_RESOLVE_LIB_DEFECTS
-  // DR 740 - omit specialization for array objects with a compile time length
-  // 对编译时期能确定长度的数组特例化
-  // 对于已经说过的问题，就不再写注释了，请读者自己注意
-  template &lt;typename _Tp, typename _Dp&gt; class unique_ptr&lt;_Tp[], _Dp&gt; &#123;
-    template &lt;typename _Up&gt;
-    using _DeleterConstraint =
-        typename __uniq_ptr_impl&lt;_Tp, _Up&gt;::_DeleterConstraint::type;
-
-    __uniq_ptr_data&lt;_Tp, _Dp&gt; _M_t;
-
-    //就像remove_cv_t
-    template &lt;typename _Up&gt; using __remove_cv = typename remove_cv&lt;_Up&gt;::type;
-
-    // like is_base_of&lt;_Tp, _Up&gt; but false if unqualified types are the same
-    // 从实现中和注释中就可以看出，需要判断Up是否是Tp的派生类
-    template &lt;typename _Up&gt;
-    using __is_derived_Tp =
-        __and_&lt;is_base_of&lt;_Tp, _Up&gt;,
-               __not_&lt;is_same&lt;__remove_cv&lt;_Tp&gt;, __remove_cv&lt;_Up&gt;&gt;&gt;&gt;;
-
-  public:
-    using pointer = typename __uniq_ptr_impl&lt;_Tp, _Dp&gt;::pointer;
-    using element_type = _Tp;
-    using deleter_type = _Dp;
-
-    // helper template for detecting a safe conversion from another
-    // unique_ptr
-    //辅助模板来帮助实现从另一个unique_ptr转换是否安全
-    //安全转换的条件是：
-    //是一个数组
-    //poniter和element_type*是同一类型
-    //另一个unique_ptr::pointer和::element_type*是同一个类型
-    //另一个unique_ptr::element_type(*)[]可以转换为当前的unique_ptr::element_type(*)[]
-    //至于为什么要这样设计，还是和用多态方式处理数组有关，下面会说到
-    template &lt;typename _Up, typename _Ep, typename _UPtr = unique_ptr&lt;_Up, _Ep&gt;,
-              typename _UP_pointer = typename _UPtr::pointer,
-              typename _UP_element_type = typename _UPtr::element_type&gt;
-    using __safe_conversion_up =
-        __and_&lt;is_array&lt;_Up&gt;, is_same&lt;pointer, element_type *&gt;,
-               is_same&lt;_UP_pointer, _UP_element_type *&gt;,
-               is_convertible&lt;_UP_element_type (*)[], element_type (*)[]&gt;&gt;;
-
-    // helper template for detecting a safe conversion from a raw pointer
-    // 辅助模板从裸指针转换为当前的unique_ptr::pointer
-    //这段代码实在是太难以阅读了，为了方便，我们进行一些格式上的改变
-    // template &lt;typename _Up&gt;
-    // using __safe_conversion_raw = __and_&lt;
-    //     __or_&lt;__or_&lt;is_same&lt;_Up, pointer&gt;, is_same&lt;_Up, nullptr_t&gt;&gt;,
-    //           __and_&lt;is_pointer&lt;_Up&gt;, is_same&lt;pointer, element_type *&gt;,
-    //                  is_convertible&lt;typename remove_pointer&lt;_Up&gt;::type (*)[],
-    //                                 element_type (*)[]&gt;&gt;&gt;&gt;;
-    //满足转换规则只需要满足其中以下条件之一(Up是一个raw-pointer)
-    //- Up和pointer是同类型或者Up和nullptr_t是同类型
-    //- Up是一个指针并且pointer和element_type*是同一类型并且Up移除指针后的类型的数组指针可以转换为element_type的数组指针
-    template&lt;typename Up&gt;
-
-    using _safe_conversion_raw = __and_&lt;
-            __or_&lt;
-                    __or_&lt;is_same&lt;Up, pointer&gt;, is_same&lt;Up, nullptr_t&gt; &gt;,
-                    __and_&lt;
-                            is_pointer&lt;Up&gt;, is_same&lt;pointer, element_type *&gt;,
-                            is_convertible&lt;typename remove_pointer&lt;Up&gt;::type (*)[], element_type (*)[]&gt;
-                          &gt;
-                 &gt;
-    &gt;;
-    // Constructors.
-
-    /// Default constructor, creates a unique_ptr that owns nothing.
-    template &lt;typename _Del = _Dp, typename = _DeleterConstraint&lt;_Del&gt;&gt;
-    constexpr unique_ptr() noexcept : _M_t() &#123;&#125;
-
-    /** Takes ownership of a pointer.
-     *
-     * @param __p  A pointer to an array of a type safely convertible
-     * to an array of @c element_type
-     *
-     * The deleter will be value-initialized.
-     */
-    template &lt;
-        typename _Up, typename _Vp = _Dp, typename = _DeleterConstraint&lt;_Vp&gt;,
-        typename =
-            typename enable_if&lt;__safe_conversion_raw&lt;_Up&gt;::value, bool&gt;::type&gt; //做了一个类型约束
-    explicit unique_ptr(_Up __p) noexcept : _M_t(__p) &#123;&#125;
-
-    /** Takes ownership of a pointer.
-     *
-     * @param __p  A pointer to an array of a type safely convertible
-     * to an array of @c element_type
-     * @param __d  A reference to a deleter.
-     *
-     * The deleter will be initialized with @p __d
-     */
-     //从一个raw-pointer和一个删除器构造一个uniuqe_ptr
-     //很明显的需要raw-pointer可以安全的转换为unique_ptr并且删除器是可以拷贝狗仔的
-    template &lt;typename _Up, typename _Del = deleter_type,
-              typename = _Require&lt;__safe_conversion_raw&lt;_Up&gt;, //只是类型约束和非数组版的不一样
-                                  is_copy_constructible&lt;_Del&gt;&gt;&gt;
-    unique_ptr(_Up __p, const deleter_type &amp;__d) noexcept : _M_t(__p, __d) &#123;&#125;
-
-    /** Takes ownership of a pointer.
-     *
-     * @param __p  A pointer to an array of a type safely convertible
-     * to an array of @c element_type
-     * @param __d  A reference to a deleter.
-     *
-     * The deleter will be initialized with @p std::move(__d)
-     */
-    template &lt;typename _Up, typename _Del = deleter_type,
-              typename = _Require&lt;__safe_conversion_raw&lt;_Up&gt;,
-                                  is_move_constructible&lt;_Del&gt;&gt;&gt;
-    unique_ptr(
-        _Up __p,
-        __enable_if_t&lt;!is_lvalue_reference&lt;_Del&gt;::value, _Del &amp;&amp;&gt; __d) noexcept
-        : _M_t(std::move(__p), std::move(__d)) &#123;&#125;
-
-    template &lt;typename _Up, typename _Del = deleter_type,
-              typename _DelUnref = typename remove_reference&lt;_Del&gt;::type,
-              typename = _Require&lt;__safe_conversion_raw&lt;_Up&gt;&gt;&gt;
-    unique_ptr(_Up,
-               __enable_if_t&lt;is_lvalue_reference&lt;_Del&gt;::value, _DelUnref &amp;&amp;&gt;) =
-        delete;
-
-    /// Move constructor.
-    unique_ptr(unique_ptr &amp;&amp;) = default;
-
-    /// Creates a unique_ptr that owns nothing.
-    template &lt;typename _Del = _Dp, typename = _DeleterConstraint&lt;_Del&gt;&gt;
-    constexpr unique_ptr(nullptr_t) noexcept : _M_t() &#123;&#125;
-
-    template &lt;
-        typename _Up, typename _Ep,
-        typename = _Require&lt;
-            __safe_conversion_up&lt;_Up, _Ep&gt;,
-            typename conditional&lt;is_reference&lt;_Dp&gt;::value, is_same&lt;_Ep, _Dp&gt;,
-                                 is_convertible&lt;_Ep, _Dp&gt;&gt;::type&gt;&gt;
-    unique_ptr(unique_ptr&lt;_Up, _Ep&gt; &amp;&amp;__u) noexcept
-        : _M_t(__u.release(), std::forward&lt;_Ep&gt;(__u.get_deleter())) &#123;&#125;
-
-    /// Destructor, invokes the deleter if the stored pointer is not null.
-    ~unique_ptr() &#123;
-      auto &amp;__ptr = _M_t._M_ptr();
-      if (__ptr != nullptr)
-        get_deleter()(__ptr);
-      __ptr = pointer();
-    &#125;
-
-    // Assignment.
-
-    /** @brief Move assignment operator.
-     *
-     * Invokes the deleter if this object owns a pointer.
-     */
-    unique_ptr &amp;operator=(unique_ptr &amp;&amp;) = default;
-
-    /** @brief Assignment from another type.
-     *
-     * @param __u  The object to transfer ownership from, which owns a
-     *             convertible pointer to an array object.
-     *
-     * Invokes the deleter if this object owns a pointer.
-     */
-    template &lt;typename _Up, typename _Ep&gt;
-    typename enable_if&lt;__and_&lt;__safe_conversion_up&lt;_Up, _Ep&gt;,
-                              is_assignable&lt;deleter_type &amp;, _Ep &amp;&amp;&gt;&gt;::value,
-                       unique_ptr &amp;&gt;::type
-    operator=(unique_ptr&lt;_Up, _Ep&gt; &amp;&amp;__u) noexcept &#123;
-      reset(__u.release());
-      get_deleter() = std::forward&lt;_Ep&gt;(__u.get_deleter());
-      return *this;
-    &#125;
-
-    /// Reset the %unique_ptr to empty, invoking the deleter if necessary.
-    unique_ptr &amp;operator=(nullptr_t) noexcept &#123;
-      reset();
-      return *this;
-    &#125;
-
-    // Observers.
-    // 重载的[]，实现也是非常简单
-    /// Access an element of owned array.
-    typename std::add_lvalue_reference&lt;element_type&gt;::type
-    operator[](size_t __i) const &#123;
-      __glibcxx_assert(get() != pointer());
-      return get()[__i];
-    &#125;
-
-    /// Return the stored pointer.
-    pointer get() const noexcept &#123; return _M_t._M_ptr(); &#125;
-
-    /// Return a reference to the stored deleter.
-    deleter_type &amp;get_deleter() noexcept &#123; return _M_t._M_deleter(); &#125;
-
-    /// Return a reference to the stored deleter.
-    const deleter_type &amp;get_deleter() const noexcept &#123;
-      return _M_t._M_deleter();
-    &#125;
-
-    /// Return @c true if the stored pointer is not null.
-    explicit operator bool() const noexcept &#123;
-      return get() == pointer() ? false : true;
-    &#125;
-
-    // Modifiers.
-
-    /// Release ownership of any stored pointer.
-    pointer release() noexcept &#123; return _M_t.release(); &#125;
-
-    /** @brief Replace the stored pointer.
-     *
-     * @param __p  The new pointer to store.
-     *
-     * The deleter will be invoked if a pointer is already owned.
-     */
-    template &lt;
-        typename _Up,
-        typename = _Require&lt;__or_&lt;
-            is_same&lt;_Up, pointer&gt;,
-            __and_&lt;is_same&lt;pointer, element_type *&gt;, is_pointer&lt;_Up&gt;,
-                   is_convertible&lt;typename remove_pointer&lt;_Up&gt;::type (*)[],
-                                  element_type (*)[]&gt;&gt;&gt;&gt;&gt;
-    void reset(_Up __p) noexcept &#123;
-      _M_t.reset(std::move(__p));
-    &#125;
-
-    void reset(nullptr_t = nullptr) noexcept &#123; reset(pointer()); &#125;
-
-    /// Exchange the pointer and deleter with another object.
-    void swap(unique_ptr &amp;__u) noexcept &#123;
-      static_assert(__is_swappable&lt;_Dp&gt;::value, &quot;deleter must be swappable&quot;);
-      _M_t.swap(__u._M_t);
-    &#125;
-
-    // Disable copy from lvalue.
-    unique_ptr(const unique_ptr &amp;) = delete;
-    unique_ptr &amp;operator=(const unique_ptr &amp;) = delete;
-  &#125;;
-</code></pre>
-<h2 id="std-make-unique"><a href="#std-make-unique" class="headerlink" title="std::make_unique"></a>std::make_unique</h2><p>令人头大的部分终于过去了，占据了本文章绝大篇幅的那些部分。接下来放松一下，看一看<code>std::make_unique</code>的实现吧</p>
-<pre><code>在这里仅仅分析14的部分(make_unique是14增添的)，对于14以上的代码，读者有兴趣可以自行了解
-</code></pre>
-<h3 id="MakeUniq"><a href="#MakeUniq" class="headerlink" title="_MakeUniq"></a>_MakeUniq</h3><p>做的功能就是类型萃取，用作于make_unique的返回值，这样做的目的也是为了实现类型安全</p>
-<p>类型参数应为T的地方写成T[]会导致类型替换失败，反之亦然</p>
-<pre><code class="C++">  template&lt;typename _Tp&gt;
-    struct _MakeUniq
-    &#123; typedef unique_ptr&lt;_Tp&gt; __single_object; &#125;;
-
-  template&lt;typename _Tp&gt;
-    struct _MakeUniq&lt;_Tp[]&gt;
-    &#123; typedef unique_ptr&lt;_Tp[]&gt; __array; &#125;;
-
-  template&lt;typename _Tp, size_t _Bound&gt;
-    struct _MakeUniq&lt;_Tp[_Bound]&gt;
-    &#123; struct __invalid_type &#123; &#125;; &#125;;
-</code></pre>
-<p>make_unique的实现部分</p>
-<pre><code class="C++">  /// std::make_unique for single objects
-  // 非数组版本
-  template&lt;typename _Tp, typename... _Args&gt;
-    inline typename _MakeUniq&lt;_Tp&gt;::__single_object
-    make_unique(_Args&amp;&amp;... __args) //&amp;&amp; ... +forward 的形式转发参数
-    &#123; return unique_ptr&lt;_Tp&gt;(new _Tp(std::forward&lt;_Args&gt;(__args)...)); &#125;
-
-  /// std::make_unique for arrays of unknown bound
-  //返回一个unique_ptr指向一个长度为__num的数组
-  //关于remove_extent_t,请参考https://www.apiref.com/cpp-zh/cpp/types/remove_extent.html
-  template&lt;typename _Tp&gt;
-    inline typename _MakeUniq&lt;_Tp&gt;::__array
-    make_unique(size_t __num)
-    &#123; return unique_ptr&lt;_Tp&gt;(new remove_extent_t&lt;_Tp&gt;[__num]()); &#125;
-  
-  //不能从一个已知界限的数组返回一个unique_ptr
-  /// Disable std::make_unique for arrays of known bound
-  template&lt;typename _Tp, typename... _Args&gt;
-    typename _MakeUniq&lt;_Tp&gt;::__invalid_type
-    make_unique(_Args&amp;&amp;...) = delete;
-</code></pre>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>unique_ptr的源码分析，就告一段落了。还有很多很多细节和实现手法没有剖析，剖析了的细节和实现手法，一些也没有说明为什么要这样做。</p>
-<p>如果日后发现的错误，会在这里更新勘误表。</p>
-<p>如果你有任何的问题，可以通过邮箱，QQ来联系到我。</p>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        <span class="icon">
-            <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-        </span>
-        
-        
-        <span class="tag">
-            
-            <a href="/tags/Modern-C/" style="color: #ff7d73">
-                Modern C++
-            </a>
-        </span>
-        
-        <span class="tag">
-            
-            <a href="/tags/C/" style="color: #00a596">
-                C++
-            </a>
-        </span>
-        
-        <span class="tag">
-            
-            <a href="/tags/C-Library/" style="color: #ff7d73">
-                C++ Library
-            </a>
-        </span>
-        
-    </div>
-    <a href="/2022/09/22/unique-ptr源码解析/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post">
-    <a href="/2022/09/18/万能引用和重载中的问题以及解决方案/">
-        <h2 class="post-title">万能引用和重载中的问题以及解决方案</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
-            </span>
-            2022/9/18
-        </span>
-    </div>
-    <div class="excerpt">
-        <div class="content" v-pre>
-            
-            <h1 id="使用万能引用来通用式的处理左值右值排列组合的情况"><a href="#使用万能引用来通用式的处理左值右值排列组合的情况" class="headerlink" title="使用万能引用来通用式的处理左值右值排列组合的情况"></a>使用万能引用来通用式的处理左值右值排列组合的情况</h1><p>我曾经在一次开发中遇到过这样的问题，我有一个User class，他里面有string：id, name, passward，以及其他内置类型.如果是在C++11之前，写出一个好的构造函数应当是很容易的，但是C++11之后，有了移动语义，写出一个完美的构造函数确实不容易。</p>
-<p>这样想，我想尽可能的利用好移动语义，假设我们的name等等成员不是一个短字符串，这时候移动语义对性能会有优化。现在又3个string类型的成员，考虑到每个成员的左值和右值，有8种构造函数的写法(不算默认构造)。要是这种可以进行移动的成员再多几个呢——这是一个指数级增长的趋势。这种写法显然是不行的。那就用模板——还要是万能模板。可以初步设计出这样的构造函数。</p>
-<pre><code class="C++">class User &#123;
-public:
-    template &lt;typename T&gt;
-    User(T &amp;&amp; _name, T &amp;&amp; _id, T &amp;&amp; _password) :
-        name(forward&lt;T&gt;(_name), forward&lt;T&gt;(_id),forward&lt;T&gt;(_password)) &#123; &#125;
-&#125;
-</code></pre>
-<p>这样哪个无论什么样的组合，我们均可用一个函数来完成。而且对于其他有移动语义的类型来书，再加上一个F &amp;&amp;即可，这是线性增加的，还算不错。</p>
-<h1 id="万能引用和重载会互相冲突"><a href="#万能引用和重载会互相冲突" class="headerlink" title="万能引用和重载会互相冲突"></a>万能引用和重载会互相冲突</h1><p>当形参只有一个的时候，会有些微妙的变化。</p>
-<p>现在假设User中只有一个string类型的name，如果你依旧考虑像上面一样实现构造函数，会有一些隐晦的错误。</p>
-<pre><code class="C++">class User &#123;
-public:
-    template&lt;typename T&gt;
-    User(T &amp;&amp; _name): name(std::forward&lt;T&gt;(_name)) &#123; &#125;
-private:
-    string name;
-&#125;;
-
-
-int main()
-&#123;
-    User user(&quot;hello&quot;); //很好，这个甚至是直接再类中用const char * 直接构造了一个字符串
-    User user1(user);       // error
-    return 0;
-&#125;
-</code></pre>
-<p>编译器会给出我们这样的一个错误</p>
-<blockquote>
-<p>No matching constructor for initialization of ‘std::string’ (aka ‘basic_string<char>‘)</p>
-</blockquote>
-<p>编译器说无法匹配string的构造函数，莫名奇妙有些。<br>实际上，编译器给出的错误一点问题也没有。</p>
-<p>我们先来回复一个拷贝构造的函数原型 <code>User(const User &amp; user)</code><br>我们传递的user不具有const性质，而模板会生成一个non-const的形参，看起来像这样<code>User(User &amp; _name): name(_name)</code>(此处省略forward,下同)，编译器觉得这个non-const的版本更加匹配，随后使用一个User对象来构造string，那肯定是不行的。<br>如果我们的user具有const性质，编译器就不会报错。</p>
-<pre><code class="C++">int main()
-&#123;
-    const User user(&quot;hello&quot;); 
-    User user1(user);       // 工作的很好
-    return 0;
-&#125;
-</code></pre>
-<p>这种和直觉上不服的行为肯定不是我们想要的，如果你留意编译器的警告，或者说是clang-tidy的静态分析，你会看见这样的警告</p>
-<blockquote>
-<p>Clang-Tidy: Constructor accepting a forwarding reference can hide the copy and move constructors</p>
-<p>Clang-Tidy：接受转发引用的构造函数可以隐藏复制和移动构造函数</p>
-</blockquote>
-<p>还有这样的情况，假设我们只需要构造一个int类型的数据成员，其他的数据成员都调用默认构造。</p>
-<pre><code class="C++">class User &#123;
-public:
-    template&lt;typename T&gt;
-    explicit User(T &amp;&amp; _name): name(std::forward&lt;T&gt;(_name)) &#123;
-        cout &lt;&lt; &quot;T&amp;&amp;&quot; &lt;&lt; endl;
-    &#125;
-    explicit User(int _age): age(_age), name() &#123; &#125;
-private:
-    string name;
-    int age;
-&#125;;
-int main()
-&#123;
-    User user(25);
-    //...假设这里经过算法的计算，得出的一个double类型来当作age， 我们也期望这种隐式转换double -&gt; int(即向下取整)
-    double ans = 18.63;
-    User user1(ans)
-    return 0;
-&#125;
-</code></pre>
-<p>不好了，编译器又给出了错误！</p>
-<p>原因是万能引用为我们实例化了一个<code>User (double &amp; _name): name(_name)</code>,精确度高于手写的int版本的构造函数——用一个double构造一个string，当然是不行的了。</p>
-<p>类似的成员函数应用万能模板也有这样的重载问题。</p>
-<h2 id="在继承体系中，这个问题也会出现，甚至更加错综复杂"><a href="#在继承体系中，这个问题也会出现，甚至更加错综复杂" class="headerlink" title="在继承体系中，这个问题也会出现，甚至更加错综复杂"></a>在继承体系中，这个问题也会出现，甚至更加错综复杂</h2><p>现在Reader继承User</p>
-<pre><code class="C++">class User &#123;
-public:
-    template&lt;typename T&gt;
-    explicit User(T &amp;&amp; _name): name(std::forward&lt;T&gt;(_name)) &#123;
-        cout &lt;&lt; &quot;T&amp;&amp;&quot; &lt;&lt; endl;
-    &#125;
-    explicit User(int _age): age(_age), name() &#123; &#125;
-    User(const User &amp; user) = default;
-private:
-    string name;
-    int age;
-&#125;;
-
-class Reader : public User &#123;
-public:
-    Reader(const Reader &amp; reader) :
-            User(reader), phone_number(reader.phone_number) &#123; &#125;
-private:
-    string phone_number;
-&#125;;
-</code></pre>
-<p>编译器依旧还是这个错误</p>
-<blockquote>
-<p>No matching constructor for initialization of ‘std::string’ (aka ‘basic_string<char>‘)</p>
-</blockquote>
-<p>原因是Reader &amp; cast -&gt; User &amp; 是一种隐式转换。</p>
-<p>万能引用又出来作怪，生成这样的版本<code>User(Reader &amp; _name): name(_name))</code></p>
-<p>显然，这个版本更加精确，使用Reader &amp; 构造 string当然不行。</p>
-<p>《Modern Effective C++》,对些情况是这样总结的</p>
-<ul>
-<li>把万能引用作为候选重载型别，几乎总会让该重载版本在始料未及的情况下被调用</li>
-<li>完美转发构造函数的问题尤为严重，因为对于非常量的左值型别而言，他们一般都会形成相对于复制构造函数的更加匹配，并且还会劫持派生类中对基类的复制和构造函数的调用。</li>
-</ul>
-<h1 id="解决方法"><a href="#解决方法" class="headerlink" title="解决方法"></a>解决方法</h1><p>解决这个问题的方法还是有很多的，我们可以权衡利弊的来考虑。</p>
-<h2 id="退而求其次"><a href="#退而求其次" class="headerlink" title="退而求其次"></a>退而求其次</h2><p>不是谁都有精力去学习复杂的Modern C++(这里大部分的意思是关于TMP)，使用一些简单的新特性也是不错的。我们可以完全不用万能引用，因为相比代码可读性极具下降而带来不稳定的性能提升，如果你不是一个完美主义者，代码可读性应当是应该的选择。</p>
-<h3 id="舍弃重载"><a href="#舍弃重载" class="headerlink" title="舍弃重载"></a><strong>舍弃重载</strong></h3><p>大可像Rust那样，舍弃重载，也是解决办法之一，但是由于语法问题，构造函数时语言固有的，或许你也可以麻烦一点，用static函数实现？就使用默认构造，然后一一修改值——这样效率反而低了，舍本逐末不可取。总之，舍弃重载可以暂时的解决问题，但不是一个长久之计。</p>
-<h3 id="传递const-T-amp"><a href="#传递const-T-amp" class="headerlink" title="传递const T &amp;"></a>传递const T &amp;</h3><p>这就是98时候的写法了，经典永不过时，这种写法简洁又不失高性能，并且不会又其他的问题出现，这种方式大家应当都很熟悉，还是很值得考虑的。</p>
-<h2 id="使用现代方法"><a href="#使用现代方法" class="headerlink" title="使用现代方法"></a><strong>使用现代方法</strong></h2><p>如果你选择了使用现代方法解决此问题，就代表了你踏进了Modern C++的大门，不仅仅是关于&amp;&amp;和&amp;的语法游戏，你必须具有TMP(模板元编程的基础),才可以游刃有余的写出奇妙的Modern C++代码，如果你还不具备这项技能，又想使用高级手法来解决问题，那你应当做好准备迎接一轮又一轮的新特性学习。</p>
-<blockquote>
-<p>题外话：我把Modern C++代码说做是“奇妙的”，而不是“精美的”、“简洁的”这类词是有原因的，一个基本的事实，Modern C++代码并不简洁，甚至是丑陋和复杂，但这些复杂的代码背后的工作原理，了解之后没有人不会惊叹，不会大呼奇妙。</p>
-</blockquote>
-<h3 id="传值"><a href="#传值" class="headerlink" title="传值"></a><strong>传值</strong></h3><p>可以使用值传递+移动构造的方式来代替万能引用和转发。如果对象的移动语义有较低的成本使用 pass by value and use std::move也是一个比较好的选择。</p>
-<p>比如说像这样</p>
-<pre><code class="C++">class User &#123;
-public:
-    template&lt;typename T&gt;
-    explicit User(string _name): name(std::move(_name)) &#123;
-    &#125;
-    explicit User(int _age): age(_age), name() &#123; &#125;
-    User(const User &amp; user) = default;
-private:
-    string name;
-    int age&#123;&#125;;
-&#125;;
-</code></pre>
-<p>但是这个选择不够通用，如果对象没有移动语义，或者是POD类型，这样做性能反而会下降。你可以阅读这个文章<a target="_blank" rel="noopener" href="https://jan6055.github.io/2022/09/17/pass-by-value-and-use-std-move/">https://jan6055.github.io/2022/09/17/pass-by-value-and-use-std-move/</a> 来了解相关信息。</p>
-<h3 id="标签分派"><a href="#标签分派" class="headerlink" title="标签分派"></a><strong>标签分派</strong></h3><p>如果你看过一些STL的源代码，可能会熟悉这种方式，大致的思路是这样的，我们把构造函数委派给其他函数，这些函数做具体的实现，并且他们有不同的重载版本，分别接受构造所需要的参数和一个名为true_type&#x2F;false_type类型的对象</p>
-<blockquote>
-<p>true_type和false_type由标准库提供，仅仅是定义，并未添加任何数据和行为， 实现标签的效果。</p>
-</blockquote>
-<p>判断T是不是整形，我们可以使用<code>std::is_integral</code>，但是考虑左值的情况，T被推断为int &amp;，我们应当先把引用性质给移除，可以使用<code>std::remove_reference</code>得出的代码就是这样<code>std::is_integral&lt;std::remove_reference_t&lt;T&gt;&gt;()</code>, 我们使用的_t后缀的模板（TMP中叫做元函数）来直接获得类型——这是C++14支持的，但是，别忘了使用<code>()</code>来生成一个对象，才可用于重载。</p>
-<p>具体的实现如下</p>
-<pre><code class="C++">class User &#123;
-public:
-    template&lt;typename T&gt;
-    explicit User(T &amp;&amp; arg) &#123;
-        init(std::forward&lt;T&gt;(arg),
-        typename std::is_integral&lt;std::remove_reference_t&lt;T&gt;&gt;()
-        );
-    &#125;
-
-    template&lt;typename T&gt;
-    void init(T &amp;&amp; _name, false_type) &#123;
-        name = std::forward&lt;T&gt;(_name);  //这里是赋值操作，如果使用这样的手法对于构造函数而言，就只能这样
-        age = 0;
-    &#125;
-    void init(int _age, true_type) &#123;
-        //name会隐式的初始化
-        age = _age;
-    &#125;
-    User(const User &amp; user) = default;
-private:
-    string name;
-    int age&#123;&#125;;
-&#125;;
-</code></pre>
-<p>这确实够复杂，先别放松，更复杂的还在后面！</p>
-<h3 id="使用TMP对万能模板做出限制"><a href="#使用TMP对万能模板做出限制" class="headerlink" title="使用TMP对万能模板做出限制"></a><strong>使用TMP对万能模板做出限制</strong></h3><p>先说明一点，你应当了解TMP并且熟悉其最基本构成，还应当知道SFINAE，如果你不知道，快去找相关书籍看吧，如果我把这里展开说明，并且把用到的TMP技巧细节全部说一遍，那就偏离主题了。并且，我也没有足够的能力讲清TMP中的所有细节和问题，这件事情你应当请教C++标准委员会(bushi</p>
-<p>我们可以让万能引用拒绝User类的对象，也拒绝int类的对象。在现代C++中，这是可以实现的——你甚至能在98里实现，但是需要点技巧。</p>
-<p>使用enable_if来让编译器类型替换失败，也就是SFINAE, 但是我们应当考虑到左值的情况T , T&amp;并不是一种类型，比如int, int&amp;, 还有<code>const T, volatile T, const volatileT</code> 这些和T均不是一种类型。可以使std::decay来去掉cvr性质。</p>
-<p>具体的实现是这样</p>
-<pre><code class="C++">class User &#123;
-public:
-    template&lt;typename T,
-             typename = typename std::enable_if&lt;!std::is_same&lt;User,std::decay_t&lt;T&gt;&gt;::value &amp;&amp;
-                                                !std::is_integral&lt;std::remove_reference&lt;T&gt;&gt;::value
-                                               &gt;::type&gt;
-    explicit User(T &amp;&amp; _name) : name(std::forward&lt;T&gt;(_name)) &#123; &#125;
-    explicit User(int _age) : age(_age), name()&#123; &#125;
-    User(const User &amp; user) = default;
-private:
-    string name;
-    int age&#123;&#125;;
-&#125;;
-</code></pre>
-<p>这样实现还真是复杂，如果没有C++14<code>_t</code>的元函数，那么将会更加复杂，感谢C++14!<br>大功告成了吗，并没有。对于继承关系来说，还是存在问题。如果子类中调用基类的构造函数，就是我们讨论过的哪个问题。在实例化的时候，在经过类型退化后，T被推断为Reader，这就又回到了我们之前所说的问题。</p>
-<p>好在STL中提供了<code>is_base_of</code>这个元函数，能够判断一个类型是否是另一个类型的基类,<code>is_base_of&lt;T,T&gt;::value = ture</code></p>
-<p>于是我们可以简单的修改一下代码。</p>
-<pre><code class="C++">class User &#123;
-public:
-    template&lt;typename T,
-             typename = typename std::enable_if&lt;!std::is_base_of&lt;User,std::decay_t&lt;T&gt;&gt;::value &amp;&amp;
-                                                !std::is_integral&lt;std::remove_reference&lt;T&gt;&gt;::value
-                                               &gt;::type&gt;
-    explicit User(T &amp;&amp; _name) : name(std::forward&lt;T&gt;(_name)) &#123; &#125;
-    explicit User(int _age) : age(_age), name()&#123; &#125;
-    User(const User &amp; user) = default;
-private:
-    string name;
-    int age&#123;&#125;;
-&#125;;
-
-class Reader : public User &#123;
-public:
-    Reader(const Reader &amp; reader) :
-            User(reader), phone_number(reader.phone_number) &#123; &#125;
-private:
-    string phone_number;
-&#125;;
-</code></pre>
-<p>问题迎刃而解！你现在是否感叹Modern C++的巧妙了呢？</p>
-<h1 id="万能模板的不足"><a href="#万能模板的不足" class="headerlink" title="万能模板的不足"></a>万能模板的不足</h1><p>你会说，能有什么不足呢？这么高级的技巧，多么的神奇。实际上，万能引用的强大如此，不足也是如此。回头看看经典版本</p>
-<pre><code class="C++">class User &#123;
-public:
-    explicit User(const string &amp; _name): name(_name) &#123; &#125;
-    explicit User(int _age) : age(_age), name() &#123; &#125;
-    User(const User &amp;) = default;
-private:
-    string name;
-    int age&#123;&#125;;
-&#125;;
-</code></pre>
-<p>正所谓洗去铅华只剩金，实现了同样的功能，难道我们要为性能舍弃掉如此的可读性和简洁性吗。同样的，如果是团队合作，小伙伴们可都不一定会这样的高级技巧。到头来还要你自己维护。如果没有注释，等个几天——你就不知道自己写的是什么啦，真是太棒了！</p>
-<p>使用模板的一个不可避免的问题就是当错误发生时，不好定位。你应该有没有按照规范使用过STL容器的经历，看见了编译器给你报告的错误。很吓人，如果没有经验的人看到这些错误（可能有几百行甚至几千行）。该怎么定位问题。虽然我们可以使用<code>statci_assert</code>来未雨绸缪。但也不是所有的时候情况都很客观。</p>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>总之，要不要使用如此晦涩复杂的特性，还是取决于程序员本身，你也可以使用const &amp;快快乐乐的写代码，正因为</p>
-<blockquote>
-<p>你没有用到的东西，不应当给你增添任何负担，你用到的东西，没有什么比C++提供的更好了</p>
-</blockquote>
-<p>使用Modern C++也是你自己的选择，除非写库，很少有人能用到模板开发，真正把这些Modern C++特性用到生产环境的，并且用好的，我想都是在C++领域发光发热的大牛们吧。</p>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        <span class="icon">
-            <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-        </span>
-        
-        
-        <span class="tag">
-            
-            <a href="/tags/Modern-C/" style="color: #00bcd4">
-                Modern C++
-            </a>
-        </span>
-        
-        <span class="tag">
-            
-            <a href="/tags/C/" style="color: #03a9f4">
-                C++
-            </a>
-        </span>
-        
-        <span class="tag">
-            
-            <a href="/tags/TMP/" style="color: #03a9f4">
-                TMP
-            </a>
-        </span>
-        
-    </div>
-    <a href="/2022/09/18/万能引用和重载中的问题以及解决方案/" class="go-post">阅读全文</a>
 </div>
 
              
