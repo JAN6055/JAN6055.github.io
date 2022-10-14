@@ -307,14 +307,14 @@ main:
         
         <span class="tag">
             
-            <a href="/tags/x64-asm/" style="color: #00a596">
+            <a href="/tags/x64-asm/" style="color: #03a9f4">
                 x64_asm
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/asm/" style="color: #03a9f4">
+            <a href="/tags/asm/" style="color: #ffa2c4">
                 asm
             </a>
         </span>
@@ -353,14 +353,14 @@ main:
         
         <span class="tag">
             
-            <a href="/tags/x64-asm/" style="color: #03a9f4">
+            <a href="/tags/x64-asm/" style="color: #00a596">
                 x64_asm
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/asm/" style="color: #03a9f4">
+            <a href="/tags/asm/" style="color: #ff7d73">
                 asm
             </a>
         </span>
@@ -425,6 +425,152 @@ main:
 <td>无符号除法。得到的结果放在rax中，余数放在rdx中。</td>
 </tr>
 </tbody></table>
+<pre><code class="asm">extern printf
+section .data
+        number1         dq 128
+        number2         dq 19
+        neg_num         dq -12
+        fmt                     db &quot;The numbers are %ld and %ld&quot;,10,0
+        fmtint          db &quot;%s %ld&quot;,10,0
+        sumi            db &quot;The sum is&quot;,0
+        difi            db &quot;The differrnce is&quot;,0
+        inci            db &quot;Number 1 Incremented:&quot;,0
+        deci            db &quot;Number 1 decremented:&quot;,0
+        sali            db &quot;Number 1 Shift left 2(x4):&quot;,0
+        sari            db &quot;Number 1 Shift right 2(/4):&quot;,0
+        sariex          db &quot;Number 1 Shift right 2(/4) with &quot;
+                                db &quot;sing extension:&quot;,0
+        multi           db &quot;The productz is&quot;,0
+        divi            db &quot;The integer quotient is&quot;,0
+        remi            db &quot;The modulo is&quot;,0
+section .bss
+        resulti resq 1
+        modulo  resq 1
+section .text
+        global main
+main:
+        push rbp
+        mov rbp, rsp
+
+        ;显示数字
+        mov rdi, fmt
+        mov rsi, [number1]
+        mov rdx, [number2]
+        mov rax, 0
+        call printf
+
+        ;加法
+        mov rax, [number1]
+        add rax, [number2]
+        mov [resulti], rax
+
+        ;显示结果
+        mov rdi, fmtint
+        mov rsi, sumi
+        mov rdx, [resulti]
+        mov rax, 0
+        call printf
+
+        ;减法
+        mov rax, [number1]
+        sub rax, [number2]
+        mov [resulti], rax
+
+        ;显示结果
+        mov rdi, fmtint
+        mov rsi, difi
+        mov rdx, [resulti]
+        mov rax, 0
+        call printf
+
+        ;++
+        mov rax, [number1]
+        inc rax
+        mov [resulti], rax
+        ;显示结果
+        mov rdi, fmtint
+        mov rsi, inci
+        mov rdx, [resulti]
+        mov rax, 0
+        call printf
+
+        ;--
+        mov rax, [number1]
+        dec rax
+        mov [resulti], rax
+
+        ;显示结果
+        mov rdi, fmtint
+        mov rsi, deci
+        mov rdx, [resulti]
+        mov rax, 0
+        call printf
+
+        ;左移运算
+        mov rax, [number1]
+        sal rax, 2 ;x4
+        mov [resulti], rax
+        ;显示结果
+        mov rdi, fmtint
+        mov rsi, sali
+        mov rdx, [resulti]
+        mov rax, 0
+        call printf
+
+        ;右移运算
+        mov rax, [resulti]
+        sar rax, 2 ; /4
+        mov [resulti], rax
+        ;显示结果
+        mov rdi, fmtint
+        mov rsi, sari
+        mov rdx, [resulti]
+        mov rax, 0
+        call printf
+
+        mov rax, [neg_num]
+        sar rax, 2
+        mov [resulti], rax
+        ;显示结果
+        mov rdi, fmtint
+        mov rsi, sariex
+        mov rdx, [resulti]
+        mov rax, 0
+        call printf
+
+        ;乘法
+        mov rax, [number1]
+        imul qword [number2]
+        mov [resulti], rax
+        ;显示结果
+        mov rdi, fmtint
+        mov rsi, multi
+        mov rdx, [resulti]
+        mov rax, 0
+        call printf
+
+        ;除法
+        mov rax, [number1]
+        mov rdx, 0
+        idiv qword [number2]
+        mov [resulti], rax
+        ;显示结果
+        mov rdi, fmtint
+        mov rsi, divi
+        mov rdx, [resulti]
+        mov rax, 0
+        call printf
+
+        mov rdi, fmtint
+        mov rsi, remi
+        mov rdx, [modulo]
+        mov rax, 0
+        call printf
+
+        mov rsp, rbp
+        pop rbp
+        ret
+</code></pre>
 
             
         </div>
@@ -438,14 +584,14 @@ main:
         
         <span class="tag">
             
-            <a href="/tags/x64-asm/" style="color: #03a9f4">
+            <a href="/tags/x64-asm/" style="color: #00bcd4">
                 x64_asm
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/asm/" style="color: #ff7d73">
+            <a href="/tags/asm/" style="color: #ffa2c4">
                 asm
             </a>
         </span>
@@ -610,21 +756,21 @@ fn is_palindrome(s: &amp;str) -&gt; bool &#123;
         
         <span class="tag">
             
-            <a href="/tags/Rust/" style="color: #03a9f4">
+            <a href="/tags/Rust/" style="color: #ffa2c4">
                 Rust
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/Unsafe-Rust/" style="color: #00bcd4">
+            <a href="/tags/Unsafe-Rust/" style="color: #ff7d73">
                 Unsafe Rust
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/Effective-Rust/" style="color: #00a596">
+            <a href="/tags/Effective-Rust/" style="color: #03a9f4">
                 Effective Rust
             </a>
         </span>
@@ -720,14 +866,14 @@ error: could not compile `option_` due to 2 previous errors
         
         <span class="tag">
             
-            <a href="/tags/Rust/" style="color: #ff7d73">
+            <a href="/tags/Rust/" style="color: #03a9f4">
                 Rust
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/Effective-Rust/" style="color: #ff7d73">
+            <a href="/tags/Effective-Rust/" style="color: #ffa2c4">
                 Effective Rust
             </a>
         </span>
@@ -1034,7 +1180,7 @@ impl &lt;&#39;a, T&gt; Iterator for IterMut&lt;&#39;a, T&gt; &#123;
         
         <span class="tag">
             
-            <a href="/tags/Rust/" style="color: #00a596">
+            <a href="/tags/Rust/" style="color: #ffa2c4">
                 Rust
             </a>
         </span>
@@ -1260,14 +1406,14 @@ for byte in s.bytes() &#123;
         
         <span class="tag">
             
-            <a href="/tags/Rust/" style="color: #00bcd4">
+            <a href="/tags/Rust/" style="color: #00a596">
                 Rust
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/Rust-Library/" style="color: #00bcd4">
+            <a href="/tags/Rust-Library/" style="color: #00a596">
                 Rust Library
             </a>
         </span>
@@ -1603,21 +1749,21 @@ template&lt;typename _Tp&gt;
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #ff7d73">
+            <a href="/tags/Modern-C/" style="color: #03a9f4">
                 Modern C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #03a9f4">
+            <a href="/tags/C/" style="color: #00bcd4">
                 C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C-Library/" style="color: #00bcd4">
+            <a href="/tags/C-Library/" style="color: #03a9f4">
                 C++ Library
             </a>
         </span>
@@ -2203,7 +2349,7 @@ int main()
         
         <span class="tag">
             
-            <a href="/tags/C-Library/" style="color: #ff7d73">
+            <a href="/tags/C-Library/" style="color: #00a596">
                 C++ Library
             </a>
         </span>
@@ -2544,21 +2690,21 @@ int main()
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #ff7d73">
+            <a href="/tags/Modern-C/" style="color: #ffa2c4">
                 Modern C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #ffa2c4">
+            <a href="/tags/C/" style="color: #03a9f4">
                 C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C-Library/" style="color: #03a9f4">
+            <a href="/tags/C-Library/" style="color: #ffa2c4">
                 C++ Library
             </a>
         </span>
