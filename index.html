@@ -216,7 +216,7 @@ rsp is 23cfdfe0
 <li>函数调用的上下文</li>
 </ul>
 <p>栈是从高地址向低地址成长的。我们可以用rsp和rbp来划定范围。rbp指向栈底部(高地址), rsp指向栈顶(低地址)。</p>
-<p>再回到我们的问题,为什么要保存rbp? 我们已经说过了，每个函数都有一个自己的栈帧。当调用函数的时候，会修改rbp。因此在将rbp用于栈帧之前(调用函数前),应当将其保存。以免rbp丢失而导致非正常行为。还有另外一些原因：我们对于函数调用中的参数，会有约定的寄存器。例如第一个参数位rdi,第二个参数位rsi等。rbp在函数的调用中不用理啊传递任何参数。</p>
+<p>再回到我们的问题,为什么要保存rbp? 我们已经说过了，每个函数都有一个自己的栈帧。当调用函数的时候，会修改rbp。因此在将rbp用于栈帧之前(调用函数前),应当将其保存。以免rbp丢失而导致非正常行为。还有另外一些原因：我们对于函数调用中的参数，会有约定的寄存器。例如第一个参数位rdi,第二个参数位rsi等。rbp在函数的调用中不用传递任何参数。</p>
 <h1 id="函数的分类"><a href="#函数的分类" class="headerlink" title="函数的分类"></a>函数的分类</h1><p>函数可以分为两种类型，分支函数&#x2F;枝干函数，叶子函数。我们把函数的调用关系映射到一个树——我们已经熟悉的数据结构。分支函数就是会调用其他函数的函数。而叶子函数就是不会调用其他函数的函数。</p>
 <p>因为叶子函数不会调用其他函数，通常可以忽略栈帧和栈对齐。只要你不把栈搞乱即可。但注意用xmm和printf的时候，即使是叶子函数，还是要进行对齐。</p>
 <h1 id="序言和尾声的代替"><a href="#序言和尾声的代替" class="headerlink" title="序言和尾声的代替"></a>序言和尾声的代替</h1><p>可以使用<code>enter 0,0</code>来代替函数的序言。这样做可能造成性能问题。</p>
@@ -236,14 +236,14 @@ rsp is 23cfdfe0
         
         <span class="tag">
             
-            <a href="/tags/x64-asm/" style="color: #00bcd4">
+            <a href="/tags/x64-asm/" style="color: #ffa2c4">
                 x64_asm
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/asm/" style="color: #03a9f4">
+            <a href="/tags/asm/" style="color: #00a596">
                 asm
             </a>
         </span>
@@ -416,14 +416,14 @@ main:
         
         <span class="tag">
             
-            <a href="/tags/x64-asm/" style="color: #00bcd4">
+            <a href="/tags/x64-asm/" style="color: #03a9f4">
                 x64_asm
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/asm/" style="color: #ffa2c4">
+            <a href="/tags/asm/" style="color: #ff7d73">
                 asm
             </a>
         </span>
@@ -462,7 +462,7 @@ main:
         
         <span class="tag">
             
-            <a href="/tags/x64-asm/" style="color: #ffa2c4">
+            <a href="/tags/x64-asm/" style="color: #00bcd4">
                 x64_asm
             </a>
         </span>
@@ -700,7 +700,7 @@ main:
         
         <span class="tag">
             
-            <a href="/tags/asm/" style="color: #00a596">
+            <a href="/tags/asm/" style="color: #ffa2c4">
                 asm
             </a>
         </span>
@@ -865,14 +865,14 @@ fn is_palindrome(s: &amp;str) -&gt; bool &#123;
         
         <span class="tag">
             
-            <a href="/tags/Rust/" style="color: #00bcd4">
+            <a href="/tags/Rust/" style="color: #ff7d73">
                 Rust
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/Unsafe-Rust/" style="color: #ffa2c4">
+            <a href="/tags/Unsafe-Rust/" style="color: #ff7d73">
                 Unsafe Rust
             </a>
         </span>
@@ -982,7 +982,7 @@ error: could not compile `option_` due to 2 previous errors
         
         <span class="tag">
             
-            <a href="/tags/Effective-Rust/" style="color: #00a596">
+            <a href="/tags/Effective-Rust/" style="color: #00bcd4">
                 Effective Rust
             </a>
         </span>
@@ -1289,7 +1289,7 @@ impl &lt;&#39;a, T&gt; Iterator for IterMut&lt;&#39;a, T&gt; &#123;
         
         <span class="tag">
             
-            <a href="/tags/Rust/" style="color: #00a596">
+            <a href="/tags/Rust/" style="color: #00bcd4">
                 Rust
             </a>
         </span>
@@ -1515,14 +1515,14 @@ for byte in s.bytes() &#123;
         
         <span class="tag">
             
-            <a href="/tags/Rust/" style="color: #03a9f4">
+            <a href="/tags/Rust/" style="color: #00bcd4">
                 Rust
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/Rust-Library/" style="color: #03a9f4">
+            <a href="/tags/Rust-Library/" style="color: #ff7d73">
                 Rust Library
             </a>
         </span>
@@ -1858,21 +1858,21 @@ template&lt;typename _Tp&gt;
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #ff7d73">
+            <a href="/tags/Modern-C/" style="color: #00a596">
                 Modern C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #ff7d73">
+            <a href="/tags/C/" style="color: #ffa2c4">
                 C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C-Library/" style="color: #00bcd4">
+            <a href="/tags/C-Library/" style="color: #ff7d73">
                 C++ Library
             </a>
         </span>
@@ -2444,7 +2444,7 @@ int main()
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #ff7d73">
+            <a href="/tags/Modern-C/" style="color: #03a9f4">
                 Modern C++
             </a>
         </span>
@@ -2458,7 +2458,7 @@ int main()
         
         <span class="tag">
             
-            <a href="/tags/C-Library/" style="color: #00bcd4">
+            <a href="/tags/C-Library/" style="color: #03a9f4">
                 C++ Library
             </a>
         </span>
