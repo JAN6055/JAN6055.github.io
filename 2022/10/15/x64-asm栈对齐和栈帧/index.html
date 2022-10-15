@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-        <title>X64-Asm浮点数操作 | Hello @You</title>
+        <title>X64-Asm栈对齐和栈帧 | Hello @You</title>
         <meta name="author" content="Jan6055">
         <meta name="description" content="">
         <meta name="keywords" content="C++,Rust,Jan6055">
@@ -122,14 +122,14 @@
                         
 <div class="article">
     <div>
-        <h1>X64-Asm浮点数操作 </h1>
+        <h1>X64-Asm栈对齐和栈帧 </h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
             </span>
-            2022/10/14
+            2022/10/15
         </span>
         
         
@@ -140,14 +140,14 @@
             
             <span class="tag">
                 
-                <a href="/tags/x64-asm/" style="color: #00bcd4">
+                <a href="/tags/x64-asm/" style="color: #ff7d73">
                     x64_asm
                 </a>
             </span>
             
             <span class="tag">
                 
-                <a href="/tags/asm/" style="color: #ffa2c4">
+                <a href="/tags/asm/" style="color: #ff7d73">
                     asm
                 </a>
             </span>
@@ -156,141 +156,70 @@
         
     </div>
     <div class="content" v-pre>
-        <h1 id="XMM寄存器"><a href="#XMM寄存器" class="headerlink" title="XMM寄存器"></a>XMM寄存器</h1><p>xmm寄存器一共有个，每个xmm寄存器128位。他们的编号分别是xmm0-xmm15.可用于浮点数的操作。</p>
-<h1 id="浮点数编码"><a href="#浮点数编码" class="headerlink" title="浮点数编码"></a>浮点数编码</h1><p>计算机中浮点数使用IEEE编码。单精度为32位，双精度位64位。</p>
-<h1 id="浮点数编程"><a href="#浮点数编程" class="headerlink" title="浮点数编程"></a>浮点数编程</h1><p>对于浮点数使用移动指令，不能使用mov，要使用movsd——表示移动一个单精度浮点数。类似的add等操作也需要做出相应的改变。</p>
-<table>
-<thead>
-<tr>
-<th>操作</th>
-<th>功能</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>movsd</td>
-<td>移动一个双精度浮点数</td>
-</tr>
-<tr>
-<td>movss</td>
-<td>移动一个单精度浮点数</td>
-</tr>
-<tr>
-<td>addsd</td>
-<td>将两个双精度浮点数相加</td>
-</tr>
-<tr>
-<td>addss</td>
-<td>将单个双精度浮点数相加</td>
-</tr>
-<tr>
-<td>subsd</td>
-<td>将两个双精度浮点数相减</td>
-</tr>
-<tr>
-<td>subss</td>
-<td>将单个双精度浮点数相减</td>
-</tr>
-<tr>
-<td>mulsd</td>
-<td>将两个双精度浮点数相乘</td>
-</tr>
-<tr>
-<td>mulss</td>
-<td>将两个单精度浮点数相乘</td>
-</tr>
-<tr>
-<td>divsd</td>
-<td>将两个双精度浮点数相除</td>
-</tr>
-<tr>
-<td>divss</td>
-<td>将单个双精度浮点数相除</td>
-</tr>
-<tr>
-<td>sqrtsd</td>
-<td>对双精度浮点数求平方根</td>
-</tr>
-<tr>
-<td>sqrtss</td>
-<td>对单精度浮点数求平方根</td>
-</tr>
-</tbody></table>
-<p>下满的代码时对浮点数进行+-*&#x2F;和平方根运算。</p>
-<pre><code class="asm">;fcalc.asm
-
-extern printf
-section .data
-        number1         dq 9.0
-        number2         dq 73.0
-        fmt                     db &quot;The numbers are %f and %f&quot;,10,0
-
-        fmtfloat        db &quot;%s %f&quot;,10,0
-        f_sum           db &quot;The float sum of %f and %f is %f&quot;,10,0
-        f_dif           db &quot;The float difference of %f and %f is %f&quot;,10,0
-        f_mul           db &quot;The float product of %f and %f is %f&quot;,10,0
-        f_div           db &quot;The float division of %f and %f is %f&quot;,10,0
-        f_sqrt          db &quot;The float squareroot of %f is %f&quot;,10,0
+        <h1 id="栈对齐"><a href="#栈对齐" class="headerlink" title="栈对齐"></a>栈对齐</h1><p>在英特尔手册中, 你会发现当调用函数时，栈要求必须是16字节对齐。</p>
+<p>一些SIMD指令(Single Instruction, Multiple Data，一条指令操作多个数据)对较大的数据执行并进行操作可能要求这些数据位于内存中16字节的倍数上。例如printf于xmm一起使用的时候，会将栈对齐位16个字节。如果用不带xmm的printf，则可以不用进行对齐，但是这样迟早会出问题。</p>
+<p><strong>请记住，函数调用的时候，会将栈对齐位16倍数</strong></p>
+<p>那么我们随便写一些东西</p>
+<p>makefile</p>
+<pre><code class="makefile">test: test.o
+        gcc -o test test.o -no-pie
+test.o: test.asm
+        nasm -f elf64 -g -F dwarf test.asm -l test.lst
+</code></pre>
+<p>前面我们已经说过的，在函数调用的时候总是应当栈对齐。</p>
+<p>在<code>call main</code>之前，栈是对齐的。在<code>call main</code>之后。rsp-8。此时栈还差8个字节对齐。我们可以用这个程序来验证。</p>
+<p>注意我们的程序把栈对齐的指令给注释掉了</p>
+<pre><code class="asm">extern printf
 section .bss
+section .data
+        fmt             db &quot;The number is %d&quot;,10,0
+        rsp_fmt db &quot;rsp is %x&quot;,10,0
 section .text
         global main
 main:
-        push rbp
-        mov rbp, rsp
 
-        ;打印数字
-        movsd xmm0, [number1] ;movsd表示移动一个双精度浮点数,8位
-        movsd xmm1, [number2]
+        ;push rbp
+        ;mov rbp, rsp
         mov rdi, fmt
-        mov rax, 2 ;用到两个xmm寄存器
+        mov rsi, 10
+        mov rax, 0
         call printf
 
-        ;sum
-        movsd xmm2, [number1]
-        addsd xmm2, [number2] ;number1+number2结果放在xmm2中
-
-        mov rdi, f_sum
-        mov rax, 3
+        ;print rsp
+        mov rdi, rsp_fmt
+        mov rsi, rsp
+        mov rax, 0
         call printf
-
-        ;difference
-        movsd xmm2, [number1]
-        subsd xmm2, [number2]
-        movsd xmm0, [number1] ;movsd表示移动一个双精度浮点数,8位
-        movsd xmm1, [number2]
-        mov rdi, f_dif
-        mov rax, 3
-        call printf
-
-        ;mul
-        movsd xmm2, [number1]
-        mulsd xmm2, [number2]
-        movsd xmm0, [number1] ;movsd表示移动一个双精度浮点数,8位
-        movsd xmm1, [number2]
-        mov rdi, f_mul
-        mov rax, 3
-        call printf
-
-        ;division
-        movsd xmm2, [number1]
-        divsd xmm2, [number2]
-        movsd xmm0, [number1] ;movsd表示移动一个双精度浮点数,8位
-        movsd xmm1, [number2]
-        mov rdi, f_div
-        mov rax, 3
-        call printf
-
-        ;squareroot
-        sqrtsd xmm1, [number1]
-        movsd xmm0, [number1]
-        mov rdi, f_sqrt
-        mov rax, 2
-        call printf
-        ;exit
-
-        mov rsp, rbp
-        pop rbp
+        ;mov rsp, rbp
+        ;pop rbp
         ret
 </code></pre>
+<p>在我的机器上，有这样的输出结果。也许你的会不同，但是有一点是一样的。你的rsp的值最低位不应该是0。或者更确切的来说，应当是8</p>
+<pre><code>The number is 10
+rsp is d52880f8
+</code></pre>
+<p>把用于栈对齐的指令取消注释，再次运行。得到的rsp的值最低位应当是0。</p>
+<pre><code>The number is 10
+rsp is 23cfdfe0
+</code></pre>
+<p>这就是为什么程序要使用序言和尾声。 </p>
+<p>我猜现在你还有一个疑问。为什么被调用者要保存rsp，而不是rdi，rsi其他的寄存器？</p>
+<p>为了解决这个疑问，我们还要了解一个东西——栈帧。</p>
+<h1 id="栈帧"><a href="#栈帧" class="headerlink" title="栈帧"></a>栈帧</h1><p>在函数的每次调用过程中，都需要在栈空间实现自己的一个独立的栈，我们可以把这独立的栈叫做栈帧。</p>
+<p>更准确的说： 每一次函数的调用,都会在调用栈(call stack)上维护一个独立的栈帧(stack frame).每个独立的栈帧一般包括:</p>
+<ul>
+<li>函数的返回地址和参数</li>
+<li>临时变量: 包括函数的非静态局部变量以及编译器自动生成的其他临时变量</li>
+<li>函数调用的上下文</li>
+</ul>
+<p>栈是从高地址向低地址成长的。我们可以用rsp和rbp来划定范围。rbp指向栈底部(高地址), rsp指向栈顶(低地址)。</p>
+<p>再回到我们的问题,为什么要保存rbp? 我们已经说过了，每个函数都有一个自己的栈帧。当调用函数的时候，会修改rbp。因此在将rbp用于栈帧之前(调用函数前),应当将其保存。以免rbp丢失而导致非正常行为。还有另外一些原因：我们对于函数调用中的参数，会有约定的寄存器。例如第一个参数位rdi,第二个参数位rsi等。rbp在函数的调用中不用理啊传递任何参数。</p>
+<h1 id="函数的分类"><a href="#函数的分类" class="headerlink" title="函数的分类"></a>函数的分类</h1><p>函数可以分为两种类型，分支函数&#x2F;枝干函数，叶子函数。我们把函数的调用关系映射到一个树——我们已经熟悉的数据结构。分支函数就是会调用其他函数的函数。而叶子函数就是不会调用其他函数的函数。</p>
+<p>因为叶子函数不会调用其他函数，通常可以忽略栈帧和栈对齐。只要你不把栈搞乱即可。但注意用xmm和printf的时候，即使是叶子函数，还是要进行对齐。</p>
+<h1 id="序言和尾声的代替"><a href="#序言和尾声的代替" class="headerlink" title="序言和尾声的代替"></a>序言和尾声的代替</h1><p>可以使用<code>enter 0,0</code>来代替函数的序言。这样做可能造成性能问题。</p>
+<p>可以使用<code>leave</code>来代替尾声。单不必担心性能问题。</p>
+<h1 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h1><p>无论如何，始终包含栈帧并检查堆栈是一个好习惯。以后可以为我们省去很多麻烦。</p>
+<p>还有一个理由是：gdb或者基于gdb的调试器，在调试的时候都期望可以找到一个栈帧。如果代码中没有这些栈帧。则会发生不可预测的行为。</p>
 
     </div>
     

@@ -144,6 +144,115 @@
             
 
 <div class="post">
+    <a href="/2022/10/15/x64-asm栈对齐和栈帧/">
+        <h2 class="post-title">X64-Asm栈对齐和栈帧</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="date">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
+            </span>
+            2022/10/15
+        </span>
+    </div>
+    <div class="excerpt">
+        <div class="content" v-pre>
+            
+            <h1 id="栈对齐"><a href="#栈对齐" class="headerlink" title="栈对齐"></a>栈对齐</h1><p>在英特尔手册中, 你会发现当调用函数时，栈要求必须是16字节对齐。</p>
+<p>一些SIMD指令(Single Instruction, Multiple Data，一条指令操作多个数据)对较大的数据执行并进行操作可能要求这些数据位于内存中16字节的倍数上。例如printf于xmm一起使用的时候，会将栈对齐位16个字节。如果用不带xmm的printf，则可以不用进行对齐，但是这样迟早会出问题。</p>
+<p><strong>请记住，函数调用的时候，会将栈对齐位16倍数</strong></p>
+<p>那么我们随便写一些东西</p>
+<p>makefile</p>
+<pre><code class="makefile">test: test.o
+        gcc -o test test.o -no-pie
+test.o: test.asm
+        nasm -f elf64 -g -F dwarf test.asm -l test.lst
+</code></pre>
+<p>前面我们已经说过的，在函数调用的时候总是应当栈对齐。</p>
+<p>在<code>call main</code>之前，栈是对齐的。在<code>call main</code>之后。rsp-8。此时栈还差8个字节对齐。我们可以用这个程序来验证。</p>
+<p>注意我们的程序把栈对齐的指令给注释掉了</p>
+<pre><code class="asm">extern printf
+section .bss
+section .data
+        fmt             db &quot;The number is %d&quot;,10,0
+        rsp_fmt db &quot;rsp is %x&quot;,10,0
+section .text
+        global main
+main:
+
+        ;push rbp
+        ;mov rbp, rsp
+        mov rdi, fmt
+        mov rsi, 10
+        mov rax, 0
+        call printf
+
+        ;print rsp
+        mov rdi, rsp_fmt
+        mov rsi, rsp
+        mov rax, 0
+        call printf
+        ;mov rsp, rbp
+        ;pop rbp
+        ret
+</code></pre>
+<p>在我的机器上，有这样的输出结果。也许你的会不同，但是有一点是一样的。你的rsp的值最低位不应该是0。或者更确切的来说，应当是8</p>
+<pre><code>The number is 10
+rsp is d52880f8
+</code></pre>
+<p>把用于栈对齐的指令取消注释，再次运行。得到的rsp的值最低位应当是0。</p>
+<pre><code>The number is 10
+rsp is 23cfdfe0
+</code></pre>
+<p>这就是为什么程序要使用序言和尾声。 </p>
+<p>我猜现在你还有一个疑问。为什么被调用者要保存rsp，而不是rdi，rsi其他的寄存器？</p>
+<p>为了解决这个疑问，我们还要了解一个东西——栈帧。</p>
+<h1 id="栈帧"><a href="#栈帧" class="headerlink" title="栈帧"></a>栈帧</h1><p>在函数的每次调用过程中，都需要在栈空间实现自己的一个独立的栈，我们可以把这独立的栈叫做栈帧。</p>
+<p>更准确的说： 每一次函数的调用,都会在调用栈(call stack)上维护一个独立的栈帧(stack frame).每个独立的栈帧一般包括:</p>
+<ul>
+<li>函数的返回地址和参数</li>
+<li>临时变量: 包括函数的非静态局部变量以及编译器自动生成的其他临时变量</li>
+<li>函数调用的上下文</li>
+</ul>
+<p>栈是从高地址向低地址成长的。我们可以用rsp和rbp来划定范围。rbp指向栈底部(高地址), rsp指向栈顶(低地址)。</p>
+<p>再回到我们的问题,为什么要保存rbp? 我们已经说过了，每个函数都有一个自己的栈帧。当调用函数的时候，会修改rbp。因此在将rbp用于栈帧之前(调用函数前),应当将其保存。以免rbp丢失而导致非正常行为。还有另外一些原因：我们对于函数调用中的参数，会有约定的寄存器。例如第一个参数位rdi,第二个参数位rsi等。rbp在函数的调用中不用理啊传递任何参数。</p>
+<h1 id="函数的分类"><a href="#函数的分类" class="headerlink" title="函数的分类"></a>函数的分类</h1><p>函数可以分为两种类型，分支函数&#x2F;枝干函数，叶子函数。我们把函数的调用关系映射到一个树——我们已经熟悉的数据结构。分支函数就是会调用其他函数的函数。而叶子函数就是不会调用其他函数的函数。</p>
+<p>因为叶子函数不会调用其他函数，通常可以忽略栈帧和栈对齐。只要你不把栈搞乱即可。但注意用xmm和printf的时候，即使是叶子函数，还是要进行对齐。</p>
+<h1 id="序言和尾声的代替"><a href="#序言和尾声的代替" class="headerlink" title="序言和尾声的代替"></a>序言和尾声的代替</h1><p>可以使用<code>enter 0,0</code>来代替函数的序言。这样做可能造成性能问题。</p>
+<p>可以使用<code>leave</code>来代替尾声。单不必担心性能问题。</p>
+<h1 id="调试"><a href="#调试" class="headerlink" title="调试"></a>调试</h1><p>无论如何，始终包含栈帧并检查堆栈是一个好习惯。以后可以为我们省去很多麻烦。</p>
+<p>还有一个理由是：gdb或者基于gdb的调试器，在调试的时候都期望可以找到一个栈帧。如果代码中没有这些栈帧。则会发生不可预测的行为。</p>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        <span class="icon">
+            <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
+        </span>
+        
+        
+        <span class="tag">
+            
+            <a href="/tags/x64-asm/" style="color: #00bcd4">
+                x64_asm
+            </a>
+        </span>
+        
+        <span class="tag">
+            
+            <a href="/tags/asm/" style="color: #03a9f4">
+                asm
+            </a>
+        </span>
+        
+    </div>
+    <a href="/2022/10/15/x64-asm栈对齐和栈帧/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post">
     <a href="/2022/10/14/x64-asm浮点数操作/">
         <h2 class="post-title">X64-Asm浮点数操作</h2>
     </a>
@@ -307,7 +416,7 @@ main:
         
         <span class="tag">
             
-            <a href="/tags/x64-asm/" style="color: #03a9f4">
+            <a href="/tags/x64-asm/" style="color: #00bcd4">
                 x64_asm
             </a>
         </span>
@@ -353,14 +462,14 @@ main:
         
         <span class="tag">
             
-            <a href="/tags/x64-asm/" style="color: #00a596">
+            <a href="/tags/x64-asm/" style="color: #ffa2c4">
                 x64_asm
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/asm/" style="color: #ff7d73">
+            <a href="/tags/asm/" style="color: #ffa2c4">
                 asm
             </a>
         </span>
@@ -584,14 +693,14 @@ main:
         
         <span class="tag">
             
-            <a href="/tags/x64-asm/" style="color: #00bcd4">
+            <a href="/tags/x64-asm/" style="color: #03a9f4">
                 x64_asm
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/asm/" style="color: #ffa2c4">
+            <a href="/tags/asm/" style="color: #00a596">
                 asm
             </a>
         </span>
@@ -756,21 +865,21 @@ fn is_palindrome(s: &amp;str) -&gt; bool &#123;
         
         <span class="tag">
             
-            <a href="/tags/Rust/" style="color: #ffa2c4">
+            <a href="/tags/Rust/" style="color: #00bcd4">
                 Rust
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/Unsafe-Rust/" style="color: #ff7d73">
+            <a href="/tags/Unsafe-Rust/" style="color: #ffa2c4">
                 Unsafe Rust
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/Effective-Rust/" style="color: #03a9f4">
+            <a href="/tags/Effective-Rust/" style="color: #ff7d73">
                 Effective Rust
             </a>
         </span>
@@ -873,7 +982,7 @@ error: could not compile `option_` due to 2 previous errors
         
         <span class="tag">
             
-            <a href="/tags/Effective-Rust/" style="color: #ffa2c4">
+            <a href="/tags/Effective-Rust/" style="color: #00a596">
                 Effective Rust
             </a>
         </span>
@@ -1180,7 +1289,7 @@ impl &lt;&#39;a, T&gt; Iterator for IterMut&lt;&#39;a, T&gt; &#123;
         
         <span class="tag">
             
-            <a href="/tags/Rust/" style="color: #ffa2c4">
+            <a href="/tags/Rust/" style="color: #00a596">
                 Rust
             </a>
         </span>
@@ -1406,14 +1515,14 @@ for byte in s.bytes() &#123;
         
         <span class="tag">
             
-            <a href="/tags/Rust/" style="color: #00a596">
+            <a href="/tags/Rust/" style="color: #03a9f4">
                 Rust
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/Rust-Library/" style="color: #00a596">
+            <a href="/tags/Rust-Library/" style="color: #03a9f4">
                 Rust Library
             </a>
         </span>
@@ -1749,21 +1858,21 @@ template&lt;typename _Tp&gt;
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #03a9f4">
+            <a href="/tags/Modern-C/" style="color: #ff7d73">
                 Modern C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #00bcd4">
+            <a href="/tags/C/" style="color: #ff7d73">
                 C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C-Library/" style="color: #03a9f4">
+            <a href="/tags/C-Library/" style="color: #00bcd4">
                 C++ Library
             </a>
         </span>
@@ -2342,375 +2451,20 @@ int main()
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #ff7d73">
+            <a href="/tags/C/" style="color: #00bcd4">
                 C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C-Library/" style="color: #00a596">
+            <a href="/tags/C-Library/" style="color: #00bcd4">
                 C++ Library
             </a>
         </span>
         
     </div>
     <a href="/2022/09/26/type-traits源码分析-二-/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post">
-    <a href="/2022/09/26/type-traits源码分析-一-/">
-        <h2 class="post-title">Type_traits源码分析(一)</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
-            </span>
-            2022/9/26
-        </span>
-    </div>
-    <div class="excerpt">
-        <div class="content" v-pre>
-            
-            <h1 id="type-traits概述"><a href="#type-traits概述" class="headerlink" title="type_traits概述"></a>type_traits概述</h1><p>tyep_traits是C++TMP中不可缺少的一部分，也是Modern C++不可缺少的一部分。任何一位C++程序员，如果想学习Modern C++，想学号Modern C++，肯定不能避免学习type_traits。</p>
-<h2 id="什么是type-traits"><a href="#什么是type-traits" class="headerlink" title="什么是type_traits?"></a>什么是type_traits?</h2><p>type_traits，顾名思义，为类型萃取器&#x2F;类型特征。type_traits是一系列的元函数。在普通函数中，我们传入数据，返回数据。但是在元函数中，我们传入类型&#x2F;常量，返回类型&#x2F;常量。</p>
-<p>C++ type_traits的实现,也就是元函数的一般形式, 使用结构体+模板(模式匹配+模板偏特化)的方式。</p>
-<p>使用&lt;&gt;来传入类型(语法层面的), 使用::value&#x2F;::type来获得返回值&#x2F;返回类型(约定俗成的)。<br>例如<code>std::true_type::value == true</code>,<code>std::false_type::value == false</code>,<code>std::remove_const&lt;const int&gt;::value</code></p>
-<p>所有的type_traits操作均发生在编译时期。</p>
-<h2 id="type-trait能够干什么"><a href="#type-trait能够干什么" class="headerlink" title="type_trait能够干什么?"></a>type_trait能够干什么?</h2><p>type_traits不仅是标准库的重要组成部分，也是模板元编程中的基本技能。</p>
-<p>标准库中的类型安全也多亏了type_traits，在各种C++库中也总是能看到type_traits的身影。</p>
-<h1 id="type-traits中的约定"><a href="#type-traits中的约定" class="headerlink" title="type_traits中的约定"></a>type_traits中的约定</h1><p>type_traits发展了很长的时间，C++标准演化出来了一套规定<br>通用的规定</p>
-<ul>
-<li>使用::value来表示返回值(值元函数)</li>
-<li>使用::type来表示返回类型(类型元函数)</li>
-<li>每个元函数只能返回一个类型或者一个值</li>
-<li>元函数可以同时是值元函数和类型元函数</li>
-<li>元函数必须是一个模板类</li>
-<li>对于一个type_traits,形如XXX_t的形式是一个类型应用XXX后的返回类型</li>
-<li>对于一个type_traits,形如XXX_v的形式是一个类型应用XXX后的返回值(C++17)</li>
-</ul>
-<p>对于一元type_traits的规定</p>
-<ul>
-<li>接受一个类型参数 + 可选的辅助附加参数</li>
-<li>必须可以默认构造</li>
-<li>必须可以拷贝构造</li>
-<li>必须公开且无歧义</li>
-<li>所有的一元元函数都必须从std::integral_constant继承</li>
-<li>基本的特征成员不应该被隐藏，而且明确可用</li>
-</ul>
-<p>对于二元元函数的规定</p>
-<ul>
-<li>接受有两个类型参数 + 可选的辅助附加参数</li>
-<li>必须可以默认构造</li>
-<li>必须可以拷贝构造</li>
-<li>必须公开且无歧义</li>
-<li>所有的一元元函数都必须从std::integral_constant的特例化继承</li>
-<li>基本的特征成员不应该被隐藏，而且明确可用</li>
-</ul>
-<p>对于transformation-traits的规定</p>
-<ul>
-<li>接受一个类型参数 + 可选的辅助附加参数</li>
-<li>定义一个public的名为type的嵌套类型</li>
-<li>没有默认&#x2F;拷贝构造的要求(可以有，也可以没有)</li>
-</ul>
-<blockquote>
-<p>你会发现标准库的有些地方没有遵守这个标准——那些代码是在这个标准没有成型之前，例如迭代器有关的类型萃取</p>
-</blockquote>
-<h1 id="描述"><a href="#描述" class="headerlink" title="描述"></a>描述</h1><p>本篇文章使用gcc编译器，会提到17,20中的type_traits,请确保你所用的编译器支持17，20</p>
-<p>对于有些条件编译，不列出源码并且不分析</p>
-<p>我会将元函数和type_traits等价起来，如果文中说元函数，你可以联系上下文把其当作type_traits。反之亦然。</p>
-<h1 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h1><p>标准库对于type_traits的实现，放在了type_traits中</p>
-<h2 id="integral-constant"><a href="#integral-constant" class="headerlink" title="integral_constant"></a>integral_constant</h2><pre><code class="C++"> template&lt;typename _Tp, _Tp __v&gt;
-    struct integral_constant
-    &#123;
-      static constexpr _Tp                  value = __v;
-      typedef _Tp                           value_type;
-      typedef integral_constant&lt;_Tp, __v&gt;   type;
-      constexpr operator value_type() const noexcept &#123; return value; &#125;
-    //有constexpr性质，可以编译时期求值
-      constexpr value_type operator()() const noexcept &#123; return value; &#125;
-    &#125;;
-</code></pre>
-<p>我们可以看见integral_constant定义的很简单，记得unix的哲学吗? less is more! 几乎所有的type_traits都会直接的或者间接的继承integral_constant</p>
-<h2 id="true-type-false-type"><a href="#true-type-false-type" class="headerlink" title="true_type false_type"></a>true_type false_type</h2><p><code>true_type</code>,<code>false_type</code>仅仅是integral_constant的别名，定义如下</p>
-<pre><code class="C++">  /// The type used as a compile-time boolean with true value.
-  typedef integral_constant&lt;bool, true&gt;     true_type;
-
-  /// The type used as a compile-time boolean with false value.
-  typedef integral_constant&lt;bool, false&gt;    false_type;
-</code></pre>
-<p>很多的元函数都继承这两个类型，例如is_XXX等元函数。</p>
-<h2 id="bool-constant"><a href="#bool-constant" class="headerlink" title="bool_constant"></a>bool_constant</h2><p>很好理解</p>
-<pre><code class="C++">  /// The type used as a compile-time boolean with true value.
-  typedef integral_constant&lt;bool, true&gt;     true_type;
-
-  /// The type used as a compile-time boolean with false value.
-  typedef integral_constant&lt;bool, false&gt;    false_type;
-</code></pre>
-<h2 id="conditional"><a href="#conditional" class="headerlink" title="conditional"></a>conditional</h2><p>conditional接受三个参数，一个bool值，两个类型参数，作用相当于编译时期的if，可以这样描述</p>
-<p><code>&lt;bool p, T1, T2&gt; p ? T1 : T2</code></p>
-<pre><code class="C++">//前置声明
-template&lt;bool, typename, typename&gt;
-    struct conditional;  
-...
-/// Define a member typedef @c type to one of two argument types.
-  template&lt;bool _Cond, typename _Iftrue, typename _Iffalse&gt; //主模板
-    struct conditional
-    &#123; typedef _Iftrue type; &#125;;
-
-  // Partial specialization for false.
-  template&lt;typename _Iftrue, typename _Iffalse&gt;		//特化模板
-    struct conditional&lt;false, _Iftrue, _Iffalse&gt;
-    &#123; typedef _Iffalse type; &#125;;
-</code></pre>
-<h2 id="type-identity"><a href="#type-identity" class="headerlink" title="__type_identity"></a>__type_identity</h2><p>关于个元函数，没有明确的规定，可以教type_is,或者其他的东西。每个标准库的实现都有所不同。作用就是给定一个T类型，返回一个T类型，用于被其他元函数继承。</p>
-<pre><code class="C++">  template &lt;typename _Type&gt;
-    struct __type_identity
-    &#123; using type = _Type; &#125;;
-
-  template&lt;typename _Tp&gt;
-    using __type_identity_t = typename __type_identity&lt;_Tp&gt;::type;
-</code></pre>
-<h2 id="logic-traits"><a href="#logic-traits" class="headerlink" title="logic traits"></a>logic traits</h2><p>合取，析取，否定 traits。其中<code>conjunction</code>、<code>disjunction</code>、<code>negation</code>在定义了宏<code>__cpp_lib_logical_traits 201510</code>才启用</p>
-<h3 id="or"><a href="#or" class="headerlink" title="__or_"></a><strong>__or_</strong></h3><p>类似or关键字，__or_元函数接受一个参数包，对这些类型的返回值求析取</p>
-<pre><code class="C++">template&lt;typename...&gt;
-    struct __or_; //主模板永远不能被匹配匹配到，所以不用定义
-
-  template&lt;&gt;
-    struct __or_&lt;&gt;	//如果没有类型，继承true_type
-    : public false_type
-    &#123; &#125;;
-
-  template&lt;typename _B1&gt;
-    struct __or_&lt;_B1&gt; //有一个类型继承哪个类型
-    : public _B1
-    &#123; &#125;;
-
-  template&lt;typename _B1, typename _B2&gt; //如果时两个类型，递归的继承
-    struct __or_&lt;_B1, _B2&gt;
-    : public conditional&lt;_B1::value, _B1, _B2&gt;::type 
-    //if _B1::value==true，那么不再判断，继承_B1即可，我们关心的是::value的这个返回值。
-    //if _B1::value==false, 则继承_B2，此时_B2匹配到接受一个参数的特例化
-    &#123; &#125;;
-
-  template&lt;typename _B1, typename _B2, typename _B3, typename... _Bn&gt; //接受多个类型
-    struct __or_&lt;_B1, _B2, _B3, _Bn...&gt;
-    : public conditional&lt;_B1::value, _B1, __or_&lt;_B2, _B3, _Bn...&gt;&gt;::type
-    //if _B1::value==true同理
-    //if _B1::value==false, 递归的继承__or_&lt;_B2, _B3, _Bn...&gt;
-    &#123; &#125;;
-</code></pre>
-<pre><code class="C++">//这种语法是C++17添加进来的，也很有效的简化了模板元编程的复杂性
-template&lt;typename... _Bn&gt;
-    inline constexpr bool __or_v = __or_&lt;_Bn...&gt;::value; //__or_v即是类型用用于__or_v后的返回
-//__and_v同
-</code></pre>
-<h3 id="and"><a href="#and" class="headerlink" title="__and_"></a><strong>__and_</strong></h3><p>__and_的功能和实现与__or_的功能和实现大同小异</p>
-<pre><code class="C++">  template&lt;typename...&gt;
-    struct __and_;
-
-  template&lt;&gt;
-    struct __and_&lt;&gt;
-    : public true_type //这里继承true_type
-    &#123; &#125;;
-
-  template&lt;typename _B1&gt;
-    struct __and_&lt;_B1&gt;
-    : public _B1
-    &#123; &#125;;
-
-  template&lt;typename _B1, typename _B2&gt;
-    struct __and_&lt;_B1, _B2&gt;
-    : public conditional&lt;_B1::value, _B2, _B1&gt;::type //这里的类型排列相较于__or_是反的
-    &#123; &#125;;
-
-  template&lt;typename _B1, typename _B2, typename _B3, typename... _Bn&gt;
-    struct __and_&lt;_B1, _B2, _B3, _Bn...&gt;
-    : public conditional&lt;_B1::value, __and_&lt;_B2, _B3, _Bn...&gt;, _B1&gt;::type //类型排列同上
-    &#123; &#125;;
-</code></pre>
-<pre><code class="C++">  template&lt;typename... _Bn&gt;
-    inline constexpr bool __and_v = __and_&lt;_Bn...&gt;::value;
-</code></pre>
-<h3 id="not"><a href="#not" class="headerlink" title="__not_"></a><strong>__not_</strong></h3><p>__not_对给定类型的::value返回值取反,实现非常的简单</p>
-<pre><code class="C++">  template&lt;typename _Pp&gt;
-    struct __not_
-    : public __bool_constant&lt;!bool(_Pp::value)&gt; //这里有一个强转
-    &#123; &#125;;
-</code></pre>
-<h3 id="conjunction"><a href="#conjunction" class="headerlink" title="conjunction"></a><strong>conjunction</strong></h3><p>合取，功能和__or_一样，通过继承其实现。</p>
-<pre><code class="C++">  template&lt;typename... _Bn&gt;
-    struct conjunction
-    : __and_&lt;_Bn...&gt;
-    &#123; &#125;;
-</code></pre>
-<pre><code class="C++">template&lt;typename... _Bn&gt;
-    inline constexpr bool conjunction_v = conjunction&lt;_Bn...&gt;::value;
-</code></pre>
-<h3 id="disjunction"><a href="#disjunction" class="headerlink" title="disjunction"></a><strong>disjunction</strong></h3><p>析取，同上</p>
-<pre><code class="C++">  template&lt;typename... _Bn&gt;
-    struct disjunction
-    : __or_&lt;_Bn...&gt;
-    &#123; &#125;;
-</code></pre>
-<pre><code class="C++">   template&lt;typename... _Bn&gt;
-    inline constexpr bool disjunction_v = disjunction&lt;_Bn...&gt;::value;
-</code></pre>
-<h3 id="negation"><a href="#negation" class="headerlink" title="negation"></a><strong>negation</strong></h3><p>否定，同上</p>
-<pre><code class="C++">  template&lt;typename _Pp&gt;
-    struct negation
-    : __not_&lt;_Pp&gt;
-    &#123; &#125;;
-</code></pre>
-<pre><code class="C++">  template&lt;typename _Pp&gt;
-    inline constexpr bool negation_v = negation&lt;_Pp&gt;::value;
-</code></pre>
-<h2 id="is-l-x2F-r-reference"><a href="#is-l-x2F-r-reference" class="headerlink" title="is_l&#x2F;r reference"></a>is_l&#x2F;r reference</h2><p>传入一个类型，返回其是不是一个左值&#x2F;右值引用类型，如果具有，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type</p>
-<pre><code class="C++">  /// is_lvalue_reference
-  template&lt;typename&gt;		//主模板继承false_type
-    struct is_lvalue_reference
-    : public false_type &#123; &#125;;
-
-  template&lt;typename _Tp&gt;
-    struct is_lvalue_reference&lt;_Tp&amp;&gt; //对于左值引用的特例化，继承true_type
-    : public true_type &#123; &#125;;
-
-  /// is_rvalue_reference
-  template&lt;typename&gt;			//同上
-    struct is_rvalue_reference
-    : public false_type &#123; &#125;;
-
-  template&lt;typename _Tp&gt;		//同上
-    struct is_rvalue_reference&lt;_Tp&amp;&amp;&gt;
-    : public true_type &#123; &#125;;
-</code></pre>
-<h2 id="is-reference"><a href="#is-reference" class="headerlink" title="is_reference"></a>is_reference</h2><p>传入一个类型，返回其是不是一个引用类型，如果具有，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type</p>
-<pre><code class="C++">template&lt;typename&gt;
-struct is_reference; //声明
-
-template&lt;typename _Tp&gt;
-struct is_reference 		//左值引用/右值引用
-    : public __or_&lt;is_lvalue_reference&lt;_Tp&gt;, 这里用__or_来实现
-                   is_rvalue_reference&lt;_Tp&gt;&gt;::type
-&#123; &#125;;
-</code></pre>
-<h2 id="is-const"><a href="#is-const" class="headerlink" title="is_const"></a>is_const</h2><p>传入一个类型，返回其是否具有const性质，如果具有，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
-<p>通过普通的模板特化就可以实现</p>
-<pre><code class="C++">  /// is_const
-  template&lt;typename&gt;
-    struct is_const
-    : public false_type &#123; &#125;;
-
-  template&lt;typename _Tp&gt;
-    struct is_const&lt;_Tp const&gt; //对于const的特化
-    : public true_type &#123; &#125;;
-</code></pre>
-<p>注意，对于&amp;&#x2F;&amp;&amp;is_const的返回类型是一个::false_type,就是所<code>std::is_const&lt;const int &amp;&gt;::value==false</code></p>
-<p>类似的，还有<code>const int *</code>也是一样。因为这样的语义表示的指向的对象是常量性质的，而不是引用&#x2F;指针本身是常量性质的。</p>
-<h2 id="is-volatile"><a href="#is-volatile" class="headerlink" title="is_volatile"></a>is_volatile</h2><p>传入一个类型，返回其是否具有volatile性质，如果具有，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
-<p>实现方式和is_const大同小异。注意的事项也和is_const是一样的。</p>
-<pre><code class="C++">  template&lt;typename&gt;
-    struct is_volatile
-    : public false_type &#123; &#125;;
-
-  template&lt;typename _Tp&gt;
-    struct is_volatile&lt;_Tp volatile&gt;
-    : public true_type &#123; &#125;;
-</code></pre>
-<h2 id="is-function"><a href="#is-function" class="headerlink" title="is_function"></a>is_function</h2><p>传入一个类型，返回其是不是一个函数类型，如果具有，返回值&#x2F;类型为 true&#x2F;true_type, 否则返回false&#x2F;false_type。</p>
-<p>C++还有这样的功能！这是黑魔法吗？</p>
-<p>这不是什么黑魔法，但确实够酷。在你惊叹他的时候，应当了解一下原理。</p>
-<p>对于一个T类型，如果其是一个函数&#x2F;&amp;，对其添加const不会发成任何类型上的变化。例如</p>
-<pre><code class="C++">void fun() &#123; &#125;
-template &lt;typename T&gt;
-struct add_const &#123;
-  using type = const T;
-&#125;;
-int main() &#123;
-    typename add_const&lt;decltype(fun)&gt;::type c;
-  return 0;
-&#125;
-</code></pre>
-<p>编译器会生成这样的代码</p>
-<pre><code class="C++">void fun()
-&#123;
-&#125;
-
-template&lt;typename T&gt;
-struct add_const
-&#123;
-  using type = const T;
-&#125;;
-
-/* First instantiated from: insights.cpp:10 */
-#ifdef INSIGHTS_USE_TEMPLATE
-template&lt;&gt;
-struct add_const&lt;void ()&gt; 
-&#123;
-  using type = void (); //类型上没有发生任何变化
-&#125;;
-
-#endif
-
-int main()
-&#123;
-  void c();
-  return 0;
-&#125;
-</code></pre>
-<p>基于这个原理，我们可以轻松实现这个元函数。考虑到对于<code>const T &amp;</code>,<code>const T &amp;&amp;</code>(T不是一个函数类型) 应用is_const:value&#x3D;&#x3D;false &amp;&#x2F;&amp;&amp;继承false_type,主模板添加const性质之后判断得到的类型是不是具有const性质。</p>
-<pre><code class="C++">  template&lt;typename&gt;
-    struct is_function;
-  /// is_function
-  template&lt;typename _Tp&gt;
-    struct is_function
-    : public __bool_constant&lt;!is_const&lt;const _Tp&gt;::value&gt; &#123; &#125;;
-    
-//对引用考虑即可，对指针添加const变为*const
-  template&lt;typename _Tp&gt;
-    struct is_function&lt;_Tp&amp;&gt; 
-    : public false_type &#123; &#125;;
-
-  template&lt;typename _Tp&gt;
-    struct is_function&lt;_Tp&amp;&amp;&gt;
-    : public false_type &#123; &#125;;
-</code></pre>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        <span class="icon">
-            <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-        </span>
-        
-        
-        <span class="tag">
-            
-            <a href="/tags/Modern-C/" style="color: #ffa2c4">
-                Modern C++
-            </a>
-        </span>
-        
-        <span class="tag">
-            
-            <a href="/tags/C/" style="color: #03a9f4">
-                C++
-            </a>
-        </span>
-        
-        <span class="tag">
-            
-            <a href="/tags/C-Library/" style="color: #ffa2c4">
-                C++ Library
-            </a>
-        </span>
-        
-    </div>
-    <a href="/2022/09/26/type-traits源码分析-一-/" class="go-post">阅读全文</a>
 </div>
 
              
