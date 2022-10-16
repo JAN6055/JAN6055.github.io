@@ -1,0 +1,371 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+        <title>X64-Asm外部函数 | Hello @You</title>
+        <meta name="author" content="Jan6055">
+        <meta name="description" content="">
+        <meta name="keywords" content="C++,Rust,Jan6055">
+        <link rel="icon" href="https://avatars.githubusercontent.com/u/94843786?s=400&u=3e0bac8cdc09c80d159d076c0503db566f8f0579&v=4">
+        <script src="https://cdn.staticfile.org/instant.page/5.1.0/instantpage.min.js" type="module"></script>
+        <script src="https://cdn.staticfile.org/font-awesome/6.1.1/js/all.min.js"></script>
+        
+        <link rel="stylesheet" href="/css/fonts.min.css">
+        <link rel="stylesheet" href="/css/particlex.css">
+        
+        <script src="https://cdn.staticfile.org/vue/3.2.33/vue.global.prod.min.js"></script>
+    <meta name="generator" content="Hexo 6.2.0"></head>
+    <body>
+        <div id="loading" style="height:100vh;width:100vw;position:fixed;display:flex;z-index:200;justify-content:space-between;background:#fff;transition:opacity 0.3s ease-out"><div style="position:fixed;height:100vh;width:100vw;display:flex;justify-content:center;align-items:center"><div id="loadcontent" style="width:50vmin;height:50vmin;padding:50px;border-radius:50%;display:flex;justify-content:center;align-items:center;border:solid 10px #a3ddfb;text-align:center"><div><h2>LOADING...</h2><p style="word-break:keep-all">加载过慢请开启缓存(浏览器默认开启)</p><div><img alt="loading" src="/loading.gif"></div></div></div></div></div>
+        <div id="layout">
+            <i data-fa-symbol="calendar-solid" class="fa-solid fa-calendar fa-fw"></i>
+            <i data-fa-symbol="bookmark-solid" class="fa-solid fa-bookmark fa-fw"></i>
+            <i data-fa-symbol="tags-solid" class="fa-solid fa-tags fa-fw"></i>
+            <transition name="into">
+                <div v-show="show_page" style="display: -not-none">
+                    <div id="menu_show">
+                         
+<nav id="menu">
+    <div class="desktop-menu">
+        <a href="/">
+            <span class="title">Hello @you</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;about</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;tags</span>
+        </a>
+        
+    </div>
+    <div :class="'phone-menu ' + menu_show" id="phone-menu">
+        <div class="curtain" @click="menu_show = !menu_show" v-show="menu_show"></div>
+        <div :class="'title'" @click="menu_show = !menu_show">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;Hello @you</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="menu_show">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">about</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+                    </div>
+                    <div id="main">
+                        
+<div class="article">
+    <div>
+        <h1>X64-Asm外部函数 </h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
+            </span>
+            2022/10/15
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/x64-asm/" style="color: #ff7d73">
+                    x64_asm
+                </a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/asm/" style="color: #ffa2c4">
+                    asm
+                </a>
+            </span>
+            
+        </span>
+        
+    </div>
+    <div class="content" v-pre>
+        <h1 id="函数和变量的可见性"><a href="#函数和变量的可见性" class="headerlink" title="函数和变量的可见性"></a>函数和变量的可见性</h1><p>我们在写单文件的时候会将main声明为<code>glabal</code>。这表示<code>main</code>函数是一个全局函数。在链接的时候对外部可见。我们也可以使用global来声明其他的任何函数和变量。并使用extern来导入他们。</p>
+<p>function.asm</p>
+<pre><code class="assembly">extern printf
+extern c_area	;这些函数在其它的文件中定义
+extern c_circum
+extern r_area
+extern r_circum
+global pi		;声明为全局的,别的文件可以导入pi
+section .data
+        pi      dq 3.141592654
+        radius  dq 10.0
+        side1   dq 4
+        side2   dq 5
+        fmtf    db &quot;%s %f&quot;,10,0
+        fmti    db &quot;%s %d&quot;,10,0
+        ca      db &quot;The circle area is &quot;,0
+        cc      db &quot;The circle circumreference is &quot;,0
+        ra      db &quot;The rectangle area is &quot;, 0
+        rc      db &quot;The rectangle circumreference is&quot;,0
+section .bss
+section .text
+        global main
+main:
+        enter 0,0
+        movsd xmm0, [radius]
+        call c_area ;调用外部函数
+        mov rdi, fmtf
+        mov rsi, ca
+        mov rax, 1
+        call printf
+
+        movsd xmm0, [radius]
+        call c_circum
+        mov rdi, fmtf
+        mov rsi, ca
+        mov rax, 1
+        call printf
+
+        mov rdi, [side1]
+        mov rsi, [side2]
+        call r_area
+        mov rdi, fmti
+        mov rsi, ra
+        mov rdx, rax
+        mov rax, 0
+        call printf
+
+        mov rdi, [side1]
+        mov rsi, [side2]
+
+        call r_circum
+        mov rdi, fmti
+        mov rsi, rc
+        mov rdx, rax
+        mov rax, 0
+        call printf
+
+        leave
+        ret
+</code></pre>
+<p>circle.asm</p>
+<pre><code class="assembly">extern pi
+section .text
+        global c_area ;声明为全局的函数
+        global c_circum
+c_area:
+        section .text
+        enter 0, 0
+        movsd xmm1, [pi]
+        mulsd xmm0, xmm0
+        mulsd xmm0, xmm1
+        leave
+        ret
+;-----------------------------------------------
+c_circum:
+        section .text
+        enter 0, 0
+        movsd xmm1, [pi]
+        addsd xmm0, xmm0
+        mulsd xmm0, xmm1
+        leave
+        ret
+</code></pre>
+<p>rect.asm</p>
+<pre><code class="assembly">section .text
+        global r_area  ;声明为全局的
+        global r_circum
+;-------------------------
+;rdi: 长
+;rsi: 宽
+;area: rax, rdx
+r_area:
+        enter 0,0
+        mov rax, rdi
+        imul rax, rsi
+        leave
+        ret
+;------------------
+r_circum:
+        enter 0, 0
+        mov rax, rdi
+        add rax, rsi
+        add rax, rax
+        leave
+        ret
+</code></pre>
+<h1 id="makefile"><a href="#makefile" class="headerlink" title="makefile"></a>makefile</h1><p>我们依旧按照依赖关系来书写makefile</p>
+<p>因为调用外部函数。这些函数放在了其他的.o文件中。最终的可执行文件不仅需要function.o文件，还需要那顶定义了全局函数的其他.o文件。对于这些.o文件，再按照其依赖树递归的书写即可。</p>
+<pre><code class="makefile">function: function.o circle.o rect.o
+        gcc -g -o function function.o circle.o rect.o -no-pie
+function.o: function.asm
+        nasm -f elf64 -g -F dwarf function.asm -l function.lst
+circle.o: circle.asm
+        nasm -f elf64 -g -F dwarf circle.asm -l circle.lst
+rect.o: rect.asm
+        nasm -f elf64 -g -F dwarf rect.asm -l rect.lst
+</code></pre>
+<p>最终我们键入make指令并运行</p>
+<pre><code class="text">The circle area is  314.159265
+The circle area is  62.831853
+The rectangle area is  20
+The rectangle circumreference is 18
+</code></pre>
+<p>大功告成。</p>
+<h1 id="手动的制造一些错误"><a href="#手动的制造一些错误" class="headerlink" title="手动的制造一些错误"></a>手动的制造一些错误</h1><p>我们将函数的global给注释掉。不出意外的话，会得到一个链接错误。</p>
+<pre><code class="error">/usr/bin/ld: function.o: in function `main&#39;:
+function.asm:39: undefined reference to `r_area&#39;
+</code></pre>
+<p>正如我们所料。再ld链接function.o和rect.o的时候，说没有找到r_area的定义（我们将其的global声明给去掉了）。</p>
+<p>再比如对pi变量实行同样的操作。</p>
+<pre><code class="error">/usr/bin/ld: circle.o: in function `c_area&#39;:
+circle.asm:8: undefined reference to `pi&#39;
+/usr/bin/ld: circle.o: in function `c_circum&#39;:
+circle.asm:17: undefined reference to `pi&#39;
+</code></pre>
+<p>还是同样的错误，ld又会说，我没有找到某个东西的定义。</p>
+<h1 id="链接的一些细节"><a href="#链接的一些细节" class="headerlink" title="链接的一些细节"></a>链接的一些细节</h1><p>我们再不同的文件中定义了不同的函数，在编译的时候，这些asm文件被单独的编译。那么函数调用如何编译呢？答案是先放着，等到链接的时候再替换具体的跳转地址。</p>
+<pre><code class="assembly">0000000D E8(00000000)                call c_area
+</code></pre>
+<p>我们查看<code>.lst</code>文件，发现调用指令(E8)后的地址为0。</p>
+<p>也可以使用objdump来查看function.o的反汇编</p>
+<pre><code class="assembly">e8 00 00 00 00          callq  71 &lt;main+0x71&gt;
+</code></pre>
+<p>&lt;main+0x71&gt;并不是真正的函数地址，我们还是可以看见e8后面的地址还是0</p>
+<p>我们再来查看function反汇编</p>
+<pre><code class="assembly">40113d:       e8 be 00 00 00          callq  401200 &lt;c_area&gt;
+</code></pre>
+<p>再链接过后，可以看见跳转地址 成功的被替换。</p>
+<p>如果你觉得这是偶然——好吧，换个方式说服你。</p>
+<p>我们反汇编<code>funciton.o</code>文件，并查找所有的call指令，对于最后链接出来的可执行文件，执行同样的操作。</p>
+<p><code>objdump -d function.o | rg call</code></p>
+<pre><code class="assembly">   d:   e8 00 00 00 00          callq  12 &lt;main+0x12&gt;
+  2b:   e8 00 00 00 00          callq  30 &lt;main+0x30&gt;
+  39:   e8 00 00 00 00          callq  3e &lt;main+0x3e&gt;
+  57:   e8 00 00 00 00          callq  5c &lt;main+0x5c&gt;
+  6c:   e8 00 00 00 00          callq  71 &lt;main+0x71&gt;
+  8d:   e8 00 00 00 00          callq  92 &lt;main+0x92&gt;
+  a2:   e8 00 00 00 00          callq  a7 &lt;main+0xa7&gt;
+  c3:   e8 00 00 00 00          callq  c8 &lt;main+0xc8&gt;
+</code></pre>
+<p>还是上面说到过的<code>&lt;main+0x...&gt;</code>这并不是真正的函数跳转地址。</p>
+<p><code> objdump -d function | rg call</code></p>
+<pre><code class="assembly">  401014:       ff d0                   callq  *%rax
+  401068:       ff 15 82 2f 00 00       callq  *0x2f82(%rip)        # 403ff0 &lt;__libc_start_main@GLIBC_2.2.5&gt;
+  401101:       e8 7a ff ff ff          callq  401080 &lt;deregister_tm_clones&gt;
+  40113d:       e8 be 00 00 00          callq  401200 &lt;c_area&gt;
+  40115b:       e8 d0 fe ff ff          callq  401030 &lt;printf@plt&gt;
+  401169:       e8 a9 00 00 00          callq  401217 &lt;c_circum&gt;
+  401187:       e8 a4 fe ff ff          callq  401030 &lt;printf@plt&gt;
+  40119c:       e8 8f 00 00 00          callq  401230 &lt;r_area&gt;
+  4011bd:       e8 6e fe ff ff          callq  401030 &lt;printf@plt&gt;
+  4011d2:       e8 66 00 00 00          callq  40123d &lt;r_circum&gt;
+  4011f3:       e8 38 fe ff ff          callq  401030 &lt;printf@plt&gt;
+  40127c:       e8 7f fd ff ff          callq  401000 &lt;_init&gt;
+  401299:       41 ff 14 df             callq  *(%r15,%rbx,8)
+</code></pre>
+<p>可以看见，e8后面的地址均被替换。</p>
+<p>关于链接的细节，并不打算展开细说。那样就脱离的本篇的主题了。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>如果想使用外部函数&#x2F;变量，请将那个函数声明为<code>global</code>。链接的时候链接器会自动替换跳转地址。</p>
+
+    </div>
+    
+</div>
+                         
+<footer id="footer">
+    <div class="footer-wrap">
+        <div>
+            © 20xx - 2022 Hello @you
+            <span class="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            @Jan6055
+        </div>
+        <div></div>
+        <div>Based on the <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo Engine</a> & <a
+                target="_blank" rel="noopener" href="https://github.com/argvchs/hexo-theme-particlex">ParticleX Theme</a></div>
+        
+    </div>
+</footer>
+                    </div>
+                </div>
+            </transition>
+            <div id="img_show">
+                <img id="img_content" alt="img_show">
+            </div>
+        </div>
+        <script src="https://cdn.staticfile.org/highlight.js/11.5.1/highlight.min.js"></script>
+        <script src="/js/particlex.js"></script>
+        <script src="/js/showimg.js"></script>
+        
+
+    </body>
+</html>
