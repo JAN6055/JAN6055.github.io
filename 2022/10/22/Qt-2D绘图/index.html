@@ -140,7 +140,7 @@
             
             <span class="tag">
                 
-                <a href="/tags/GUI/" style="color: #ffa2c4">
+                <a href="/tags/GUI/" style="color: #ff7d73">
                     GUI
                 </a>
             </span>
@@ -154,7 +154,7 @@
             
             <span class="tag">
                 
-                <a href="/tags/Qt/" style="color: #00a596">
+                <a href="/tags/Qt/" style="color: #00bcd4">
                     Qt
                 </a>
             </span>
@@ -180,12 +180,14 @@
 &#125;
 </code></pre>
 <p>我们可以使用画笔画点，线，面等。还可以画一些其他的集合形状。</p>
-<p><img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221022101806985.png" alt="image-20221022101806985"></p>
-<h1 id="使用画笔"><a href="#使用画笔" class="headerlink" title="使用画笔"></a>使用画笔</h1><p>我们可以为画家提供画笔。比如笔的粗细，线条的风格，颜色等等。</p>
+<img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221022101806985.png">
+
+<p>我们可以为画家提供画笔。比如笔的粗细，线条的风格，颜色等等。</p>
 <pre><code class="C++">    QPen pen(Qt::green,4);
     painter.setPen(pen);
 </code></pre>
-<p><img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221022102205538.png" alt="image-20221022102205538"></p>
+<img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221022102205538.png">
+
 <p>我们还可以为笔提供其他的不同属性。详细信息请查看Qt帮助文档，官方文档有很好的解释。</p>
 <p><a target="_blank" rel="noopener" href="https://doc.qt.io/qt-6/qpen.html">QPen Class | Qt GUI 6.4.0</a></p>
 <h1 id="使用画刷"><a href="#使用画刷" class="headerlink" title="使用画刷"></a>使用画刷</h1><p>使用画刷来填充区域。同画笔一样，画刷也有自己的属性。</p>
@@ -205,7 +207,8 @@
 &#125;
 </code></pre>
 <p>使用画刷可以对画出的图形进行填充。如果没有指定画刷，那么画出的图形将不会被填充。</p>
-<p><img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221022103200127.png" alt="image-20221022103200127"></p>
+<img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221022103200127.png">
+
 <p>我们还可以使用画刷绘制纹理。</p>
 <pre><code class="C++">void MainWindow::paintEvent(QPaintEvent *event)
 &#123;
@@ -222,7 +225,8 @@
 </code></pre>
 <p>为了方便，我们随手截取一个图片，不用qrc文件，直接读取C盘下的文件。最终的显示效果是这样的。</p>
 <p>纹理和图片还是有不同的。为了方便这里就这样做的。</p>
-<p><img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221022104125514.png" alt="image-20221022104125514"></p>
+<img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221022104125514.png">
+
 <p>画刷提供一些风格，可以查阅Qt文档来查看。</p>
 <p><a target="_blank" rel="noopener" href="https://doc.qt.io/qt-6/qbrush.html#details">QBrush Class | Qt GUI 6.4.0</a></p>
 <h1 id="一些便捷的方法"><a href="#一些便捷的方法" class="headerlink" title="一些便捷的方法"></a>一些便捷的方法</h1><p>如果想要绘制一个矩形区域为一个颜色。我们可以把画笔和画刷设置为一样的颜色。</p>
@@ -235,8 +239,9 @@
     painter.eraseRect(10,0,10,this-&gt;height()/2);
 &#125;
 </code></pre>
-<p><img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221022104846786.png" alt="image-20221022104846786"></p>
-<h1 id="抗锯齿"><a href="#抗锯齿" class="headerlink" title="抗锯齿"></a>抗锯齿</h1><p>抗锯齿又被称为反锯齿或者反走样，就是对图形的边缘惊醒平滑处理。在游戏中有广泛的应用。</p>
+<img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221022104846786.png">
+
+<p>抗锯齿又被称为反锯齿或者反走样，就是对图形的边缘惊醒平滑处理。在游戏中有广泛的应用。</p>
 <p><code>QPainter</code>在进行绘制的时候可以使用<code>QPainter::RenderHint</code>渲染提示来指定是否要使用抗锯齿功能。</p>
 <table>
 <thead>
