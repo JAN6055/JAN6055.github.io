@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-        <title>X64-Asm整数的运算 | Hello @You</title>
+        <title>正则表达式 | Hello @You</title>
         <meta name="author" content="Jan6055">
         <meta name="description" content="">
         <meta name="keywords" content="C++,Rust,Jan6055">
@@ -122,14 +122,14 @@
                         
 <div class="article">
     <div>
-        <h1>X64-Asm整数的运算 </h1>
+        <h1>正则表达式 </h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
             </span>
-            2022/10/13
+            2022/10/20
         </span>
         
         
@@ -140,15 +140,8 @@
             
             <span class="tag">
                 
-                <a href="/tags/x64-asm/" style="color: #ff7d73">
-                    x64_asm
-                </a>
-            </span>
-            
-            <span class="tag">
-                
-                <a href="/tags/asm/" style="color: #00bcd4">
-                    asm
+                <a href="/tags/正则表达式/" style="color: #00a596">
+                    正则表达式
                 </a>
             </span>
             
@@ -156,193 +149,107 @@
         
     </div>
     <div class="content" v-pre>
-        <table>
+        <p>限定符应用于限定符前的字符。</p>
+<table>
 <thead>
 <tr>
-<th>操作</th>
-<th>结果</th>
+<th>限定符</th>
+<th>含义</th>
 </tr>
 </thead>
 <tbody><tr>
-<td>add</td>
-<td>用于加法，会设置CF,OF,SF,ZF。可用于无符号和有符号</td>
+<td>？</td>
+<td>出现1次或者0次</td>
 </tr>
 <tr>
-<td>sub</td>
-<td>用于减法，会设置CF,OF,SF,ZF。可用于无符号和有符号</td>
+<td>*</td>
+<td>出现任意多次</td>
 </tr>
 <tr>
-<td>inc</td>
-<td>自增1，不会影响标志寄存器</td>
+<td>+</td>
+<td>出现任意多次，但不是0次</td>
 </tr>
 <tr>
-<td>dec</td>
-<td>自减1，不会影响标志寄存器</td>
+<td>{x}</td>
+<td>出现x次</td>
 </tr>
 <tr>
-<td>sal</td>
-<td>左移</td>
+<td>{x,y}</td>
+<td>出现[x,y]次</td>
 </tr>
 <tr>
-<td>sar</td>
-<td>算数右移</td>
-</tr>
-<tr>
-<td>imul</td>
-<td>有符号数相乘。得到的结果需要用两个寄存器来保存（qword x qword），地位放在rax中，高位放在rdx中。</td>
-</tr>
-<tr>
-<td>idiv</td>
-<td>无符号除法。得到的结果放在rax中，余数放在rdx中。</td>
+<td>{x,}</td>
+<td>出现x次或x次以上</td>
 </tr>
 </tbody></table>
-<pre><code class="asm">extern printf
-section .data
-        number1         dq 128
-        number2         dq 19
-        neg_num         dq -12
-        fmt                     db &quot;The numbers are %ld and %ld&quot;,10,0
-        fmtint          db &quot;%s %ld&quot;,10,0
-        sumi            db &quot;The sum is&quot;,0
-        difi            db &quot;The differrnce is&quot;,0
-        inci            db &quot;Number 1 Incremented:&quot;,0
-        deci            db &quot;Number 1 decremented:&quot;,0
-        sali            db &quot;Number 1 Shift left 2(x4):&quot;,0
-        sari            db &quot;Number 1 Shift right 2(/4):&quot;,0
-        sariex          db &quot;Number 1 Shift right 2(/4) with &quot;
-                                db &quot;sing extension:&quot;,0
-        multi           db &quot;The productz is&quot;,0
-        divi            db &quot;The integer quotient is&quot;,0
-        remi            db &quot;The modulo is&quot;,0
-section .bss
-        resulti resq 1
-        modulo  resq 1
-section .text
-        global main
-main:
-        push rbp
-        mov rbp, rsp
-
-        ;显示数字
-        mov rdi, fmt
-        mov rsi, [number1]
-        mov rdx, [number2]
-        mov rax, 0
-        call printf
-
-        ;加法
-        mov rax, [number1]
-        add rax, [number2]
-        mov [resulti], rax
-
-        ;显示结果
-        mov rdi, fmtint
-        mov rsi, sumi
-        mov rdx, [resulti]
-        mov rax, 0
-        call printf
-
-        ;减法
-        mov rax, [number1]
-        sub rax, [number2]
-        mov [resulti], rax
-
-        ;显示结果
-        mov rdi, fmtint
-        mov rsi, difi
-        mov rdx, [resulti]
-        mov rax, 0
-        call printf
-
-        ;++
-        mov rax, [number1]
-        inc rax
-        mov [resulti], rax
-        ;显示结果
-        mov rdi, fmtint
-        mov rsi, inci
-        mov rdx, [resulti]
-        mov rax, 0
-        call printf
-
-        ;--
-        mov rax, [number1]
-        dec rax
-        mov [resulti], rax
-
-        ;显示结果
-        mov rdi, fmtint
-        mov rsi, deci
-        mov rdx, [resulti]
-        mov rax, 0
-        call printf
-
-        ;左移运算
-        mov rax, [number1]
-        sal rax, 2 ;x4
-        mov [resulti], rax
-        ;显示结果
-        mov rdi, fmtint
-        mov rsi, sali
-        mov rdx, [resulti]
-        mov rax, 0
-        call printf
-
-        ;右移运算
-        mov rax, [resulti]
-        sar rax, 2 ; /4
-        mov [resulti], rax
-        ;显示结果
-        mov rdi, fmtint
-        mov rsi, sari
-        mov rdx, [resulti]
-        mov rax, 0
-        call printf
-
-        mov rax, [neg_num]
-        sar rax, 2
-        mov [resulti], rax
-        ;显示结果
-        mov rdi, fmtint
-        mov rsi, sariex
-        mov rdx, [resulti]
-        mov rax, 0
-        call printf
-
-        ;乘法
-        mov rax, [number1]
-        imul qword [number2]
-        mov [resulti], rax
-        ;显示结果
-        mov rdi, fmtint
-        mov rsi, multi
-        mov rdx, [resulti]
-        mov rax, 0
-        call printf
-
-        ;除法
-        mov rax, [number1]
-        mov rdx, 0
-        idiv qword [number2]
-        mov [resulti], rax
-        ;显示结果
-        mov rdi, fmtint
-        mov rsi, divi
-        mov rdx, [resulti]
-        mov rax, 0
-        call printf
-
-        mov rdi, fmtint
-        mov rsi, remi
-        mov rdx, [modulo]
-        mov rax, 0
-        call printf
-
-        mov rsp, rbp
-        pop rbp
-        ret
-</code></pre>
-
+<p>匹配多个字符</p>
+<p>使用<code>()</code>将需要匹配的多个字符括起来</p>
+<p>运算符</p>
+<table>
+<thead>
+<tr>
+<th>OP</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>str1|str2</td>
+<td>str1或者str2</td>
+</tr>
+</tbody></table>
+<p>元字符</p>
+<table>
+<thead>
+<tr>
+<th>元字符</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>\d</td>
+<td>数字字符</td>
+</tr>
+<tr>
+<td>\D</td>
+<td>非数字字符</td>
+</tr>
+<tr>
+<td>\w</td>
+<td>单词字符(所有的英文字符+数字+下划线)</td>
+</tr>
+<tr>
+<td>\W</td>
+<td>非单词字符</td>
+</tr>
+<tr>
+<td>\s</td>
+<td>空白字符(包括空格+制表+换行)</td>
+</tr>
+<tr>
+<td>\S</td>
+<td>非空白字符</td>
+</tr>
+<tr>
+<td>.</td>
+<td>任意字符，但不包含换行符</td>
+</tr>
+<tr>
+<td>^</td>
+<td>匹配行首</td>
+</tr>
+<tr>
+<td>$</td>
+<td>匹配行尾</td>
+</tr>
+</tbody></table>
+<p>可以使用<code>\</code>来进行转意。例如匹配<code>&quot;\d&quot;</code>使用<code>\\d</code>。匹配<code>&quot;.&quot;</code>使用<code>\.</code>。</p>
+<h1 id="贪婪匹配和惰性匹配"><a href="#贪婪匹配和惰性匹配" class="headerlink" title="贪婪匹配和惰性匹配"></a>贪婪匹配和惰性匹配</h1><p>正则表达式默认是贪婪匹配，会匹配尽可能多的字符</p>
+<p>我们可以使用？改为懒惰匹配，匹配尽可能少的字符。</p>
+<p>例如我们要匹配<code>&lt;span&gt;&lt;b&gt; This is a text&lt;\b&gt;&lt;\span&gt;</code>中html的标签。</p>
+<p>使用:<code>&lt;.+?&gt;</code></p>
+<p>示例</p>
+<h2 id="RGB匹配"><a href="#RGB匹配" class="headerlink" title="RGB匹配"></a>RGB匹配</h2><p><code>#[a-fA-F0-9]&#123;6&#125;\b</code></p>
+<h2 id="IPV4地址匹配"><a href="#IPV4地址匹配" class="headerlink" title="IPV4地址匹配"></a>IPV4地址匹配</h2>
     </div>
     
 </div>

@@ -140,14 +140,14 @@
             
             <span class="tag">
                 
-                <a href="/tags/x64-asm/" style="color: #ff7d73">
+                <a href="/tags/x64-asm/" style="color: #00a596">
                     x64_asm
                 </a>
             </span>
             
             <span class="tag">
                 
-                <a href="/tags/asm/" style="color: #ffa2c4">
+                <a href="/tags/asm/" style="color: #ff7d73">
                     asm
                 </a>
             </span>
@@ -334,6 +334,7 @@ circle.asm:17: undefined reference to `pi&#39;
 </code></pre>
 <p>可以看见，e8后面的地址均被替换。</p>
 <p>关于链接的细节，并不打算展开细说。那样就脱离的本篇的主题了。</p>
+<h1 id="C函数"><a href="#C函数" class="headerlink" title="C函数"></a>C函数</h1><p>为什么<code>makefile</code>中没有对printf的引用呢？gcc可以自动识别C苦衷源代码函数的引用。这意味着你不应该使用C函数的名成来命名为自己的函数！这回导致链接出错。</p>
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>如果想使用外部函数&#x2F;变量，请将那个函数声明为<code>global</code>。链接的时候链接器会自动替换跳转地址。</p>
 
     </div>
