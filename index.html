@@ -144,6 +144,159 @@
             
 
 <div class="post">
+    <a href="/2022/10/22/Qt-2D绘图/">
+        <h2 class="post-title">Qt-2D绘图</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="date">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
+            </span>
+            2022/10/22
+        </span>
+    </div>
+    <div class="excerpt">
+        <div class="content" v-pre>
+            
+            <h1 id="为什么需要2D绘图"><a href="#为什么需要2D绘图" class="headerlink" title="为什么需要2D绘图"></a>为什么需要2D绘图</h1><p>Qt虽然为我们提供了强大的开发类库。但是对于复杂的GUI界面。我们还需要定制自己的界面样式。例如代码编辑器中的左侧行号，就需要我们自己绘制。</p>
+<h1 id="2D绘图的基本架构"><a href="#2D绘图的基本架构" class="headerlink" title="2D绘图的基本架构"></a>2D绘图的基本架构</h1><ul>
+<li><code>QPainter</code>用来执行绘图操作</li>
+<li><code>QPainterDevice</code>一个可绘制的设备，相当于画布一样，提供了一个二维空间的抽象，是所有可绘制设备的基类</li>
+<li><code>QPaintEngine</code>提供一些接口用于<code>QPinter</code>和<code>QPainterDevive</code>内部。使得<code>QPainter</code>可在不同的设备上进行绘制，相当于一个适配器一样。</li>
+<li>我们可以重写<code>paintEvent</code>函数来进行自己的绘制。</li>
+</ul>
+<h1 id="使用画家"><a href="#使用画家" class="headerlink" title="使用画家"></a>使用画家</h1><pre><code class="C++">void MainWindow::paintEvent(QPaintEvent *event)
+&#123;
+    QPainter painter(this);
+    painter.drawLine(10,10,100,100);
+    painter.drawLine(QPoint(0,0),QPoint(width(),height()));
+    painter.drawRect(0,0,50,50);
+    painter.drawRoundedRect(20,20,80,80,10,10);
+&#125;
+</code></pre>
+<p>我们可以使用画笔画点，线，面等。还可以画一些其他的集合形状。</p>
+<p><img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221022101806985.png" alt="image-20221022101806985"></p>
+<h1 id="使用画笔"><a href="#使用画笔" class="headerlink" title="使用画笔"></a>使用画笔</h1><p>我们可以为画家提供画笔。比如笔的粗细，线条的风格，颜色等等。</p>
+<pre><code class="C++">    QPen pen(Qt::green,4);
+    painter.setPen(pen);
+</code></pre>
+<p><img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221022102205538.png" alt="image-20221022102205538"></p>
+<p>我们还可以为笔提供其他的不同属性。详细信息请查看Qt帮助文档，官方文档有很好的解释。</p>
+<p><a target="_blank" rel="noopener" href="https://doc.qt.io/qt-6/qpen.html">QPen Class | Qt GUI 6.4.0</a></p>
+<h1 id="使用画刷"><a href="#使用画刷" class="headerlink" title="使用画刷"></a>使用画刷</h1><p>使用画刷来填充区域。同画笔一样，画刷也有自己的属性。</p>
+<pre><code class="C++">void MainWindow::paintEvent(QPaintEvent *event)
+&#123;
+    QPainter painter(this);
+    QPen pen(Qt::green,2);
+    painter.setPen(pen);
+    QRect rect(50,50,400,400);
+    QBrush brush(Qt::blue);
+    painter.setBrush(brush);
+    painter.drawRect(rect);
+
+    brush.setColor(QColor(52,66,35));
+    painter.setBrush(brush);
+    painter.drawEllipse(220,20,50,50);
+&#125;
+</code></pre>
+<p>使用画刷可以对画出的图形进行填充。如果没有指定画刷，那么画出的图形将不会被填充。</p>
+<p><img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221022103200127.png" alt="image-20221022103200127"></p>
+<p>我们还可以使用画刷绘制纹理。</p>
+<pre><code class="C++">void MainWindow::paintEvent(QPaintEvent *event)
+&#123;
+    QPainter painter(this);
+    QPen pen(Qt::green,2);
+    painter.setPen(pen);
+    QBrush brush(Qt::blue);
+    QPixmap p (&quot;C:\\Users\\wangq\\Pictures\\Screenshots\\屏幕截图_20221022_103721&quot;);
+    brush.setTexture(p);
+    QRect rect(0,0,p.width(),p.height());
+    painter.setBrush(brush);
+    painter.drawRect(rect);
+&#125;
+</code></pre>
+<p>为了方便，我们随手截取一个图片，不用qrc文件，直接读取C盘下的文件。最终的显示效果是这样的。</p>
+<p>纹理和图片还是有不同的。为了方便这里就这样做的。</p>
+<p><img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221022104125514.png" alt="image-20221022104125514"></p>
+<p>画刷提供一些风格，可以查阅Qt文档来查看。</p>
+<p><a target="_blank" rel="noopener" href="https://doc.qt.io/qt-6/qbrush.html#details">QBrush Class | Qt GUI 6.4.0</a></p>
+<h1 id="一些便捷的方法"><a href="#一些便捷的方法" class="headerlink" title="一些便捷的方法"></a>一些便捷的方法</h1><p>如果想要绘制一个矩形区域为一个颜色。我们可以把画笔和画刷设置为一样的颜色。</p>
+<h2 id="fillRect-x2F-eraseRect"><a href="#fillRect-x2F-eraseRect" class="headerlink" title="fillRect&#x2F;eraseRect"></a>fillRect&#x2F;eraseRect</h2><p>实际上这样做有些麻烦，我们可以使用<code>fillRect</code>函数含填充一个矩形区域,使用<code>eraseRect</code>来擦除一个矩形区域内的内容。</p>
+<pre><code class="C++">void MainWindow::paintEvent(QPaintEvent *event)
+&#123;
+    QPainter painter(this);
+    painter.fillRect(0,0,20,this-&gt;height(),QBrush(Qt::darkGray));
+    //擦除一部分区域
+    painter.eraseRect(10,0,10,this-&gt;height()/2);
+&#125;
+</code></pre>
+<p><img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221022104846786.png" alt="image-20221022104846786"></p>
+<h1 id="抗锯齿"><a href="#抗锯齿" class="headerlink" title="抗锯齿"></a>抗锯齿</h1><p>抗锯齿又被称为反锯齿或者反走样，就是对图形的边缘惊醒平滑处理。在游戏中有广泛的应用。</p>
+<p><code>QPainter</code>在进行绘制的时候可以使用<code>QPainter::RenderHint</code>渲染提示来指定是否要使用抗锯齿功能。</p>
+<table>
+<thead>
+<tr>
+<th>常量</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>QPainter::Antialiasing</code></td>
+<td>指示绘图引擎在可能的情况下应该进行边缘的抗锯齿</td>
+</tr>
+<tr>
+<td><code>QPainter::TextAntialiasing</code></td>
+<td>指示绘图引擎在可能的情况下应该绘制抗锯齿的文字</td>
+</tr>
+<tr>
+<td><code>QPainter::SmoothPixmapTransform</code></td>
+<td>指示绘图引擎应该使用一个平滑pixmap转换算法(比如双线性插值)而不是最邻近插值算法</td>
+</tr>
+</tbody></table>
+<p>我们可以看见最开始的画图结果，线条有很强的锯齿感。</p>
+<p>我么对其进行抗锯齿操作。</p>
+<pre><code class="C++">painter.setRenderHint(QPainter::Antialiasing);
+</code></pre>
+<p><img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221022112302663.png" alt="image-20221022112302663"></p>
+<p>我们可以很明显的看见抗锯齿之后的效果明显平滑了许多。</p>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        <span class="icon">
+            <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
+        </span>
+        
+        
+        <span class="tag">
+            
+            <a href="/tags/GUI/" style="color: #00a596">
+                GUI
+            </a>
+        </span>
+        
+        <span class="tag">
+            
+            <a href="/tags/C/" style="color: #00a596">
+                C++
+            </a>
+        </span>
+        
+        <span class="tag">
+            
+            <a href="/tags/Qt/" style="color: #ff7d73">
+                Qt
+            </a>
+        </span>
+        
+    </div>
+    <a href="/2022/10/22/Qt-2D绘图/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post">
     <a href="/2022/10/20/正则表达式/">
         <h2 class="post-title">正则表达式</h2>
     </a>
@@ -272,7 +425,7 @@
         
         <span class="tag">
             
-            <a href="/tags/正则表达式/" style="color: #ffa2c4">
+            <a href="/tags/正则表达式/" style="color: #03a9f4">
                 正则表达式
             </a>
         </span>
@@ -464,7 +617,7 @@ main:
         
         <span class="tag">
             
-            <a href="/tags/x64-asm/" style="color: #00bcd4">
+            <a href="/tags/x64-asm/" style="color: #ff7d73">
                 x64_asm
             </a>
         </span>
@@ -689,14 +842,14 @@ circle.asm:17: undefined reference to `pi&#39;
         
         <span class="tag">
             
-            <a href="/tags/x64-asm/" style="color: #00bcd4">
+            <a href="/tags/x64-asm/" style="color: #03a9f4">
                 x64_asm
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/asm/" style="color: #03a9f4">
+            <a href="/tags/asm/" style="color: #00bcd4">
                 asm
             </a>
         </span>
@@ -777,7 +930,7 @@ rsp is 23cfdfe0
 <li>临时变量: 包括函数的非静态局部变量以及编译器自动生成的其他临时变量</li>
 <li>函数调用的上下文</li>
 </ul>
-<p>栈是从高地址向低地址成长的。我们可以用rsp和rbp来划定范围。rbp指向栈底部(高地址), rsp指向栈顶(低地址)。</p>
+<p><code>rbp</code>是 x86_64 上的帧指针。代码中，它会获取堆栈指针 ( <code>rsp</code> ) 的快照，以便在对 <code>rsp</code> 进行调整时(即为局部变量或 <code>push</code> 将值保留到堆栈上)，局部变量和函数参数仍然可以从 <code>rbp</code> 的恒定偏移量访问.</p>
 <p>再回到我们的问题,为什么要保存rbp? 我们已经说过了，每个函数都有一个自己的栈帧。当调用函数的时候，会修改rbp。因此在将rbp用于栈帧之前(调用函数前),应当将其保存。以免rbp丢失而导致非正常行为。还有另外一些原因：我们对于函数调用中的参数，会有约定的寄存器。例如第一个参数位rdi,第二个参数位rsi等。rbp在函数的调用中不用传递任何参数。</p>
 <h1 id="函数的分类"><a href="#函数的分类" class="headerlink" title="函数的分类"></a>函数的分类</h1><p>函数可以分为两种类型，分支函数&#x2F;枝干函数，叶子函数。我们把函数的调用关系映射到一个树——我们已经熟悉的数据结构。分支函数就是会调用其他函数的函数。而叶子函数就是不会调用其他函数的函数。</p>
 <p>因为叶子函数不会调用其他函数，通常可以忽略栈帧和栈对齐。只要你不把栈搞乱即可。但注意用xmm和printf的时候，即使是叶子函数，还是要进行对齐。</p>
@@ -798,14 +951,14 @@ rsp is 23cfdfe0
         
         <span class="tag">
             
-            <a href="/tags/x64-asm/" style="color: #00bcd4">
+            <a href="/tags/x64-asm/" style="color: #ff7d73">
                 x64_asm
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/asm/" style="color: #00a596">
+            <a href="/tags/asm/" style="color: #ff7d73">
                 asm
             </a>
         </span>
@@ -978,14 +1131,14 @@ main:
         
         <span class="tag">
             
-            <a href="/tags/x64-asm/" style="color: #03a9f4">
+            <a href="/tags/x64-asm/" style="color: #00bcd4">
                 x64_asm
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/asm/" style="color: #00a596">
+            <a href="/tags/asm/" style="color: #ffa2c4">
                 asm
             </a>
         </span>
@@ -1024,14 +1177,14 @@ main:
         
         <span class="tag">
             
-            <a href="/tags/x64-asm/" style="color: #00bcd4">
+            <a href="/tags/x64-asm/" style="color: #03a9f4">
                 x64_asm
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/asm/" style="color: #ff7d73">
+            <a href="/tags/asm/" style="color: #ffa2c4">
                 asm
             </a>
         </span>
@@ -1255,14 +1408,14 @@ main:
         
         <span class="tag">
             
-            <a href="/tags/x64-asm/" style="color: #03a9f4">
+            <a href="/tags/x64-asm/" style="color: #ff7d73">
                 x64_asm
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/asm/" style="color: #00a596">
+            <a href="/tags/asm/" style="color: #ffa2c4">
                 asm
             </a>
         </span>
@@ -1427,21 +1580,21 @@ fn is_palindrome(s: &amp;str) -&gt; bool &#123;
         
         <span class="tag">
             
-            <a href="/tags/Rust/" style="color: #ff7d73">
+            <a href="/tags/Rust/" style="color: #ffa2c4">
                 Rust
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/Unsafe-Rust/" style="color: #ff7d73">
+            <a href="/tags/Unsafe-Rust/" style="color: #ffa2c4">
                 Unsafe Rust
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/Effective-Rust/" style="color: #ff7d73">
+            <a href="/tags/Effective-Rust/" style="color: #ffa2c4">
                 Effective Rust
             </a>
         </span>
@@ -1544,320 +1697,13 @@ error: could not compile `option_` due to 2 previous errors
         
         <span class="tag">
             
-            <a href="/tags/Effective-Rust/" style="color: #00bcd4">
+            <a href="/tags/Effective-Rust/" style="color: #ff7d73">
                 Effective Rust
             </a>
         </span>
         
     </div>
     <a href="/2022/10/01/区别-mut-mut-mut-mut/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post">
-    <a href="/2022/10/01/Rust通过Box方式实现LinkedList/">
-        <h2 class="post-title">Rust通过Box方式实现LinkedList</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
-            </span>
-            2022/10/1
-        </span>
-    </div>
-    <div class="excerpt">
-        <div class="content" v-pre>
-            
-            <h1 id="链表在rust中"><a href="#链表在rust中" class="headerlink" title="链表在rust中"></a>链表在rust中</h1><p>别的语言，学习的差不多了。写个链表试试？</p>
-<p>Rust，学习的差不多的，写个链表，逝世！</p>
-<p>虽然rust是系统及编程语言，但那和safe代码没有什么关系，在safe代码中，你依旧不能灵活的操纵内存。</p>
-<p>代替的可以使用Box来当作指针，但是由于所有权和借用的规则，使得Option+Box这种形式写出的LinkedList既复杂，又低效。但是对于学习来说还是很有帮助的。所以，本篇文章将编码一个支持基础操作的LinkedList，并解释说明那些烦人的细节。</p>
-<p>希望本篇文章能对你对Rust的理解有帮助。本文章基于《通过链表学rust》。</p>
-<h1 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h1><p>我们要写一个泛型的链表。使用<code>Option&lt;Box&lt;Node&lt;T&gt;&gt;&gt;</code>这样的形式，来组织一个最基本的链式结构。</p>
-<h2 id="Link"><a href="#Link" class="headerlink" title="Link"></a>Link</h2><p>使用类型别名是由必要的。Link是如下的别名</p>
-<pre><code class="rust">type Link&lt;T&gt; = Option&lt;Box&lt;Node&lt;T&gt;&gt;&gt;;
-</code></pre>
-<p>这样可以避免冗长且不易阅读的代码。然后请你记住一个重要的，Link不是一个指针类型，你很可能基于C风格语言的习惯将Link看作一个指针——在我们这个例子中不是这样的。但可以做到这样，那是unsafe的事情了。在我们例子中，<strong>Link是一个Option。</strong>使用<code>Option&lt;Box&lt;&gt;&gt;</code>可以模拟出类似指针的东西。但是你在处理LinkedList的时候大可将其当作一个指针来看待。</p>
-<h2 id="Node"><a href="#Node" class="headerlink" title="Node"></a>Node</h2><p>我们需要一个T类型的数据，和一个next来“指向”下一个Node。</p>
-<pre><code class="C++">struct Node&lt;T&gt; &#123;
-    data: T,
-    next: Link&lt;T&gt;,
-&#125;
-</code></pre>
-<h2 id="LinkedList"><a href="#LinkedList" class="headerlink" title="LinkedList"></a>LinkedList</h2><p>只需要一个头指针，就可以找到整个LinkedList。这个head类似于C++中的<code>Node*</code>,在构造的时候<code>head = nullptr</code>,就是说，头指针不默认指向一个节点。</p>
-<pre><code class="C++">pub struct LinkedList&lt;T&gt; &#123;
-    head: Link&lt;T&gt;,
-&#125;
-</code></pre>
-<p>为什么没有提供size？</p>
-<p>对于单向链表的size相关操作，需要额外的维护成本。如果使用单项链表，不要求size操作。否则使用双向链表。</p>
-<h3 id="new"><a href="#new" class="headerlink" title="new"></a>new</h3><p>new关联方法，返回一个初始化的LinkedList，只需要将head初始化为None即可。</p>
-<pre><code class="rust">    pub fn new() -&gt; Self &#123;
-        LinkedList &#123;
-            head: None,
-        &#125;
-    &#125;
-</code></pre>
-<h3 id="push-front"><a href="#push-front" class="headerlink" title="push_front"></a>push_front</h3><p>头插入一个节点。</p>
-<p>在编码之前，我们需要想想如何进行节点的额移动。</p>
-<ul>
-<li><p>首先，这个操作会改变链表，所以需要&amp;mut self做参数。</p>
-</li>
-<li><p>在方法体中，新建一个节点，并赋予初值。</p>
-</li>
-<li><p>让新建节点的next指向头</p>
-</li>
-<li><p>头指向新建节点</p>
-</li>
-</ul>
-<p>这些操作，你在数据结构中已经看见过了，而且身经百战的你，在经历各种语言的摧残之后，心想：这还不简单？但是rust却给了你当头一棒。你试尽了你能想到的所有办法，却只写出一段自己都不愿意阅读的，撇脚的代码。这就是作者的真实经历。</p>
-<p>“独学而无友，则孤陋而寡闻”。是时候看一看别人是怎样写的了。</p>
-<pre><code class="rust">    pub fn push_front(&amp;mut self, val: T) &#123;
-        let new_node = Box::new(Node &#123;
-            data: val,
-            next: self.head.take(),
-        &#125;);
-        self.head = Some(new_node)
-    &#125;
-</code></pre>
-<p>我们来一点点分析</p>
-<p>创建一个新的节点</p>
-<pre><code class="rust">        let new_node = Box::new(Node &#123;
-            data: val,
-            next: self.head.take(),
-        &#125;);
-</code></pre>
-<p>其中take方法会将Option设置为None，并返回原先的值。</p>
-<p>这几行代码新建了一个节点，还有将head滞空(赋值为None)。</p>
-<p>将head指向新建节点，这步只需要将被some新建节点赋值给head即可。</p>
-<pre><code class="rust">self.head = Some(new_node)
-</code></pre>
-<p>因为self是&amp;mut, 所以这里直接使用&#x3D;就可以完成。</p>
-<h3 id="peek"><a href="#peek" class="headerlink" title="peek"></a>peek</h3><p>peek方法返回<code>Option&lt;&amp;T&gt;</code>。</p>
-<ul>
-<li>如果head是一个None，返回None</li>
-<li>否则返回Some&lt;&amp;T&gt;</li>
-</ul>
-<p>你可能会想到match匹配。可以这样做。</p>
-<pre><code class="rust">    pub fn peek(&amp;self) -&gt; Option&lt;&amp;T&gt; &#123;
-        match &amp;self.head &#123;
-            None =&gt; None,
-            Some(node) =&gt; Some(&amp;node.data)
-        &#125;
-    &#125;
-</code></pre>
-<p>&amp;具有最低的优先级,即<code>&amp;(self.head)</code></p>
-<p><code>&amp;self.head</code>是必要的。match不会消费对象，但是结构Some<code>Some(node)</code>会转移所有权。就会得到一个编译错误。那是因为我们移动一个已经被借用的值<code>Box obj</code>。这个值已经被self借用了，你却要把它移动给node。</p>
-<h3 id="peek-mut"><a href="#peek-mut" class="headerlink" title="peek_mut"></a>peek_mut</h3><p>与peek相同，但是返回可变引用</p>
-<pre><code class="rust">    pub fn peek_mut(&amp;mut self) -&gt; Option&lt;&amp;mut T&gt; &#123;
-        match &amp;mut self.head &#123;
-            None =&gt; None,
-            Some(node) =&gt; Some(&amp; mut node.data)
-        &#125;
-    &#125;
-</code></pre>
-<p>同理的，<code>match</code>应当匹配<code>&amp;mut self.head</code>。</p>
-<h3 id="pop"><a href="#pop" class="headerlink" title="pop"></a>pop</h3><p>pop究竟该如何操作，我想你在学数据结构的时候都已经快听的耳朵起茧子了额。但是在这里，还是要复述一遍。</p>
-<ul>
-<li>如果head为空，什么也不做，返回一个具有空语义的对象</li>
-<li>获取头的next名为node</li>
-<li>头指向node</li>
-<li>返回node中的值&#x2F;进行其他的操作</li>
-</ul>
-<p>用Rust语言来描述，可以用match来匹配head是否为None,如果是返回None,如果不是，会匹配出原来的head叫做node，然后更新head,返回node中的数据即可。</p>
-<p>我们可以改变以下实现手法，使用take方法，取得head的所有权。然后再重新赋值head。</p>
-<pre><code class="rust">    pub fn pop(&amp;mut self) -&gt; Option&lt;T&gt; &#123;
-        match self.head.take() &#123;
-            None =&gt; None,
-            Some(node) =&gt; &#123; //node 为原来的head
-                self.head = node.next;	//node.next: Link&lt;T&gt; 变为新头
-                Some(node.data)	
-            &#125;
-        &#125;
-    &#125;
-</code></pre>
-<h3 id="drop"><a href="#drop" class="headerlink" title="drop"></a>drop</h3><p>我们可以不实现drop，用编译器为我们实现的——调用head的drop。于是drop Box中的对象，然后Box中的对象是一个Node，Node中又含有Link，这会是一个尾递归？不是的，编译器生成的drop会含有其他的操作。这不是一个尾递归。</p>
-<p>我们需要手动的为LinkedList实现drop这个trait。具体的做法是</p>
-<p>把递归改为迭代，每次获得一个节点的所有权，让后让其离开作用域自动drop，因为是一个循环，所以不会出现栈溢出这种情况。</p>
-<pre><code class="rust">impl &lt;T&gt; Drop for LinkedList&lt;T&gt; &#123;
-    fn drop(&amp;mut self) &#123;
-        let mut curr = self.head.take(); //获得head的所有权
-        while let Some (node) = curr &#123;	//让node绑定的对象离开作用域自动drop
-            curr = node.next;
-        &#125;
-    &#125;
-&#125;
-</code></pre>
-<h2 id="Iterator"><a href="#Iterator" class="headerlink" title="Iterator"></a>Iterator</h2><p>为LinkedList提供迭代器。他们分别是<code>Iter</code>,<code>IntoIter</code>,<code>IterMut</code>。其中<code>Iter</code>,<code>IterMut</code>需要额外注意生命周期。</p>
-<h3 id="IntoIter"><a href="#IntoIter" class="headerlink" title="IntoIter"></a>IntoIter</h3><p>IntoIter是最好实现的。因为其再迭代的时候会消耗容器，所以只需要每次pop以下就好了。</p>
-<pre><code class="rust">struct IntoIter&lt;T&gt; &#123;
-    list: LinkedList&lt;T&gt;,
-&#125;
-
-impl &lt;T&gt; Iterator for IntoIter&lt;T&gt; &#123;
-    type Item = T;
-    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; &#123;
-        self.list.pop()
-    &#125;
-&#125;
-</code></pre>
-<h3 id="Iter"><a href="#Iter" class="headerlink" title="Iter"></a>Iter</h3><p>Iter就相对比较难一点，我们需要获取容器的不可变引用。并迭代。如何指向链表的下一个节点，是一个问题。</p>
-<p>Iter中定义一个<code>curr: Option&lt;T&gt;</code>，指向当前的节点，每次调用next，就返回curr的值，然后更新curr。</p>
-<p>还是可以使用match来匹配。</p>
-<pre><code class="rust">pub struct Iter &lt;&#39;a, T&gt; &#123;
-    curr: Option&lt;&amp;&#39;a Node&lt;T&gt;&gt;,
-&#125;
-
-impl &lt;&#39;a, T&gt; Iterator for Iter&lt;&#39;a, T&gt; &#123;
-    type Item = &amp;&#39;a T;
-    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; &#123;
-        match self.curr &#123;
-            None =&gt; None,
-            Some(node) =&gt; &#123;
-                self.curr = node.next.as_deref();
-                Some(&amp;node.data)
-            &#125;
-        &#125;
-    &#125;
-&#125;
-</code></pre>
-<p>由于self中的curr为Option包裹的引用类型，所以match匹配出来的值也是一个&amp;类型，不用再额外添加引用。、</p>
-<p>Some的部分值得拿出来好好说说。</p>
-<pre><code class="rust">            Some(node) =&gt; &#123;
-                self.curr = node.next.as_deref();
-                Some(&amp;node.data)
-            &#125;
-</code></pre>
-<p>先搞清楚类型,<code>curr: Option&lt;Node&lt;T&gt;&gt;</code>,<code>node.next: Option&lt;Box&lt;Node&lt;T&gt;&gt;&gt;</code>。我们直接使用<code> self.curr = node.next</code>来赋值，类型不对。<code>Some(&amp;Node) &lt;- Some(Box&lt;Node&lt;T&gt;&gt;)</code>,要是给Box解引用就好了。使用<code>as_deref</code>方法来返回一个解引用(被Some包裹的)。正好合适。</p>
-<p>然后返回node中的data即可，别忘了添加&amp;。</p>
-<h3 id="IterMut"><a href="#IterMut" class="headerlink" title="IterMut"></a>IterMut</h3><p>IterMut又设计到了可变性。编码要考虑的因素就更多了。</p>
-<p>老样子，我们对Iter使用的方法，故技重施看看。</p>
-<pre><code class="rust">pub struct IterMut&lt;&#39;a, T&gt; &#123;
-    curr: Option&lt;&amp;&#39;a mut Node&lt;T&gt;&gt;
-&#125;
-
-impl &lt;&#39;a, T&gt; Iterator for IterMut&lt;&#39;a, T&gt; &#123;
-    type Item = &amp;&#39;a mut T;
-    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; &#123;
-        match self.curr &#123;
-            None =&gt; None,
-            Some(node) =&gt; &#123;
-                self.curr = node.next.as_deref_mut();
-                Some(&amp;mut node.data)
-            &#125;
-        &#125;
-    &#125;
-&#125;
-</code></pre>
-<p>会得到这样的编译错误。</p>
-<pre><code class="error">error[E0507]: cannot move out of `self.curr.0` which is behind a mutable reference
-  --&gt; src\first.rs:88:15
-   |
-88 |         match self.curr &#123;
-   |               ^^^^^^^^^ help: consider borrowing here: `&amp;self.curr`
-89 |             None =&gt; None,
-90 |             Some(node) =&gt; &#123;
-   |                  ----
-   |                  |
-   |                  data moved here
-   |                  move occurs because `node` has type `&amp;mut Node&lt;T&gt;`, which does not implement the `Copy` trait
-</code></pre>
-<p>编译器说我们移动了以已经绑定可变引用的变量。</p>
-<p>奇怪，为什么Iter可以而IterMut不可以呢？原因是不能对<code>&amp;mut &amp; T</code>进行copy，就是没有实现<code>Copy trait</code>,那怎么办？。那就又回到了peek的情况——移动了一个已经被借用的变量。只不过这个变量是一个可变引用<code>&amp;mut</code>。</p>
-<p>按照编译器的方法改。你大可试试，会有更多的错误。换一种方法吧。</p>
-<p>还是take方法。</p>
-<pre><code class="rust">pub struct IterMut&lt;&#39;a, T&gt; &#123;
-    curr: Option&lt;&amp;&#39;a mut Node&lt;T&gt;&gt;
-&#125;
-
-impl &lt;&#39;a, T&gt; Iterator for IterMut&lt;&#39;a, T&gt; &#123;
-    type Item = &amp;&#39;a mut T;
-    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; &#123;
-        match self.curr.take() &#123;
-            None =&gt; None,
-            Some(node) =&gt; &#123;
-                self.curr = node.next.as_deref_mut();
-                Some(&amp;mut node.data)
-            &#125;
-        &#125;
-    &#125;
-&#125;
-</code></pre>
-<h3 id="iter-into-iter-iter-mut"><a href="#iter-into-iter-iter-mut" class="headerlink" title="iter into_iter iter_mut"></a>iter into_iter iter_mut</h3><p>LinkedList的这三个方法如下定义。</p>
-<pre><code class="rust">    pub fn iter(&amp;self) -&gt; Iter&lt;T&gt; &#123;
-        Iter &#123;
-            curr: self.head.as_deref(),
-        &#125;
-    &#125;
-
-    pub fn iter_mut(&amp;mut self) -&gt; IterMut&lt;T&gt; &#123;
-        IterMut &#123;
-            curr: self.head.as_deref_mut()
-        &#125;
-    &#125;
-
-    pub fn into_iter(self) -&gt; IntoIter&lt;T&gt; &#123;
-        IntoIter &#123;
-            list: self
-        &#125;
-    &#125;
-</code></pre>
-<h1 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h1><pre><code class="rust">fn main() &#123;
-    let mut ls = LinkedList::new();
-    ls.push_front(12);
-    ls.push_front(14);
-    ls.push_front(100);
-    ls.push_front(222);
-    ls.pop();
-    assert_eq!(ls.peek(), Some(&amp;100));
-    assert_eq!(ls.peek_mut(), Some(&amp;mut 100));
-    for val in ls.iter() &#123;
-        println!(&quot;&#123;&#125;&quot;,val);
-    &#125;
-    for val in ls.iter_mut() &#123;
-        *val += 1;
-        println!(&quot;&#123;&#125;&quot;,val);
-    &#125;
-    for val in ls.into_iter() &#123;
-        println!(&quot;&#123;&#125;&quot;,val);
-    &#125;
-&#125;
-</code></pre>
-<p>很好的工作了起来！</p>
-<p>再来看看数据量大的时候，会不会栈溢出。</p>
-<pre><code class="rust">fn main() &#123;
-    let mut ls = LinkedList::new();
-    let n: usize = 10000000;
-    for i in 0..n &#123;
-        ls.push_front(i);
-    &#125;
-&#125;
-</code></pre>
-<p>很好，栈没有溢出。</p>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>如果谁犯下了大罪。我一定让他试试在不看资料的情况下手写一个Option+Box的链表。</p>
-<p>玩笑归玩笑，好好的看清楚上面的实现，还是能对所有权和借用和声明周期的理解更上一层楼的。</p>
-<p>对于peek,peek_mut等函数，你也可以使用map来实现，但是使用map会获得所所有权，又需要额外的处理。本文保留了match方法。</p>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        <span class="icon">
-            <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-        </span>
-        
-        
-        <span class="tag">
-            
-            <a href="/tags/Rust/" style="color: #00bcd4">
-                Rust
-            </a>
-        </span>
-        
-    </div>
-    <a href="/2022/10/01/Rust通过Box方式实现LinkedList/" class="go-post">阅读全文</a>
 </div>
 
              
@@ -1875,6 +1721,12 @@ impl &lt;&#39;a, T&gt; Iterator for IterMut&lt;&#39;a, T&gt; &#123;
             <a href="/page/2/">
                 <span class="page-num">
                     2
+                </span>
+            </a>
+            
+            <a href="/page/3">
+                <span class="page-num">
+                    3
                 </span>
             </a>
             

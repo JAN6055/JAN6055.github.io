@@ -144,6 +144,313 @@
             
 
 <div class="post">
+    <a href="/2022/10/01/Rust通过Box方式实现LinkedList/">
+        <h2 class="post-title">Rust通过Box方式实现LinkedList</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="date">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
+            </span>
+            2022/10/1
+        </span>
+    </div>
+    <div class="excerpt">
+        <div class="content" v-pre>
+            
+            <h1 id="链表在rust中"><a href="#链表在rust中" class="headerlink" title="链表在rust中"></a>链表在rust中</h1><p>别的语言，学习的差不多了。写个链表试试？</p>
+<p>Rust，学习的差不多的，写个链表，逝世！</p>
+<p>虽然rust是系统及编程语言，但那和safe代码没有什么关系，在safe代码中，你依旧不能灵活的操纵内存。</p>
+<p>代替的可以使用Box来当作指针，但是由于所有权和借用的规则，使得Option+Box这种形式写出的LinkedList既复杂，又低效。但是对于学习来说还是很有帮助的。所以，本篇文章将编码一个支持基础操作的LinkedList，并解释说明那些烦人的细节。</p>
+<p>希望本篇文章能对你对Rust的理解有帮助。本文章基于《通过链表学rust》。</p>
+<h1 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h1><p>我们要写一个泛型的链表。使用<code>Option&lt;Box&lt;Node&lt;T&gt;&gt;&gt;</code>这样的形式，来组织一个最基本的链式结构。</p>
+<h2 id="Link"><a href="#Link" class="headerlink" title="Link"></a>Link</h2><p>使用类型别名是由必要的。Link是如下的别名</p>
+<pre><code class="rust">type Link&lt;T&gt; = Option&lt;Box&lt;Node&lt;T&gt;&gt;&gt;;
+</code></pre>
+<p>这样可以避免冗长且不易阅读的代码。然后请你记住一个重要的，Link不是一个指针类型，你很可能基于C风格语言的习惯将Link看作一个指针——在我们这个例子中不是这样的。但可以做到这样，那是unsafe的事情了。在我们例子中，<strong>Link是一个Option。</strong>使用<code>Option&lt;Box&lt;&gt;&gt;</code>可以模拟出类似指针的东西。但是你在处理LinkedList的时候大可将其当作一个指针来看待。</p>
+<h2 id="Node"><a href="#Node" class="headerlink" title="Node"></a>Node</h2><p>我们需要一个T类型的数据，和一个next来“指向”下一个Node。</p>
+<pre><code class="C++">struct Node&lt;T&gt; &#123;
+    data: T,
+    next: Link&lt;T&gt;,
+&#125;
+</code></pre>
+<h2 id="LinkedList"><a href="#LinkedList" class="headerlink" title="LinkedList"></a>LinkedList</h2><p>只需要一个头指针，就可以找到整个LinkedList。这个head类似于C++中的<code>Node*</code>,在构造的时候<code>head = nullptr</code>,就是说，头指针不默认指向一个节点。</p>
+<pre><code class="C++">pub struct LinkedList&lt;T&gt; &#123;
+    head: Link&lt;T&gt;,
+&#125;
+</code></pre>
+<p>为什么没有提供size？</p>
+<p>对于单向链表的size相关操作，需要额外的维护成本。如果使用单项链表，不要求size操作。否则使用双向链表。</p>
+<h3 id="new"><a href="#new" class="headerlink" title="new"></a>new</h3><p>new关联方法，返回一个初始化的LinkedList，只需要将head初始化为None即可。</p>
+<pre><code class="rust">    pub fn new() -&gt; Self &#123;
+        LinkedList &#123;
+            head: None,
+        &#125;
+    &#125;
+</code></pre>
+<h3 id="push-front"><a href="#push-front" class="headerlink" title="push_front"></a>push_front</h3><p>头插入一个节点。</p>
+<p>在编码之前，我们需要想想如何进行节点的额移动。</p>
+<ul>
+<li><p>首先，这个操作会改变链表，所以需要&amp;mut self做参数。</p>
+</li>
+<li><p>在方法体中，新建一个节点，并赋予初值。</p>
+</li>
+<li><p>让新建节点的next指向头</p>
+</li>
+<li><p>头指向新建节点</p>
+</li>
+</ul>
+<p>这些操作，你在数据结构中已经看见过了，而且身经百战的你，在经历各种语言的摧残之后，心想：这还不简单？但是rust却给了你当头一棒。你试尽了你能想到的所有办法，却只写出一段自己都不愿意阅读的，撇脚的代码。这就是作者的真实经历。</p>
+<p>“独学而无友，则孤陋而寡闻”。是时候看一看别人是怎样写的了。</p>
+<pre><code class="rust">    pub fn push_front(&amp;mut self, val: T) &#123;
+        let new_node = Box::new(Node &#123;
+            data: val,
+            next: self.head.take(),
+        &#125;);
+        self.head = Some(new_node)
+    &#125;
+</code></pre>
+<p>我们来一点点分析</p>
+<p>创建一个新的节点</p>
+<pre><code class="rust">        let new_node = Box::new(Node &#123;
+            data: val,
+            next: self.head.take(),
+        &#125;);
+</code></pre>
+<p>其中take方法会将Option设置为None，并返回原先的值。</p>
+<p>这几行代码新建了一个节点，还有将head滞空(赋值为None)。</p>
+<p>将head指向新建节点，这步只需要将被some新建节点赋值给head即可。</p>
+<pre><code class="rust">self.head = Some(new_node)
+</code></pre>
+<p>因为self是&amp;mut, 所以这里直接使用&#x3D;就可以完成。</p>
+<h3 id="peek"><a href="#peek" class="headerlink" title="peek"></a>peek</h3><p>peek方法返回<code>Option&lt;&amp;T&gt;</code>。</p>
+<ul>
+<li>如果head是一个None，返回None</li>
+<li>否则返回Some&lt;&amp;T&gt;</li>
+</ul>
+<p>你可能会想到match匹配。可以这样做。</p>
+<pre><code class="rust">    pub fn peek(&amp;self) -&gt; Option&lt;&amp;T&gt; &#123;
+        match &amp;self.head &#123;
+            None =&gt; None,
+            Some(node) =&gt; Some(&amp;node.data)
+        &#125;
+    &#125;
+</code></pre>
+<p>&amp;具有最低的优先级,即<code>&amp;(self.head)</code></p>
+<p><code>&amp;self.head</code>是必要的。match不会消费对象，但是结构Some<code>Some(node)</code>会转移所有权。就会得到一个编译错误。那是因为我们移动一个已经被借用的值<code>Box obj</code>。这个值已经被self借用了，你却要把它移动给node。</p>
+<h3 id="peek-mut"><a href="#peek-mut" class="headerlink" title="peek_mut"></a>peek_mut</h3><p>与peek相同，但是返回可变引用</p>
+<pre><code class="rust">    pub fn peek_mut(&amp;mut self) -&gt; Option&lt;&amp;mut T&gt; &#123;
+        match &amp;mut self.head &#123;
+            None =&gt; None,
+            Some(node) =&gt; Some(&amp; mut node.data)
+        &#125;
+    &#125;
+</code></pre>
+<p>同理的，<code>match</code>应当匹配<code>&amp;mut self.head</code>。</p>
+<h3 id="pop"><a href="#pop" class="headerlink" title="pop"></a>pop</h3><p>pop究竟该如何操作，我想你在学数据结构的时候都已经快听的耳朵起茧子了额。但是在这里，还是要复述一遍。</p>
+<ul>
+<li>如果head为空，什么也不做，返回一个具有空语义的对象</li>
+<li>获取头的next名为node</li>
+<li>头指向node</li>
+<li>返回node中的值&#x2F;进行其他的操作</li>
+</ul>
+<p>用Rust语言来描述，可以用match来匹配head是否为None,如果是返回None,如果不是，会匹配出原来的head叫做node，然后更新head,返回node中的数据即可。</p>
+<p>我们可以改变以下实现手法，使用take方法，取得head的所有权。然后再重新赋值head。</p>
+<pre><code class="rust">    pub fn pop(&amp;mut self) -&gt; Option&lt;T&gt; &#123;
+        match self.head.take() &#123;
+            None =&gt; None,
+            Some(node) =&gt; &#123; //node 为原来的head
+                self.head = node.next;	//node.next: Link&lt;T&gt; 变为新头
+                Some(node.data)	
+            &#125;
+        &#125;
+    &#125;
+</code></pre>
+<h3 id="drop"><a href="#drop" class="headerlink" title="drop"></a>drop</h3><p>我们可以不实现drop，用编译器为我们实现的——调用head的drop。于是drop Box中的对象，然后Box中的对象是一个Node，Node中又含有Link，这会是一个尾递归？不是的，编译器生成的drop会含有其他的操作。这不是一个尾递归。</p>
+<p>我们需要手动的为LinkedList实现drop这个trait。具体的做法是</p>
+<p>把递归改为迭代，每次获得一个节点的所有权，让后让其离开作用域自动drop，因为是一个循环，所以不会出现栈溢出这种情况。</p>
+<pre><code class="rust">impl &lt;T&gt; Drop for LinkedList&lt;T&gt; &#123;
+    fn drop(&amp;mut self) &#123;
+        let mut curr = self.head.take(); //获得head的所有权
+        while let Some (node) = curr &#123;	//让node绑定的对象离开作用域自动drop
+            curr = node.next;
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<h2 id="Iterator"><a href="#Iterator" class="headerlink" title="Iterator"></a>Iterator</h2><p>为LinkedList提供迭代器。他们分别是<code>Iter</code>,<code>IntoIter</code>,<code>IterMut</code>。其中<code>Iter</code>,<code>IterMut</code>需要额外注意生命周期。</p>
+<h3 id="IntoIter"><a href="#IntoIter" class="headerlink" title="IntoIter"></a>IntoIter</h3><p>IntoIter是最好实现的。因为其再迭代的时候会消耗容器，所以只需要每次pop以下就好了。</p>
+<pre><code class="rust">struct IntoIter&lt;T&gt; &#123;
+    list: LinkedList&lt;T&gt;,
+&#125;
+
+impl &lt;T&gt; Iterator for IntoIter&lt;T&gt; &#123;
+    type Item = T;
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; &#123;
+        self.list.pop()
+    &#125;
+&#125;
+</code></pre>
+<h3 id="Iter"><a href="#Iter" class="headerlink" title="Iter"></a>Iter</h3><p>Iter就相对比较难一点，我们需要获取容器的不可变引用。并迭代。如何指向链表的下一个节点，是一个问题。</p>
+<p>Iter中定义一个<code>curr: Option&lt;T&gt;</code>，指向当前的节点，每次调用next，就返回curr的值，然后更新curr。</p>
+<p>还是可以使用match来匹配。</p>
+<pre><code class="rust">pub struct Iter &lt;&#39;a, T&gt; &#123;
+    curr: Option&lt;&amp;&#39;a Node&lt;T&gt;&gt;,
+&#125;
+
+impl &lt;&#39;a, T&gt; Iterator for Iter&lt;&#39;a, T&gt; &#123;
+    type Item = &amp;&#39;a T;
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; &#123;
+        match self.curr &#123;
+            None =&gt; None,
+            Some(node) =&gt; &#123;
+                self.curr = node.next.as_deref();
+                Some(&amp;node.data)
+            &#125;
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>由于self中的curr为Option包裹的引用类型，所以match匹配出来的值也是一个&amp;类型，不用再额外添加引用。、</p>
+<p>Some的部分值得拿出来好好说说。</p>
+<pre><code class="rust">            Some(node) =&gt; &#123;
+                self.curr = node.next.as_deref();
+                Some(&amp;node.data)
+            &#125;
+</code></pre>
+<p>先搞清楚类型,<code>curr: Option&lt;Node&lt;T&gt;&gt;</code>,<code>node.next: Option&lt;Box&lt;Node&lt;T&gt;&gt;&gt;</code>。我们直接使用<code> self.curr = node.next</code>来赋值，类型不对。<code>Some(&amp;Node) &lt;- Some(Box&lt;Node&lt;T&gt;&gt;)</code>,要是给Box解引用就好了。使用<code>as_deref</code>方法来返回一个解引用(被Some包裹的)。正好合适。</p>
+<p>然后返回node中的data即可，别忘了添加&amp;。</p>
+<h3 id="IterMut"><a href="#IterMut" class="headerlink" title="IterMut"></a>IterMut</h3><p>IterMut又设计到了可变性。编码要考虑的因素就更多了。</p>
+<p>老样子，我们对Iter使用的方法，故技重施看看。</p>
+<pre><code class="rust">pub struct IterMut&lt;&#39;a, T&gt; &#123;
+    curr: Option&lt;&amp;&#39;a mut Node&lt;T&gt;&gt;
+&#125;
+
+impl &lt;&#39;a, T&gt; Iterator for IterMut&lt;&#39;a, T&gt; &#123;
+    type Item = &amp;&#39;a mut T;
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; &#123;
+        match self.curr &#123;
+            None =&gt; None,
+            Some(node) =&gt; &#123;
+                self.curr = node.next.as_deref_mut();
+                Some(&amp;mut node.data)
+            &#125;
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<p>会得到这样的编译错误。</p>
+<pre><code class="error">error[E0507]: cannot move out of `self.curr.0` which is behind a mutable reference
+  --&gt; src\first.rs:88:15
+   |
+88 |         match self.curr &#123;
+   |               ^^^^^^^^^ help: consider borrowing here: `&amp;self.curr`
+89 |             None =&gt; None,
+90 |             Some(node) =&gt; &#123;
+   |                  ----
+   |                  |
+   |                  data moved here
+   |                  move occurs because `node` has type `&amp;mut Node&lt;T&gt;`, which does not implement the `Copy` trait
+</code></pre>
+<p>编译器说我们移动了以已经绑定可变引用的变量。</p>
+<p>奇怪，为什么Iter可以而IterMut不可以呢？原因是不能对<code>&amp;mut &amp; T</code>进行copy，就是没有实现<code>Copy trait</code>,那怎么办？。那就又回到了peek的情况——移动了一个已经被借用的变量。只不过这个变量是一个可变引用<code>&amp;mut</code>。</p>
+<p>按照编译器的方法改。你大可试试，会有更多的错误。换一种方法吧。</p>
+<p>还是take方法。</p>
+<pre><code class="rust">pub struct IterMut&lt;&#39;a, T&gt; &#123;
+    curr: Option&lt;&amp;&#39;a mut Node&lt;T&gt;&gt;
+&#125;
+
+impl &lt;&#39;a, T&gt; Iterator for IterMut&lt;&#39;a, T&gt; &#123;
+    type Item = &amp;&#39;a mut T;
+    fn next(&amp;mut self) -&gt; Option&lt;Self::Item&gt; &#123;
+        match self.curr.take() &#123;
+            None =&gt; None,
+            Some(node) =&gt; &#123;
+                self.curr = node.next.as_deref_mut();
+                Some(&amp;mut node.data)
+            &#125;
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+<h3 id="iter-into-iter-iter-mut"><a href="#iter-into-iter-iter-mut" class="headerlink" title="iter into_iter iter_mut"></a>iter into_iter iter_mut</h3><p>LinkedList的这三个方法如下定义。</p>
+<pre><code class="rust">    pub fn iter(&amp;self) -&gt; Iter&lt;T&gt; &#123;
+        Iter &#123;
+            curr: self.head.as_deref(),
+        &#125;
+    &#125;
+
+    pub fn iter_mut(&amp;mut self) -&gt; IterMut&lt;T&gt; &#123;
+        IterMut &#123;
+            curr: self.head.as_deref_mut()
+        &#125;
+    &#125;
+
+    pub fn into_iter(self) -&gt; IntoIter&lt;T&gt; &#123;
+        IntoIter &#123;
+            list: self
+        &#125;
+    &#125;
+</code></pre>
+<h1 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h1><pre><code class="rust">fn main() &#123;
+    let mut ls = LinkedList::new();
+    ls.push_front(12);
+    ls.push_front(14);
+    ls.push_front(100);
+    ls.push_front(222);
+    ls.pop();
+    assert_eq!(ls.peek(), Some(&amp;100));
+    assert_eq!(ls.peek_mut(), Some(&amp;mut 100));
+    for val in ls.iter() &#123;
+        println!(&quot;&#123;&#125;&quot;,val);
+    &#125;
+    for val in ls.iter_mut() &#123;
+        *val += 1;
+        println!(&quot;&#123;&#125;&quot;,val);
+    &#125;
+    for val in ls.into_iter() &#123;
+        println!(&quot;&#123;&#125;&quot;,val);
+    &#125;
+&#125;
+</code></pre>
+<p>很好的工作了起来！</p>
+<p>再来看看数据量大的时候，会不会栈溢出。</p>
+<pre><code class="rust">fn main() &#123;
+    let mut ls = LinkedList::new();
+    let n: usize = 10000000;
+    for i in 0..n &#123;
+        ls.push_front(i);
+    &#125;
+&#125;
+</code></pre>
+<p>很好，栈没有溢出。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>如果谁犯下了大罪。我一定让他试试在不看资料的情况下手写一个Option+Box的链表。</p>
+<p>玩笑归玩笑，好好的看清楚上面的实现，还是能对所有权和借用和声明周期的理解更上一层楼的。</p>
+<p>对于peek,peek_mut等函数，你也可以使用map来实现，但是使用map会获得所所有权，又需要额外的处理。本文保留了match方法。</p>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        <span class="icon">
+            <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
+        </span>
+        
+        
+        <span class="tag">
+            
+            <a href="/tags/Rust/" style="color: #00bcd4">
+                Rust
+            </a>
+        </span>
+        
+    </div>
+    <a href="/2022/10/01/Rust通过Box方式实现LinkedList/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post">
     <a href="/2022/09/29/Rust字符串处理/">
         <h2 class="post-title">Rust字符串处理</h2>
     </a>
@@ -360,14 +667,14 @@ for byte in s.bytes() &#123;
         
         <span class="tag">
             
-            <a href="/tags/Rust/" style="color: #00bcd4">
+            <a href="/tags/Rust/" style="color: #03a9f4">
                 Rust
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/Rust-Library/" style="color: #00bcd4">
+            <a href="/tags/Rust-Library/" style="color: #ff7d73">
                 Rust Library
             </a>
         </span>
@@ -703,21 +1010,21 @@ template&lt;typename _Tp&gt;
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #03a9f4">
-                Modern C++
-            </a>
-        </span>
-        
-        <span class="tag">
-            
-            <a href="/tags/C/" style="color: #ff7d73">
+            <a href="/tags/C/" style="color: #00a596">
                 C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C-Library/" style="color: #00a596">
+            <a href="/tags/Modern-C/" style="color: #00bcd4">
+                Modern C++
+            </a>
+        </span>
+        
+        <span class="tag">
+            
+            <a href="/tags/C-Library/" style="color: #ff7d73">
                 C++ Library
             </a>
         </span>
@@ -1289,21 +1596,21 @@ int main()
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #00bcd4">
-                Modern C++
-            </a>
-        </span>
-        
-        <span class="tag">
-            
-            <a href="/tags/C/" style="color: #ffa2c4">
+            <a href="/tags/C/" style="color: #ff7d73">
                 C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C-Library/" style="color: #03a9f4">
+            <a href="/tags/Modern-C/" style="color: #03a9f4">
+                Modern C++
+            </a>
+        </span>
+        
+        <span class="tag">
+            
+            <a href="/tags/C-Library/" style="color: #00a596">
                 C++ Library
             </a>
         </span>
@@ -1644,15 +1951,15 @@ int main()
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #ffa2c4">
-                Modern C++
+            <a href="/tags/C/" style="color: #03a9f4">
+                C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #ff7d73">
-                C++
+            <a href="/tags/Modern-C/" style="color: #00bcd4">
+                Modern C++
             </a>
         </span>
         
@@ -2528,21 +2835,21 @@ int main() &#123;
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #00bcd4">
-                Modern C++
-            </a>
-        </span>
-        
-        <span class="tag">
-            
-            <a href="/tags/C/" style="color: #ff7d73">
+            <a href="/tags/C/" style="color: #00a596">
                 C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C-Library/" style="color: #00a596">
+            <a href="/tags/Modern-C/" style="color: #00a596">
+                Modern C++
+            </a>
+        </span>
+        
+        <span class="tag">
+            
+            <a href="/tags/C-Library/" style="color: #03a9f4">
                 C++ Library
             </a>
         </span>
@@ -2800,13 +3107,6 @@ private:
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #00a596">
-                Modern C++
-            </a>
-        </span>
-        
-        <span class="tag">
-            
             <a href="/tags/C/" style="color: #00a596">
                 C++
             </a>
@@ -2814,7 +3114,14 @@ private:
         
         <span class="tag">
             
-            <a href="/tags/TMP/" style="color: #00a596">
+            <a href="/tags/Modern-C/" style="color: #00a596">
+                Modern C++
+            </a>
+        </span>
+        
+        <span class="tag">
+            
+            <a href="/tags/TMP/" style="color: #00bcd4">
                 TMP
             </a>
         </span>
@@ -2970,15 +3277,15 @@ work(getFoo_6(10,10.3,&quot;hello&quot;));
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #00bcd4">
-                Modern C++
+            <a href="/tags/C/" style="color: #00a596">
+                C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #00bcd4">
-                C++
+            <a href="/tags/Modern-C/" style="color: #03a9f4">
+                Modern C++
             </a>
         </span>
         
@@ -3852,7 +4159,7 @@ void buffer_fun(Args &amp;&amp;... args)
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #03a9f4">
+            <a href="/tags/C/" style="color: #00bcd4">
                 C++
             </a>
         </span>
@@ -3957,203 +4264,20 @@ auto cbegin(const C &amp; c)-&gt; decltype(c.begin()) &#123;
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #00bcd4">
-                Modern C++
-            </a>
-        </span>
-        
-        <span class="tag">
-            
             <a href="/tags/C/" style="color: #ffa2c4">
                 C++
             </a>
         </span>
         
-    </div>
-    <a href="/2022/09/17/const-container-s-iterator-is-const-iterator/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post">
-    <a href="/2022/09/17/pass-by-value-and-use-std-move/">
-        <h2 class="post-title">Pass by Value and Use Std::move</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
-            </span>
-            2022/9/17
-        </span>
-    </div>
-    <div class="excerpt">
-        <div class="content" v-pre>
-            
-            <h1 id="一个警告引发的思考"><a href="#一个警告引发的思考" class="headerlink" title="一个警告引发的思考"></a>一个警告引发的思考</h1><p>在c++11之前，无论是effective系列还是c++教程，都会告诉我们在一定情况下使用const &amp;来节省性能。但是在c++11之后，有了移动语义，使一些不可能的行为变成了可能。我们先来看一段简单的代码。</p>
-<pre><code class="cpp">class Person &#123;
-private:
-    unsigned m_age = 0;
-    string m_name;
-    Person(const string &amp; name) : m_name(name) &#123; &#125;
-&#125;
-</code></pre>
-<p><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
-<p>clang-tidy会给出这样的一个警告。</p>
-<blockquote>
-<p>Clang-Tidy: Pass by value and use std::move</p>
-</blockquote>
-<p>为什么会这样呢，这无疑是一个正确的构造函数，但是为什么还要给我们这样的警告呢？</p>
-<h1 id="使用值传递加移动语义避免不必要的消耗"><a href="#使用值传递加移动语义避免不必要的消耗" class="headerlink" title="使用值传递加移动语义避免不必要的消耗"></a>使用值传递加移动语义避免不必要的消耗</h1><p>我们按照警告更改成后是这样</p>
-<pre><code class="cpp">Person(string  name) : m_name(std::move(name)) &#123; &#125;
-</code></pre>
-<p><img src="data:image/gif;base64,R0lGODlhAQABAPABAP///wAAACH5BAEKAAAALAAAAAABAAEAAAICRAEAOw==" alt="点击并拖拽以移动"></p>
-<p>你可能会感到疑惑？为什么使用了值传递还会有更高的性能呢？这似乎和直觉不符。</p>
-<p>慢慢来，我们一点点分析。</p>
-<p>为了测试，我们准备一个类Foo，和一个代理的测试类Test。</p>
-<pre><code class="C++">#include &lt;iostream&gt;
-using namespace std;
-struct Foo &#123;
-    Foo() &#123;
-//        cout &lt;&lt; &quot;default&quot; &lt;&lt; endl;
-    &#125;
-    Foo(Foo &amp;&amp;)  noexcept &#123;
-        cout &lt;&lt; &quot;&amp;&amp;&quot; &lt;&lt; endl;
-    &#125;
-    Foo(const Foo &amp; ) &#123;
-        cout &lt;&lt; &quot;&amp;&quot; &lt;&lt; endl;
-    &#125;
-    Foo &amp; operator=(const Foo &amp;) &#123;
-        cout &lt;&lt; &quot;operator=(&amp;)&quot;  &lt;&lt; endl;
-        return *this;
-    &#125;
-    Foo &amp; operator=(Foo &amp;&amp; ) noexcept &#123;
-        cout &lt;&lt; &quot;operator=(&amp;&amp;)&quot;  &lt;&lt; endl;
-        return *this;
-    &#125;
-    Foo operator+(const Foo &amp;) &#123;
-//        cout &lt;&lt; &quot;operator+(&amp;)&quot; &lt;&lt; endl;
-        return *this;
-    &#125;
-&#125;;
-
-struct Test1 &#123;
-    Foo m_foo;
-    void setFoo(Foo foo) &#123;
-        m_foo = std::move(foo);
-    &#125;
-&#125;;
-
-struct Test2 &#123;
-    Foo m_foo;
-    void setFoo(const Foo &amp; foo) &#123;
-        m_foo = foo;
-    &#125;
-&#125;;
-int main()
-&#123;
-    Test1 test1;
-    Foo foo;
-    Foo foo1;
-    cout &lt;&lt; &quot;-----&quot; &lt;&lt; endl;
-    test1.setFoo(foo);
-    cout &lt;&lt; &quot;-----&quot; &lt;&lt; endl;
-    test1.setFoo(foo + foo1);
-    cout &lt;&lt; &quot;-----&quot; &lt;&lt; endl;
-    test1.setFoo(Foo&#123;&#125;);
-    cout &lt;&lt; &quot;-----&quot; &lt;&lt; endl;
-    test1.setFoo(std::move(foo));
-    cout &lt;&lt; &quot;-----&quot; &lt;&lt; endl;
-    test1.setFoo(std::move(Foo&#123;&#125;));
-    cout &lt;&lt; &quot;-----\n&quot; &lt;&lt; endl;
-
-    Test2 test2;
-    cout &lt;&lt; &quot;-----&quot; &lt;&lt; endl;
-
-    test2.setFoo(foo);
-    cout &lt;&lt; &quot;-----&quot; &lt;&lt; endl;
-    test2.setFoo(foo + foo1);
-    cout &lt;&lt; &quot;-----&quot; &lt;&lt; endl;
-    test2.setFoo(Foo&#123;&#125;);
-    cout &lt;&lt; &quot;-----&quot; &lt;&lt; endl;
-    test2.setFoo(std::move(foo));
-    cout &lt;&lt; &quot;-----&quot; &lt;&lt; endl;
-    return 0;
-&#125;
-</code></pre>
-<p>对于不同的情况，或由不同的结果，C++的特性和复杂性在这里体现的淋漓尽致。</p>
-<blockquote>
-<p>首先我们应当知道现代C++规定了编译器应当对于返回值进行优化。对于这样的一个函数</p>
-<p>X foo() { X x; return x; }</p>
-<p>现在的编译器在调用x的时候，就像直接调用构造X::X()一样，不必经过额外的拷贝。对于返回值优化问题，还有一些规则，我打算放在另一篇博客里面说。</p>
-<p>详情请见C++标准库(中文第二版)P19,P20,P21</p>
-</blockquote>
-<p>所以，甚至对于返回值优化的情况，我们也应当考虑进去。比如说对于</p>
-<p><code>setFoo(Foo&#123;&#125;)和setFoo(std::move(foo))</code>可能会有和我们预期不符合的结果。</p>
-<p>运行结果</p>
-<pre><code>-----
-&amp;			 //copy ctor
-operator=(&amp;&amp;) //move
------
-&amp;			 //这里的copy，是+运算符返回的时候产生的
-operator=(&amp;&amp;) //move
------
-operator=(&amp;&amp;) //这里只有一个move而Foo&#123;&#125;没有copy到形参，是编译器优化后的结构
------
-&amp;&amp;		     //使用std::move所以移动构造
-operator=(&amp;&amp;) //move
------
-&amp;&amp;            //使用std::move编译器不再优化Foo&#123;&#125;，转而和上种情况一样
-operator=(&amp;&amp;) //move
------
-
------
-operator=(&amp;)  //按引用传参，ctor
------
-&amp;			 //这里的copy，是+运算符返回的时候产生的
-operator=(&amp;)  //ctor
------
-operator=(&amp;)  //编译器优化，只有一个ctor
------
-operator=(&amp;)  //Clang-Tidy：将 std::move() 的结果作为 const 引用参数传递； 实际上不会发生任何动作,所以同上
------
-operator=(&amp;)  //Clang-Tidy：将 std::move() 的结果作为 const 引用参数传递； 实际上不会发生任何动作。同上
------
-</code></pre>
-<blockquote>
-<p>关于这个问题，Modern Effective C++也有探讨。见条款41。</p>
-</blockquote>
-<p>这够令人头大了，实际情况可能比我们想象的还要复杂。</p>
-<p>但是综上来看，我们不难得出一个结论。如果类型的移动语义具有较低的成本，可以使用pass by value and use std move的这种方式来进行性能优化。</p>
-<p>但是，如果类型的移动语义具有一定的消耗，不推荐这样做。就像如果我们处理的是一些短字符串，那么引用方式的传递肯定比值传递+移动这种方式要高效。如果是较长的字符串，使用值传递+引用的方式比较高效。</p>
-<p>并且，如果对象支持移动操作，那么他就会移动，如果对象不支持移动操作，那么值传递+引用的方式会copy两次，这是需要注意的。</p>
-<p>这些复杂的请况都要”归功“编译器的优化，如果实在搞不明白，那就任他去吧！说实话，作者在这里对于所有的细节也不是全部清晰。那就记住我们上面得出的的结论即可。我们不是编译器的实现者，这些问题无关大雅。</p>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        <span class="icon">
-            <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-        </span>
-        
-        
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #03a9f4">
+            <a href="/tags/Modern-C/" style="color: #00a596">
                 Modern C++
             </a>
         </span>
         
-        <span class="tag">
-            
-            <a href="/tags/C/" style="color: #00a596">
-                C++
-            </a>
-        </span>
-        
     </div>
-    <a href="/2022/09/17/pass-by-value-and-use-std-move/" class="go-post">阅读全文</a>
+    <a href="/2022/09/17/const-container-s-iterator-is-const-iterator/" class="go-post">阅读全文</a>
 </div>
 
              
@@ -4183,8 +4307,24 @@ operator=(&amp;)  //Clang-Tidy：将 std::move() 的结果作为 const 引用参
             2
         </span>
         
+        <span>
+            <a href="/page/3/">
+                <span class="page-num">
+                    3
+                </span>
+            </a>
+            
+            
+        </span>
+        
     </div>
     <div class="next">
+        
+        <a href="/page/3/ ">
+            <span class="page-num">
+                <i class="fa-solid fa-caret-right fa-fw"></i>
+            </span>
+        </a>
         
     </div>
 </div>
