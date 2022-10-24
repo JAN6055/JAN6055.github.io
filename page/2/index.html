@@ -144,6 +144,109 @@
             
 
 <div class="post">
+    <a href="/2022/10/01/区别-mut-mut-mut-mut/">
+        <h2 class="post-title">区别&amp; Mut; Mut &amp;; Mut &amp; Mut</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="date">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
+            </span>
+            2022/10/1
+        </span>
+    </div>
+    <div class="excerpt">
+        <div class="content" v-pre>
+            
+            <p>这里讨论的问题就像C++中的<code>const *</code>,<code>* const</code>,<code>const * const</code>一样，你完全可以类比。</p>
+<pre><code class="rust">#[allow(unused)]
+fn work_2() &#123;
+    let mut a = 10;
+    &#123;
+        let b = 20;
+        let ref_a = &amp;a; // -&gt; &amp;i32
+        ref_a = &amp;b;            //将引用指向b不可以
+        let mut mut_ref_a = &amp;a; //mut &amp;i32
+        *mut_ref_a = 20;       //更改变量本身，不可以
+        mut_ref_a = &amp;b;        //将引用指向b，可以
+    &#125;
+    let ref_mut_a = &amp;mut a; // -&gt; &amp;mut i32
+    *ref_mut_a = 20;  //更改变量本身的值，可以
+&#125;
+</code></pre>
+<ul>
+<li>&amp; mut代表着对一个变量的可变引用，引用的变量是可变的，但是引用本身是不可变的，也就是说当我确定引用一个变量的时候，就不能再引用其他变量了。</li>
+<li>mut &amp;代表着引用本身是可变的，即这个引用既可以引用a，又可以引用b，但是引用的变量是不可变的。</li>
+<li>&amp; mut &amp; 即代表着上述两者的结合，引用本身是可变的，并且引用的变量也是可变的。</li>
+</ul>
+<pre><code class="error">jan@jan:~/code/rust/option_$ cargo run
+   Compiling option_ v0.1.0 (/home/jan/code/rust/option_)
+error[E0384]: cannot assign twice to immutable variable `ref_a`
+  --&gt; src/main.rs:24:9
+   |
+23 |         let ref_a = &amp;a; // -&gt; &amp;i32
+   |             -----
+   |             |
+   |             first assignment to `ref_a`
+   |             help: consider making this binding mutable: `mut ref_a`
+24 |         ref_a = &amp;b;            //将引用指向b不可以
+   |         ^^^^^^^^^^ cannot assign twice to immutable variable
+ 
+error[E0594]: cannot assign to `*mut_ref_a`, which is behind a `&amp;` reference
+  --&gt; src/main.rs:26:9
+   |
+25 |         let mut mut_ref_a = &amp;a; //mut &amp;i32
+   |                             -- help: consider changing this to be a mutable reference: `&amp;mut a`
+26 |         *mut_ref_a = 20;       //更改变量本身，不可以
+   |         ^^^^^^^^^^^^^^^ `mut_ref_a` is a `&amp;` reference, so the data it refers to cannot be written
+ 
+Some errors have detailed explanations: E0384, E0594.
+For more information about an error, try `rustc --explain E0384`.
+error: could not compile `option_` due to 2 previous errors
+</code></pre>
+<p>mut &amp;可以用来充当指针的位置，例如输出一个Box+Option的链表。</p>
+<p>为了简便，不实现Display Trait,而是用一个方法</p>
+<pre><code class="rust">impl &lt;T:Display&gt; LinkedList&lt;T&gt; &#123;
+    pub fn display(&amp;self) &#123;
+        let mut curr = &amp;self.head; //curr: mut &amp;Link
+        while let Some(node) = curr &#123;
+            println!(&quot;&#123;&#125;&quot;,node.data);
+            curr = &amp;node.next;
+        &#125;
+    &#125;
+&#125;
+</code></pre>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        <span class="icon">
+            <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
+        </span>
+        
+        
+        <span class="tag">
+            
+            <a href="/tags/Rust/" style="color: #00bcd4">
+                Rust
+            </a>
+        </span>
+        
+        <span class="tag">
+            
+            <a href="/tags/Effective-Rust/" style="color: #00a596">
+                Effective Rust
+            </a>
+        </span>
+        
+    </div>
+    <a href="/2022/10/01/区别-mut-mut-mut-mut/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post">
     <a href="/2022/10/01/Rust通过Box方式实现LinkedList/">
         <h2 class="post-title">Rust通过Box方式实现LinkedList</h2>
     </a>
@@ -441,7 +544,7 @@ impl &lt;&#39;a, T&gt; Iterator for IterMut&lt;&#39;a, T&gt; &#123;
         
         <span class="tag">
             
-            <a href="/tags/Rust/" style="color: #00bcd4">
+            <a href="/tags/Rust/" style="color: #ff7d73">
                 Rust
             </a>
         </span>
@@ -1010,21 +1113,21 @@ template&lt;typename _Tp&gt;
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #00bcd4">
+            <a href="/tags/C/" style="color: #ffa2c4">
                 C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #ffa2c4">
+            <a href="/tags/Modern-C/" style="color: #00a596">
                 Modern C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C-Library/" style="color: #03a9f4">
+            <a href="/tags/C-Library/" style="color: #00a596">
                 C++ Library
             </a>
         </span>
@@ -1603,14 +1706,14 @@ int main()
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #ffa2c4">
+            <a href="/tags/Modern-C/" style="color: #00a596">
                 Modern C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C-Library/" style="color: #ffa2c4">
+            <a href="/tags/C-Library/" style="color: #03a9f4">
                 C++ Library
             </a>
         </span>
@@ -1951,21 +2054,21 @@ int main()
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #ffa2c4">
+            <a href="/tags/C/" style="color: #00a596">
                 C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #ff7d73">
+            <a href="/tags/Modern-C/" style="color: #ffa2c4">
                 Modern C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/C-Library/" style="color: #00a596">
+            <a href="/tags/C-Library/" style="color: #ffa2c4">
                 C++ Library
             </a>
         </span>
@@ -2835,7 +2938,7 @@ int main() &#123;
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #ff7d73">
+            <a href="/tags/C/" style="color: #03a9f4">
                 C++
             </a>
         </span>
@@ -2849,7 +2952,7 @@ int main() &#123;
         
         <span class="tag">
             
-            <a href="/tags/C-Library/" style="color: #ffa2c4">
+            <a href="/tags/C-Library/" style="color: #00bcd4">
                 C++ Library
             </a>
         </span>
@@ -3107,21 +3210,21 @@ private:
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #ffa2c4">
+            <a href="/tags/C/" style="color: #00bcd4">
                 C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #ff7d73">
+            <a href="/tags/Modern-C/" style="color: #00bcd4">
                 Modern C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/TMP/" style="color: #ff7d73">
+            <a href="/tags/TMP/" style="color: #ffa2c4">
                 TMP
             </a>
         </span>
@@ -3277,14 +3380,14 @@ work(getFoo_6(10,10.3,&quot;hello&quot;));
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #ffa2c4">
+            <a href="/tags/C/" style="color: #00bcd4">
                 C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/Modern-C/" style="color: #03a9f4">
+            <a href="/tags/Modern-C/" style="color: #00a596">
                 Modern C++
             </a>
         </span>
@@ -4166,118 +4269,6 @@ void buffer_fun(Args &amp;&amp;... args)
         
     </div>
     <a href="/2022/09/17/template/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post">
-    <a href="/2022/09/17/const-container-s-iterator-is-const-iterator/">
-        <h2 class="post-title">Const Container&#39;s Iterator Is Const_iterator</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
-            </span>
-            2022/9/17
-        </span>
-    </div>
-    <div class="excerpt">
-        <div class="content" v-pre>
-            
-            <p>就拿vector举例子</p>
-<p>我们转到其代码</p>
-<pre><code class="C++">  template&lt;typename _Container&gt;
-    inline _GLIBCXX17_CONSTEXPR auto
-    begin(_Container&amp; __cont) -&gt; decltype(__cont.begin())
-    &#123; return __cont.begin(); &#125;
-
-  /**
-   *  @brief  Return an iterator pointing to the first element of
-   *          the const container.
-   *  @param  __cont  Container.
-   */
-  template&lt;typename _Container&gt;
-    inline _GLIBCXX17_CONSTEXPR auto
-    begin(const _Container&amp; __cont) -&gt; decltype(__cont.begin())
-    &#123; return __cont.begin(); &#125;
-
-  /**
-   *  @brief  Return an iterator pointing to one past the last element of
-   *          the container.
-   *  @param  __cont  Container.
-   */
-  template&lt;typename _Container&gt;
-    inline _GLIBCXX17_CONSTEXPR auto
-    end(_Container&amp; __cont) -&gt; decltype(__cont.end())
-    &#123; return __cont.end(); &#125;
-
-  /**
-   *  @brief  Return an iterator pointing to one past the last element of
-   *          the const container.
-   *  @param  __cont  Container.
-   */
-  template&lt;typename _Container&gt;
-    inline _GLIBCXX17_CONSTEXPR auto
-    end(const _Container&amp; __cont) -&gt; decltype(__cont.end())
-    &#123; return __cont.end(); &#125;
-
-  /**
-   *  @brief  Return an iterator pointing to the first element of the array.
-   *  @param  __arr  Array.
-   */
-  template&lt;typename _Tp, size_t _Nm&gt;
-    inline _GLIBCXX14_CONSTEXPR _Tp*
-    begin(_Tp (&amp;__arr)[_Nm]) noexcept
-    &#123; return __arr; &#125;
-
-  /**
-   *  @brief  Return an iterator pointing to one past the last element
-   *          of the array.
-   *  @param  __arr  Array.
-   */
-  template&lt;typename _Tp, size_t _Nm&gt;
-    inline _GLIBCXX14_CONSTEXPR _Tp*
-    end(_Tp (&amp;__arr)[_Nm]) noexcept
-    &#123; return __arr + _Nm; &#125;
-</code></pre>
-<p>可以看见对于const的重载版本，返回的为const_iterator.</p>
-<h1 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h1><p>在Modern Effective C++中说到，在通用的代码中，优先选用非成员版的begin()&#x2F;end(),也正是因为如此。</p>
-<p>书中给出了cbegin()的一种实现方式。</p>
-<pre><code class="C++">template &lt;typename C&gt;
-auto cbegin(const C &amp; c)-&gt; decltype(c.begin()) &#123;
-    return c.begin();
-&#125;
-</code></pre>
-<p>因为对于具有const性质的容器（在标准库中的是这样，如果是其他库提供的容器，可能不会提供这样的行为），返回的迭代器是const_iterator,所以，这样做是正确的。</p>
-<p>对于数组来说，也是一样的。begin对于数组有特例化。 上面的代码已经看到了。</p>
-<p>当数组具有const性质的时候，例如const int nums[10], _Tp会被推导为const int, 返回类型就是const int *, 就是数组的const_iterator</p>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        <span class="icon">
-            <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-        </span>
-        
-        
-        <span class="tag">
-            
-            <a href="/tags/C/" style="color: #00bcd4">
-                C++
-            </a>
-        </span>
-        
-        <span class="tag">
-            
-            <a href="/tags/Modern-C/" style="color: #ffa2c4">
-                Modern C++
-            </a>
-        </span>
-        
-    </div>
-    <a href="/2022/09/17/const-container-s-iterator-is-const-iterator/" class="go-post">阅读全文</a>
 </div>
 
              

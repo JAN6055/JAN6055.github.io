@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
-        <title>X64-Asm整数的运算 | Hello @You</title>
+        <title>Test | Hello @You</title>
         <meta name="author" content="Jan6055">
         <meta name="description" content="">
         <meta name="keywords" content="C++,Rust,Jan6055">
@@ -122,226 +122,20 @@
                         
 <div class="article">
     <div>
-        <h1>X64-Asm整数的运算 </h1>
+        <h1>Test </h1>
     </div>
     <div class="info">
         <span class="date">
             <span class="icon">
                 <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
             </span>
-            2022/10/13
+            2022/10/24
         </span>
         
-        
-        <span class="tags">
-            <span class="icon">
-                <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-            </span>
-            
-            <span class="tag">
-                
-                <a href="/tags/x64-asm/" style="color: #00bcd4">
-                    x64_asm
-                </a>
-            </span>
-            
-            <span class="tag">
-                
-                <a href="/tags/asm/" style="color: #03a9f4">
-                    asm
-                </a>
-            </span>
-            
-        </span>
         
     </div>
     <div class="content" v-pre>
-        <table>
-<thead>
-<tr>
-<th>操作</th>
-<th>结果</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>add</td>
-<td>用于加法，会设置CF,OF,SF,ZF。可用于无符号和有符号</td>
-</tr>
-<tr>
-<td>sub</td>
-<td>用于减法，会设置CF,OF,SF,ZF。可用于无符号和有符号</td>
-</tr>
-<tr>
-<td>inc</td>
-<td>自增1，不会影响标志寄存器</td>
-</tr>
-<tr>
-<td>dec</td>
-<td>自减1，不会影响标志寄存器</td>
-</tr>
-<tr>
-<td>sal</td>
-<td>左移</td>
-</tr>
-<tr>
-<td>sar</td>
-<td>算数右移</td>
-</tr>
-<tr>
-<td>imul</td>
-<td>有符号数相乘。得到的结果需要用两个寄存器来保存（qword x qword），地位放在rax中，高位放在rdx中。</td>
-</tr>
-<tr>
-<td>idiv</td>
-<td>无符号除法。得到的结果放在rax中，余数放在rdx中。</td>
-</tr>
-</tbody></table>
-<pre><code class="asm">extern printf
-section .data
-        number1         dq 128
-        number2         dq 19
-        neg_num         dq -12
-        fmt                     db &quot;The numbers are %ld and %ld&quot;,10,0
-        fmtint          db &quot;%s %ld&quot;,10,0
-        sumi            db &quot;The sum is&quot;,0
-        difi            db &quot;The differrnce is&quot;,0
-        inci            db &quot;Number 1 Incremented:&quot;,0
-        deci            db &quot;Number 1 decremented:&quot;,0
-        sali            db &quot;Number 1 Shift left 2(x4):&quot;,0
-        sari            db &quot;Number 1 Shift right 2(/4):&quot;,0
-        sariex          db &quot;Number 1 Shift right 2(/4) with &quot;
-                                db &quot;sing extension:&quot;,0
-        multi           db &quot;The productz is&quot;,0
-        divi            db &quot;The integer quotient is&quot;,0
-        remi            db &quot;The modulo is&quot;,0
-section .bss
-        resulti resq 1
-        modulo  resq 1
-section .text
-        global main
-main:
-        push rbp
-        mov rbp, rsp
-
-        ;显示数字
-        mov rdi, fmt
-        mov rsi, [number1]
-        mov rdx, [number2]
-        mov rax, 0
-        call printf
-
-        ;加法
-        mov rax, [number1]
-        add rax, [number2]
-        mov [resulti], rax
-
-        ;显示结果
-        mov rdi, fmtint
-        mov rsi, sumi
-        mov rdx, [resulti]
-        mov rax, 0
-        call printf
-
-        ;减法
-        mov rax, [number1]
-        sub rax, [number2]
-        mov [resulti], rax
-
-        ;显示结果
-        mov rdi, fmtint
-        mov rsi, difi
-        mov rdx, [resulti]
-        mov rax, 0
-        call printf
-
-        ;++
-        mov rax, [number1]
-        inc rax
-        mov [resulti], rax
-        ;显示结果
-        mov rdi, fmtint
-        mov rsi, inci
-        mov rdx, [resulti]
-        mov rax, 0
-        call printf
-
-        ;--
-        mov rax, [number1]
-        dec rax
-        mov [resulti], rax
-
-        ;显示结果
-        mov rdi, fmtint
-        mov rsi, deci
-        mov rdx, [resulti]
-        mov rax, 0
-        call printf
-
-        ;左移运算
-        mov rax, [number1]
-        sal rax, 2 ;x4
-        mov [resulti], rax
-        ;显示结果
-        mov rdi, fmtint
-        mov rsi, sali
-        mov rdx, [resulti]
-        mov rax, 0
-        call printf
-
-        ;右移运算
-        mov rax, [resulti]
-        sar rax, 2 ; /4
-        mov [resulti], rax
-        ;显示结果
-        mov rdi, fmtint
-        mov rsi, sari
-        mov rdx, [resulti]
-        mov rax, 0
-        call printf
-
-        mov rax, [neg_num]
-        sar rax, 2
-        mov [resulti], rax
-        ;显示结果
-        mov rdi, fmtint
-        mov rsi, sariex
-        mov rdx, [resulti]
-        mov rax, 0
-        call printf
-
-        ;乘法
-        mov rax, [number1]
-        imul qword [number2]
-        mov [resulti], rax
-        ;显示结果
-        mov rdi, fmtint
-        mov rsi, multi
-        mov rdx, [resulti]
-        mov rax, 0
-        call printf
-
-        ;除法
-        mov rax, [number1]
-        mov rdx, 0
-        idiv qword [number2]
-        mov [resulti], rax
-        ;显示结果
-        mov rdi, fmtint
-        mov rsi, divi
-        mov rdx, [resulti]
-        mov rax, 0
-        call printf
-
-        mov rdi, fmtint
-        mov rsi, remi
-        mov rdx, [modulo]
-        mov rax, 0
-        call printf
-
-        mov rsp, rbp
-        pop rbp
-        ret
-</code></pre>
+        <p><img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221024210635987.png" alt="image-20221024210635987"></p>
 
     </div>
     
