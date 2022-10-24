@@ -140,21 +140,21 @@
             
             <span class="tag">
                 
-                <a href="/tags/GUI/" style="color: #00bcd4">
+                <a href="/tags/GUI/" style="color: #ff7d73">
                     GUI
                 </a>
             </span>
             
             <span class="tag">
                 
-                <a href="/tags/C/" style="color: #03a9f4">
+                <a href="/tags/C/" style="color: #00bcd4">
                     C++
                 </a>
             </span>
             
             <span class="tag">
                 
-                <a href="/tags/Qt/" style="color: #00bcd4">
+                <a href="/tags/Qt/" style="color: #03a9f4">
                     Qt
                 </a>
             </span>
@@ -164,6 +164,7 @@
     </div>
     <div class="content" v-pre>
         <h1 id="为什么需要2D绘图"><a href="#为什么需要2D绘图" class="headerlink" title="为什么需要2D绘图"></a>为什么需要2D绘图</h1><p>Qt虽然为我们提供了强大的开发类库。但是对于复杂的GUI界面。我们还需要定制自己的界面样式。例如代码编辑器中的左侧行号，就需要我们自己绘制。</p>
+<p>我们将在本章中绘制一个时钟。一个简单的代码编辑器。</p>
 <h1 id="2D绘图的基本架构"><a href="#2D绘图的基本架构" class="headerlink" title="2D绘图的基本架构"></a>2D绘图的基本架构</h1><ul>
 <li><code>QPainter</code>用来执行绘图操作</li>
 <li><code>QPainterDevice</code>一个可绘制的设备，相当于画布一样，提供了一个二维空间的抽象，是所有可绘制设备的基类</li>
@@ -182,7 +183,7 @@
 <p>我们可以使用画笔画点，线，面等。还可以画一些其他的集合形状。</p>
 <img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221022101806985.png">
 
-<p>我们可以为画家提供画笔。比如笔的粗细，线条的风格，颜色等等。</p>
+<h1 id="使用画笔"><a href="#使用画笔" class="headerlink" title="使用画笔"></a>使用画笔</h1><p>我们可以为画家提供画笔。比如笔的粗细，线条的风格，颜色等等。</p>
 <pre><code class="C++">    QPen pen(Qt::green,4);
     painter.setPen(pen);
 </code></pre>
@@ -229,6 +230,20 @@
 
 <p>画刷提供一些风格，可以查阅Qt文档来查看。</p>
 <p><a target="_blank" rel="noopener" href="https://doc.qt.io/qt-6/qbrush.html#details">QBrush Class | Qt GUI 6.4.0</a></p>
+<h1 id="绘制文字"><a href="#绘制文字" class="headerlink" title="绘制文字"></a>绘制文字</h1><p><code>QPainter</code>同样的还可以绘制文字。</p>
+<p>我们在这里简单的实现一个文本编辑器的行号功能，实际上，如果想要获得一个还不与错的效果。需要额外做一些操作。我们知识简单的画文字而已。</p>
+<pre><code class="C++">void MainWindow::paintEvent(QPaintEvent *event)
+&#123;
+    QPainter painter(this);
+    QFont f(&quot;Arial&quot;);
+    painter.setFont(f);
+    painter.fillRect(0,0,20,this-&gt;height(),QBrush(Qt::darkGray));
+    for(int i=0;i&lt;20;++i) &#123;
+        painter.drawText(3,(i+1)*20,QString::number(i+1));
+    &#125;
+&#125;
+</code></pre>
+<p><img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221022115714817.png" alt="image-20221022115714817"></p>
 <h1 id="一些便捷的方法"><a href="#一些便捷的方法" class="headerlink" title="一些便捷的方法"></a>一些便捷的方法</h1><p>如果想要绘制一个矩形区域为一个颜色。我们可以把画笔和画刷设置为一样的颜色。</p>
 <h2 id="fillRect-x2F-eraseRect"><a href="#fillRect-x2F-eraseRect" class="headerlink" title="fillRect&#x2F;eraseRect"></a>fillRect&#x2F;eraseRect</h2><p>实际上这样做有些麻烦，我们可以使用<code>fillRect</code>函数含填充一个矩形区域,使用<code>eraseRect</code>来擦除一个矩形区域内的内容。</p>
 <pre><code class="C++">void MainWindow::paintEvent(QPaintEvent *event)
@@ -241,7 +256,7 @@
 </code></pre>
 <img src="C:\Users\wangq\AppData\Roaming\Typora\typora-user-images\image-20221022104846786.png">
 
-<p>抗锯齿又被称为反锯齿或者反走样，就是对图形的边缘惊醒平滑处理。在游戏中有广泛的应用。</p>
+<h2 id="抗锯齿"><a href="#抗锯齿" class="headerlink" title="抗锯齿"></a>抗锯齿</h2><p>抗锯齿又被称为反锯齿或者反走样，就是对图形的边缘惊醒平滑处理。在游戏中有广泛的应用。</p>
 <p><code>QPainter</code>在进行绘制的时候可以使用<code>QPainter::RenderHint</code>渲染提示来指定是否要使用抗锯齿功能。</p>
 <table>
 <thead>
@@ -270,7 +285,323 @@
 <img src="C:\Users\wangq\Pictures\Screenshots\屏幕截图_20221022_112257.png">
 
 <p>我们可以很明显的看见抗锯齿之后的效果明显平滑了许多。</p>
+<h1 id="坐标变换"><a href="#坐标变换" class="headerlink" title="坐标变换"></a>坐标变换</h1><p>绘制2D图形，有时候是静态的，有时候是动态的。在绘制动态的2D图形的时候，我们就需要进行图形的转换。这种图形的转换，实际上就是坐标的转换。</p>
+<h2 id="QPainter"><a href="#QPainter" class="headerlink" title="QPainter"></a>QPainter</h2><p><code>QPointer</code>扮演底层绘画角色在<code>Widget</code>上或者其他的可绘制设备上。我们可以用其提供的一些接口来对图形进行操作。</p>
+<p><code>QPainter</code>的有一套自己的坐标系统，默认是和物理坐标一样，(0,0)点在左上角，右侧是x轴正方向，下面是y轴正方向。为了实现图形的变换操作，<code>QPainter</code>会将自己的逻辑坐标和物理坐标通过某些算法来进行映射。</p>
+<p>使用<code>QPainter</code>进行绘制时，会使用逻辑坐标进行绘制，然后再转换为绘图设备的物理坐标。<br>逻辑坐标 -&gt; <code>QPainter</code> -&gt; 物理坐标</p>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>scale</td>
+<td>缩放坐标系统</td>
+</tr>
+<tr>
+<td>rotate</td>
+<td>旋转坐标系统</td>
+</tr>
+<tr>
+<td>translate</td>
+<td>平移坐标系统</td>
+</tr>
+<tr>
+<td>shear</td>
+<td>围绕原点扭曲坐标系统</td>
+</tr>
+</tbody></table>
+<h1 id="QTransform"><a href="#QTransform" class="headerlink" title="QTransform"></a>QTransform</h1><p>坐标系统的2D转换主要是由<code>QTransform</code>来实现的，当然我们也能用上面提到的函数来进行转换。<code>QTransfrom</code>对象可以存储多个变换操作；当同样的变换需要多次使用的时候，建议使用<code>QTransform</code>。</p>
+<h1 id="窗口-视口转换"><a href="#窗口-视口转换" class="headerlink" title="窗口-视口转换"></a>窗口-视口转换</h1><ul>
+<li>视口表示物理坐标下的任意一个矩形</li>
+<li>窗口表示逻辑坐标下的相同矩形</li>
+</ul>
+<p>默认的情况下(坐标系没有任何转换)，两者时一样的。</p>
+<p>使用窗口-视口转换可以时逻辑坐标系统适合应用要求，这个机制一个可以用来让绘图代码独立于绘图设备。</p>
+<p>话不多说，我们先上代码。</p>
+<p>我们可以把窗口想象成一个虚拟空间，我们的作画在虚拟空间上作画，然后再把虚拟空间的像素映射到显示设备。</p>
+<h1 id="Clock"><a href="#Clock" class="headerlink" title="Clock"></a>Clock</h1><p>我们将在<code>QWidget</code>上绘制一个时钟</p>
+<p>Widget.cpp</p>
+<pre><code class="C++">#include &quot;widget.h&quot;
+#include &lt;QTime&gt;
+#include &lt;QTimer&gt;
+#include &lt;QPainter&gt;
+#include &lt;iostream&gt;
 
+Widget::Widget(QWidget *parent)
+    : QWidget(parent)
+&#123;
+    resize(200,200);
+    auto timer = new QTimer(this);
+    //每过一秒update重新绘制窗口
+    connect(timer,&amp;QTimer::timeout,this,QOverload&lt;&gt;::of(&amp;Widget::update));
+    timer-&gt;start(1000);
+&#125;
+
+Widget::~Widget()
+&#123;
+&#125;
+
+void Widget::paintEvent(QPaintEvent *event)
+&#123;
+    static constexpr double hourRotateRadio = 30.0;
+    static constexpr double minuteRotateRadio = 6;
+    static constexpr double secRotateRadio = 6;
+    static constexpr QPoint hourHand[] = &#123;
+        &#123;7,8&#125;,&#123;-7,8&#125;,&#123;0,-40&#125;
+    &#125;;
+    static constexpr QPoint minuteHand[] = &#123;
+        &#123;7,8&#125;,&#123;-7,8&#125;,&#123;0,-70&#125;
+    &#125;;
+    static constexpr QPoint secHand[] = &#123;
+        &#123;2,8&#125;,&#123;-2,8&#125;,&#123;0,-80&#125;
+    &#125;;
+    QColor hourColor(127,0,127);
+    QColor minuteColor(0,127,127,191);
+    QColor secColor(127,127,0,100);
+    int side = qMin(width(),height());
+    QTime time = QTime::currentTime();
+    std::cout &lt;&lt; time.hour() &lt;&lt; &quot;:&quot; //CLion上qDebug不好使用cout代替
+              &lt;&lt; time.minute() &lt;&lt; &quot;:&quot;
+              &lt;&lt; time.second() &lt;&lt; std::endl;
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(Qt::NoPen);
+    //move hour hand to center
+    painter.translate(width()/2,height()/2);
+
+    //绘制时针
+    painter.setBrush(hourColor);
+    painter.save();
+    painter.rotate(hourRotateRadio*(time.hour()+time.minute()/60.0));
+    painter.drawPolygon(hourHand,3);
+    painter.restore();
+
+    //绘制分针
+    painter.save();
+    painter.setBrush(minuteColor);
+    painter.rotate(minuteRotateRadio*(time.minute()+time.second()/60.0));
+    painter.drawPolygon(minuteHand,3);
+    painter.restore();
+
+    //绘制秒针
+    painter.save();
+    painter.rotate(time.second()*secRotateRadio);
+    painter.setBrush(secColor);
+    painter.drawPolygon(secHand,3);
+    painter.restore();
+    
+    //绘制表盘
+     for(int i=0;i&lt;60;++i) &#123;
+         if(i%5==0) &#123;
+            painter.setPen(hourColor);
+            painter.drawLine(90,0,98,0);
+         &#125; else &#123;
+             painter.setPen(minuteColor);
+             painter.drawLine(92,0,96,0);
+         &#125;
+         painter.rotate(6.0);
+     &#125;
+&#125;
+</code></pre>
+<p>通过这个例子我们可以发现，我们无门可与忽略掉虚拟坐标到物理坐标之间的转换，直接把相应的接口看作物理坐标的直接转换。</p>
+<p>比如<code>rotate</code>我们看作将绘制的东西旋转，而不是看作旋转虚拟坐标然后再映射到实际坐标。</p>
+<h1 id="CodeEditer"><a href="#CodeEditer" class="headerlink" title="CodeEditer"></a>CodeEditer</h1><p>看看你正在用的代码编辑器。左侧有行号，在我们编写代码的时候他会更新。还可以设置背景图片。还可以在一个显示屏内打开多个窗口。还有代码高亮等功能。</p>
+<p>我们要完全的实现一个IDE，那肯定不现实。</p>
+<p>我们在有限的篇幅内完成左侧的行号提示功能。</p>
+<p>此部件基于Qt官方示例代码：<a target="_blank" rel="noopener" href="https://doc.qt.io/qt-6.2/qtwidgets-widgets-codeeditor-example.html">Code Editor Example | Qt Widgets 6.2.6</a></p>
+<h2 id="基本布局"><a href="#基本布局" class="headerlink" title="基本布局"></a>基本布局</h2><p>文本编辑的部分使用<code>QPlainTextEdit</code>。这是代码编辑器的一个再合适不过的工具了。他对读取文本文件进行了优化。</p>
+<p>底层的容器我们选用<code>QTabWidget</code>将<code>QPlainEdit</code>作为其中心部件。这个<code>QTabWidgets</code>又是<code>MainWindow</code>的中心部件。</p>
+<h2 id="工具栏和菜单栏"><a href="#工具栏和菜单栏" class="headerlink" title="工具栏和菜单栏"></a>工具栏和菜单栏</h2><p>工具栏和菜单栏，不是重点，只需要看着点点就行。随你喜欢。</p>
+<h2 id="左侧行号"><a href="#左侧行号" class="headerlink" title="左侧行号"></a>左侧行号</h2><p>对于左侧的行号，很遗憾：QT并没有为我们提供相应的Widget，这个应当留给我们自己开发。</p>
+<p>我们定义一个class叫做<code>LineNumberArea</code>这个组件为我们提供绘制行号的区域。</p>
+<p>我们继承<code>QPlainTextEdit</code>重写paintEvent事件。让其能够绘制左侧的行号。</p>
+<p>在我们编辑代码的时候，每次按下回车或者删除回车的时候，都会触发<code>blockCountChanged</code> 信号。我们的左侧行号宽度是动态改变的。这就意味着 <code>blockCountChanged</code>要和更新左侧行号区域的一个函数关联。行号每多一位，我们的宽度就要变宽。</p>
+<p>在滚动的时候，左侧的行号也要相应的变化。</p>
+<p>这时候我们不得不提到一个非常好用的信号<code>void QPlainTextEdit::updateRequest(const QRect &amp; rect, int dy)</code></p>
+<p>我们看Qt官方对它的解释</p>
+<blockquote>
+<p>This signal is emitted when the text document needs an update of the specified <em>rect</em>. If the text is scrolled, <em>rect</em> will cover the entire viewport area. If the text is scrolled vertically, <em>dy</em> carries the amount of pixels the viewport was scrolled.</p>
+<p>这个信号被处触发当文本文档需要一个更新一个特定的矩形区域时。如果文本被滚动，矩形将覆盖整个视口区域。如果文本被垂直的滚动，dy携带视口被滚动的像素数量。</p>
+</blockquote>
+<blockquote>
+<p>The purpose of the signal is to support extra widgets in plain text edit subclasses that e.g. show line numbers, breakpoints, or other extra information.</p>
+<p>该信号的目的是支持拓展的组件在纯文本编辑器的子类中，例如：展示行号，断点，或者其他的信息。</p>
+</blockquote>
+<p>所以，我们也应当将其链接到一个槽函数。</p>
+<p>我们自定的代码编辑类叫做<code>CodeEditer</code>。</p>
+<p><code>LineNumberArea</code>需要获得<code>CodeEditer</code>中的一些信息 ,<code>CodeEditer</code>也需要获得<code>LineNumberArea</code>的一些信息。我们可以使用指针互相指向对方。</p>
+<pre><code class="C++">#ifndef LINENUMBERAREA_H
+#define LINENUMBERAREA_H
+
+#include &lt;QWidget&gt;
+#include &quot;codeeditor.h&quot;
+class LineNumberArea : public QWidget
+&#123;
+    Q_OBJECT
+public:
+    explicit LineNumberArea(CodeEditor * editor) : QWidget(editor) &#123;
+        codeEditor = editor;	//指定父窗口
+    &#125;
+    //获取当前的numberLine宽度
+    QSize sizeHint() const override &#123;
+        return QSize(codeEditor-&gt;lineNumberAreaWidth(), 0);
+    &#125;
+private:
+protected:
+    //重写打印事件
+    void paintEvent(QPaintEvent *event) override &#123;
+        codeEditor-&gt;lineNumberAreaPaintEvent(event); //仅仅调用在CodeEditer中定义的函数。
+    &#125;
+private:
+    CodeEditor * codeEditor;	//代码编辑组件的指针
+&#125;;
+
+#endif // LINENUMBERAREA_H
+</code></pre>
+<pre><code class="C++">#ifndef CODEEDITOR_H
+#define CODEEDITOR_H
+
+#include &lt;QPlainTextEdit&gt;
+
+class CodeEditor : public QPlainTextEdit
+&#123;
+    Q_OBJECT
+public:
+    explicit CodeEditor(QWidget * parent = nullptr);
+
+    void lineNumberAreaPaintEvent(QPaintEvent *event);	//行号区域绘制的实现
+
+protected:
+    void paintEvent(QPaintEvent *e) override;		//重写paintEvent
+
+public:
+    int lineNumberAreaWidth();						//获得左侧行号的宽度
+protected:
+    void resizeEvent(QResizeEvent *event) override;	//重写当前窗口大小改变的事件
+private slots:
+    void updateLineNumberAreaWidth(int newBlockCount);	//更新左侧行号宽度
+    void highlightCurrentLine();						//高亮当前行，下面会说到
+    void updateLineNumberArea(const QRect &amp;rect, int dy);	//更新左侧行号区域中的数字
+private:
+    QWidget *lineNumberArea;		//指向LineNumberArea的指针
+&#125;;
+
+#endif // CODEEDITOR_H
+</code></pre>
+<h3 id="构造函数"><a href="#构造函数" class="headerlink" title="构造函数"></a>构造函数</h3><pre><code class="C++">CodeEditor::CodeEditor(QWidget *parent) : QPlainTextEdit(parent) &#123;
+    lineNumberArea = new LineNumberArea(this);
+    
+    //当行数更新的时候，就更新左侧行号宽度
+    connect(this, &amp;CodeEditor::blockCountChanged, this, &amp;CodeEditor::updateLineNumberAreaWidth);
+    //if the text is scrolled vertically, update LineNumber&#39;s line number
+    connect(this, &amp;CodeEditor::updateRequest, this, &amp;CodeEditor::updateLineNumberArea);
+
+    //当光标的位置改变，就调用高亮当前行操作
+    connect(this, &amp;CodeEditor::cursorPositionChanged, this, &amp;CodeEditor::highlightCurrentLine);
+    updateLineNumberAreaWidth(0);
+    
+    //first line also need height lighter;
+    highlightCurrentLine();
+    //设置可横向滚动
+    setLineWrapMode(QPlainTextEdit::NoWrap);
+&#125;
+</code></pre>
+<h3 id="获取左侧组件行号的宽度"><a href="#获取左侧组件行号的宽度" class="headerlink" title="获取左侧组件行号的宽度"></a>获取左侧组件行号的宽度</h3><pre><code class="C++">int CodeEditor::lineNumberAreaWidth() &#123;
+    //基础倍数等于1像素
+    int digits = 1;
+    int max = qMax(1, blockCount());
+    //几位数宽度设置为几行
+    while (max &gt;= 10) &#123;
+        max /= 10;
+        ++digits;
+    &#125;
+    //为了美观额外多三个像素,单个字体的宽度*基础倍数
+    int space = 3 + fontMetrics().horizontalAdvance(&#39;9&#39;) * digits;
+
+    return space;
+&#125;
+</code></pre>
+<h3 id="更新左侧行号区域宽度"><a href="#更新左侧行号区域宽度" class="headerlink" title="更新左侧行号区域宽度"></a>更新左侧行号区域宽度</h3><pre><code class="C++">void CodeEditor::updateLineNumberAreaWidth(int newBlockCount) &#123;
+    //更新numberLine的宽度
+    //设置当前的文本区域的左边界宽度，为numberLine提供地方
+    setViewportMargins(lineNumberAreaWidth(), 0, 0, 0); 
+&#125;
+</code></pre>
+<h3 id="更新左侧行号区域"><a href="#更新左侧行号区域" class="headerlink" title="更新左侧行号区域"></a>更新左侧行号区域</h3><pre><code class="C++">void CodeEditor::updateLineNumberArea(const QRect &amp;rect, int dy) &#123;
+    //如果垂直滚动了
+    if (dy)
+        lineNumberArea-&gt;scroll(0, dy);	//那么也调用QWidget::scroll
+    else
+        lineNumberArea-&gt;update(0, rect.y(), lineNumberArea-&gt;width(), rect.height());
+
+    if (rect.contains(viewport()-&gt;rect()))
+        updateLineNumberAreaWidth(0);
+&#125;
+</code></pre>
+<h3 id="Resize"><a href="#Resize" class="headerlink" title="Resize"></a>Resize</h3><pre><code class="C++">void CodeEditor::resizeEvent(QResizeEvent *event) &#123;
+    QPlainTextEdit::resizeEvent(event);
+    QRect cr = contentsRect();
+    lineNumberArea-&gt;setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+    QPlainTextEdit::resizeEvent(event);
+&#125;
+</code></pre>
+<h3 id="绘制左侧行号区域"><a href="#绘制左侧行号区域" class="headerlink" title="绘制左侧行号区域"></a>绘制左侧行号区域</h3><p>在说到这个函数之前，我们不得不提到一些函数</p>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>qRound</td>
+<td>对浮点数四舍五入</td>
+</tr>
+<tr>
+<td>QRectF::translated</td>
+<td>返回进行移动后的副本</td>
+</tr>
+<tr>
+<td>QPlainTextEdit::contentOffset()</td>
+<td>获得文本相对的偏移</td>
+</tr>
+</tbody></table>
+<p>更多信息查看：</p>
+<p><a target="_blank" rel="noopener" href="https://doc.qt.io/qt-6/qrect.html#translate-1">QRect Class | Qt Core 6.4.0</a></p>
+<p><a target="_blank" rel="noopener" href="https://doc.qt.io/qt-6/qplaintextedit.html#blockBoundingGeometry">QPlainTextEdit Class | Qt Widgets 6.4.0</a></p>
+<p><a target="_blank" rel="noopener" href="https://doc.qt.io/qt-6/qplaintextedit.html#contentOffset">QPlainTextEdit Class | Qt Widgets 6.4.0</a></p>
+<pre><code class="C++">void CodeEditor::lineNumberAreaPaintEvent(QPaintEvent *event) &#123;
+    //在numberLine上作画
+    QPainter painter(lineNumberArea);
+    //填充矩形区域为黑色
+    painter.fillRect(event-&gt;rect(), Qt::lightGray);
+
+    QTextBlock block = firstVisibleBlock();
+    //获取当前文本块的行号
+    int blockNumber = block.blockNumber();
+    
+    int top = qRound(blockBoundingGeometry(block).translated(contentOffset()).top());
+
+    int bottom = top + qRound(blockBoundingRect(block).height());
+    while (block.isValid() &amp;&amp; top &lt;= event-&gt;rect().bottom()) &#123;
+        if (block.isVisible() &amp;&amp; bottom &gt;= event-&gt;rect().top()) &#123;
+            QString number = QString::number(blockNumber + 1);
+            painter.setPen(Qt::black);
+            painter.drawText(0, top, lineNumberArea-&gt;width(), fontMetrics().height(),
+                             Qt::AlignCenter, number);
+        &#125;
+
+        block = block.next();
+        top = bottom;
+        bottom = top + qRound(blockBoundingRect(block).height());
+        ++blockNumber;
+    &#125;
+&#125;
+</code></pre>
+<h2 id="当前行高亮"><a href="#当前行高亮" class="headerlink" title="当前行高亮"></a>当前行高亮</h2><h2 id="语法高亮"><a href="#语法高亮" class="headerlink" title="语法高亮"></a>语法高亮</h2>
     </div>
     
 </div>
