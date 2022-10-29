@@ -1,0 +1,358 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0">
+        <title>Qt正则表达式 | Hello @You</title>
+        <meta name="author" content="Jan6055">
+        <meta name="description" content="">
+        <meta name="keywords" content="C++,Rust,Jan6055">
+        <link rel="icon" href="https://avatars.githubusercontent.com/u/94843786?s=400&u=3e0bac8cdc09c80d159d076c0503db566f8f0579&v=4">
+        <script src="https://cdn.staticfile.org/instant.page/5.1.0/instantpage.min.js" type="module"></script>
+        <script src="https://cdn.staticfile.org/font-awesome/6.1.1/js/all.min.js"></script>
+        
+        <link rel="stylesheet" href="/css/fonts.min.css">
+        <link rel="stylesheet" href="/css/particlex.css">
+        
+        <script src="https://cdn.staticfile.org/vue/3.2.33/vue.global.prod.min.js"></script>
+    <meta name="generator" content="Hexo 6.2.0"></head>
+    <body>
+        <div id="loading" style="height:100vh;width:100vw;position:fixed;display:flex;z-index:200;justify-content:space-between;background:#fff;transition:opacity 0.3s ease-out"><div style="position:fixed;height:100vh;width:100vw;display:flex;justify-content:center;align-items:center"><div id="loadcontent" style="width:50vmin;height:50vmin;padding:50px;border-radius:50%;display:flex;justify-content:center;align-items:center;border:solid 10px #a3ddfb;text-align:center"><div><h2>LOADING...</h2><p style="word-break:keep-all">加载过慢请开启缓存(浏览器默认开启)</p><div><img alt="loading" src="/loading.gif"></div></div></div></div></div>
+        <div id="layout">
+            <i data-fa-symbol="calendar-solid" class="fa-solid fa-calendar fa-fw"></i>
+            <i data-fa-symbol="bookmark-solid" class="fa-solid fa-bookmark fa-fw"></i>
+            <i data-fa-symbol="tags-solid" class="fa-solid fa-tags fa-fw"></i>
+            <transition name="into">
+                <div v-show="show_page" style="display: -not-none">
+                    <div id="menu_show">
+                         
+<nav id="menu">
+    <div class="desktop-menu">
+        <a href="/">
+            <span class="title">Hello @you</span>
+        </a>
+        
+        <a href="/">
+            <i class="fa-solid fa-house fa-fw"></i>
+            <span>&ensp;home</span>
+        </a>
+        
+        <a href="/about">
+            <i class="fa-solid fa-id-card fa-fw"></i>
+            <span>&ensp;about</span>
+        </a>
+        
+        <a href="/archives">
+            <i class="fa-solid fa-box-archive fa-fw"></i>
+            <span>&ensp;archives</span>
+        </a>
+        
+        <a href="/categories">
+            <i class="fa-solid fa-bookmark fa-fw"></i>
+            <span>&ensp;categories</span>
+        </a>
+        
+        <a href="/tags">
+            <i class="fa-solid fa-tags fa-fw"></i>
+            <span>&ensp;tags</span>
+        </a>
+        
+    </div>
+    <div :class="'phone-menu ' + menu_show" id="phone-menu">
+        <div class="curtain" @click="menu_show = !menu_show" v-show="menu_show"></div>
+        <div :class="'title'" @click="menu_show = !menu_show">
+            <i class="fa-solid fa-bars fa-fw"></i>
+            <span>&emsp;Hello @you</span>
+        </div>
+        <transition name="slide">
+        <div class="items" v-show="menu_show">
+            
+            <a href="/">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-house fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">home</div>
+                </div>
+            </a>
+            
+            <a href="/about">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-id-card fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">about</div>
+                </div>
+            </a>
+            
+            <a href="/archives">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-box-archive fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">archives</div>
+                </div>
+            </a>
+            
+            <a href="/categories">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-bookmark fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">categories</div>
+                </div>
+            </a>
+            
+            <a href="/tags">
+                <div class="item">
+                    <div style="min-width: 20px; max-width: 50px; width: 10%">
+                        <i class="fa-solid fa-tags fa-fw"></i>
+                    </div>
+                    <div style="min-width: 100px; max-width: 150%; width: 20%">tags</div>
+                </div>
+            </a>
+            
+        </div>
+        </transition>
+    </div>
+</nav>
+                    </div>
+                    <div id="main">
+                        
+<div class="article">
+    <div>
+        <h1>Qt正则表达式 </h1>
+    </div>
+    <div class="info">
+        <span class="date">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
+            </span>
+            2022/10/26
+        </span>
+        
+        
+        <span class="tags">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/C/" style="color: #00a596">
+                    C++
+                </a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/Qt/" style="color: #ffa2c4">
+                    Qt
+                </a>
+            </span>
+            
+            <span class="tag">
+                
+                <a href="/tags/正则表达式/" style="color: #00bcd4">
+                    正则表达式
+                </a>
+            </span>
+            
+        </span>
+        
+    </div>
+    <div class="content" v-pre>
+        <p>Qt中的正则表达式，主要是靠如下三个类来实现</p>
+<ul>
+<li><code>QRegularExpression</code>提供了一个可以用于匹配的正则表达式</li>
+<li><code>QRegularExpressionMatch</code>提供了一个匹配字符串的结果</li>
+<li><code>QRegularExpressionMatchIterator</code>提供了一个用于迭代结果的迭代器</li>
+</ul>
+<h1 id="匹配"><a href="#匹配" class="headerlink" title="匹配"></a>匹配</h1><p>我们可以在构造的时候设定模式串和一些选项，例如是否大小写敏感，<code>.</code>是否匹配换行符等等。</p>
+<p>我们可以使用<code>match</code>方法来对一个<code>QString</code>进行匹配。注意，<code>match</code>的匹配仅仅匹配一次。遇到符合的串就不再匹配了。区分它和<code>globalMath</code>。</p>
+<pre><code class="C++">#include &lt;QRegularExpression&gt;
+int main(int argc, char *argv[])
+&#123;
+    QRegularExpression reg(R&quot;(\bmov\b)&quot;);
+    QString str(&quot;mov rax, rbp&quot;);
+    QRegularExpressionMatch matched = reg.match(str);
+    return 0;
+&#125;
+</code></pre>
+<p>可以使用<code>hasMathed</code>来判断正则表达式是否被匹配。</p>
+<pre><code class="C++">    QRegularExpressionMatch matched = reg.match(str);
+    qDebug() &lt;&lt; matched.hasMatch();
+</code></pre>
+<p>可以得到一个<code>QRegularExpressionMatch</code>。那我们如何获得具体的结果呢？</p>
+<h1 id="捕获组"><a href="#捕获组" class="headerlink" title="捕获组"></a>捕获组</h1><p>我们将用<code>()</code>扩起来的表达式称为一个捕获组。就像这样<code>(hello|world)</code>。</p>
+<p>又或者是多个捕获组的组合<code>(hello|world)(.)?</code>。在这个表达式里有两个捕获组，一个是<code>(hello|world)</code>，一个是<code>(.)</code>。</p>
+<p>我们会对捕获组进行编号，在展开讨论之前，需要说明的是，编号为0的捕获组，指的是正则表达式整体，这一规则在支持捕获组的语言中，基本上都是适用的。我们可以很轻松的验证这一点。</p>
+<p>对于捕获组的编号， 是从左向右的。比如<code>(\d&#123;4&#125;)-(\d&#123;2&#125;)-(\d&#123;2&#125;)</code>。的四个捕获组</p>
+<ol>
+<li><code>\d&#123;4&#125;)-(\d&#123;2&#125;)-(\d&#123;2&#125;)</code></li>
+<li><code>(\d&#123;4&#125;)</code></li>
+<li><code>(\d&#123;2&#125;)</code></li>
+<li><code>(\d&#123;2&#125;)</code></li>
+</ol>
+<p>如果包含捕获组的嵌套关系，依旧是这样。例如<code>(\d&#123;4&#125;)-(\d&#123;2&#125;-(\d\d))</code>。则</p>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>命名</th>
+<th>捕获组</th>
+<th>匹配内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td></td>
+<td>(\d{4})-(\d{2}-(\d\d))</td>
+<td>2008-12-31</td>
+</tr>
+<tr>
+<td>1</td>
+<td></td>
+<td>(\d{4})</td>
+<td>2008</td>
+</tr>
+<tr>
+<td>2</td>
+<td></td>
+<td>(\d{2}-(\d\d))</td>
+<td>12-31</td>
+</tr>
+<tr>
+<td>3</td>
+<td></td>
+<td>(\d\d)</td>
+<td>31</td>
+</tr>
+</tbody></table>
+<p>在Qt中，我们可以使用<code>captured</code> 这个方法来返回捕获组捕获的 （匹配的）字符串。</p>
+<pre><code class="C++">    QRegularExpression reg(R&quot;((\d&#123;4&#125;)-(\d&#123;2&#125;)-(\d&#123;2&#125;))&quot;);
+    QString str = &quot;2022-10-26&quot;;
+    QRegularExpressionMatch matched = reg.match(str);
+    qDebug() &lt;&lt; matched.hasMatch();
+    qDebug() &lt;&lt; matched.captured(0);
+    qDebug() &lt;&lt; matched.captured(1);
+    qDebug() &lt;&lt; matched.captured(2);
+    qDebug() &lt;&lt; matched.captured(3);
+</code></pre>
+<p>当然，每个捕获组都有匹配的内容。当这个正则表达式被匹配后，每个捕获组的匹配的内容是唯一的。</p>
+<p>Qt中可以使用<code>captured</code>来获得捕获组捕获的内容。</p>
+<pre><code class="C++">#include &lt;QRegularExpression&gt;
+#include &lt;QDebug&gt;
+int main(int argc, char *argv[])
+&#123;
+    QRegularExpression reg(R&quot;((\d&#123;4&#125;)-(\d&#123;2&#125;)-(\d&#123;2&#125;))&quot;);
+    QString str = &quot;Today is 2022-10-26&quot;;
+    QRegularExpressionMatch matched = reg.match(str);
+    qDebug() &lt;&lt; matched.captured(0);
+    qDebug() &lt;&lt; matched.captured(1);
+    qDebug() &lt;&lt; matched.captured(2);
+    qDebug() &lt;&lt; matched.captured(3);
+    return 0;
+&#125;
+</code></pre>
+<pre><code>&quot;2022-10-26&quot;
+&quot;2022&quot;
+&quot;10&quot;
+&quot;26&quot;
+</code></pre>
+<p>你也可以用</p>
+<ul>
+<li><p><code>capturedLength(int nth=0)</code>	获得捕获的字符串的长度</p>
+</li>
+<li><p><code>capturedStart(int nth=0)</code>  获得捕获的字符串相起始位置对于整个字符的下标</p>
+</li>
+<li><p><code>capturedEnd(nth=0)</code>  获得捕获的字符串相结束位置对于整个字符的下表。</p>
+</li>
+</ul>
+<p>等函数来获取捕获的相关信息，其中nth为第n个捕获组。</p>
+<p>详情请参阅：<a target="_blank" rel="noopener" href="https://doc.qt.io/qt-6/qregularexpressionmatch.html#capturedStart">Q正则表达式匹配类 |Qt 酷睿 6.4.0</a></p>
+<pre><code>    qDebug() &lt;&lt; matched.capturedLength();
+    qDebug() &lt;&lt; matched.capturedStart();
+    qDebug() &lt;&lt; matched.capturedEnd();
+    qDebug() &lt;&lt; matched.capturedLength(1);
+    qDebug() &lt;&lt; matched.capturedStart(1);
+    qDebug() &lt;&lt; matched.capturedEnd(1);
+</code></pre>
+<pre><code>10
+9
+19
+4
+9
+13
+</code></pre>
+<h1 id="全局匹配"><a href="#全局匹配" class="headerlink" title="全局匹配"></a>全局匹配</h1><p>使用<code>match</code>匹配，是非全局的。举一个例子。<code>I say hello and you say hello too</code> 匹配hello。</p>
+<ul>
+<li><code>math</code> -&gt; <code>I say hello and you say hello too</code></li>
+<li><code>globalMath</code> -&gt; <code>I say *hello* and you say *hello* too</code></li>
+</ul>
+<p>可以看见，全局匹配会匹配所有符合条件按的字串。</p>
+<h2 id="获取全局匹配的结果"><a href="#获取全局匹配的结果" class="headerlink" title="获取全局匹配的结果"></a>获取全局匹配的结果</h2><p><code>QRegularExpressionMatchIterator</code>是一个JAVA风格的迭代器，用于迭代匹配后的结果。</p>
+<p>使用<code>next</code>方法获得<code>QRegularExpressionMatch</code>，我们便可以进行其他操作。</p>
+<pre><code class="C++">#include &lt;QRegularExpression&gt;
+#include &lt;QDebug&gt;
+int main(int argc, char *argv[])
+&#123;
+    QRegularExpression reg(R&quot;(hello\w?)&quot;);
+    QString s(&quot;I say hello and you say helloo too&quot;);
+    QRegularExpressionMatchIterator it = reg.globalMatch(s);
+    int i = 0;
+    while(it.hasNext()) &#123;
+        ++i;
+        auto tmp = it.next();
+        qDebug() &lt;&lt; QString(&quot;第%1个匹配结果: &quot;).arg(i) &lt;&lt; Qt::endl
+                 &lt;&lt; tmp.captured(0) &lt;&lt; Qt::endl
+                 &lt;&lt; QString(&quot;len: %1&quot;).arg(tmp.capturedLength()) &lt;&lt; Qt::endl
+                 &lt;&lt; QString(&quot;start index: %1&quot;).arg(tmp.capturedStart());
+    &#125;
+    return 0;
+&#125;
+</code></pre>
+<pre><code>&quot;第1个匹配结果: &quot; 
+&quot;hello&quot; 
+&quot;len: 5&quot; 
+&quot;start index: 6&quot;
+&quot;第2个匹配结果: &quot; 
+&quot;helloo&quot; 
+&quot;len: 6&quot; 
+&quot;start index: 24&quot;
+</code></pre>
+
+    </div>
+    
+</div>
+                         
+<footer id="footer">
+    <div class="footer-wrap">
+        <div>
+            © 20xx - 2022 Hello @you
+            <span class="footer-icon">
+                <i class="fa-solid fa-font-awesome fa-fw"></i>
+            </span>
+            @Jan6055
+        </div>
+        <div></div>
+        <div>Based on the <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo Engine</a> & <a
+                target="_blank" rel="noopener" href="https://github.com/argvchs/hexo-theme-particlex">ParticleX Theme</a></div>
+        
+    </div>
+</footer>
+                    </div>
+                </div>
+            </transition>
+            <div id="img_show">
+                <img id="img_content" alt="img_show">
+            </div>
+        </div>
+        <script src="https://cdn.staticfile.org/highlight.js/11.5.1/highlight.min.js"></script>
+        <script src="/js/particlex.js"></script>
+        <script src="/js/showimg.js"></script>
+        
+
+    </body>
+</html>

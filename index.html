@@ -144,6 +144,283 @@
             
 
 <div class="post">
+    <a href="/2022/10/26/Qt正则表达式/">
+        <h2 class="post-title">Qt正则表达式</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="date">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
+            </span>
+            2022/10/26
+        </span>
+    </div>
+    <div class="excerpt">
+        <div class="content" v-pre>
+            
+            <p>Qt中的正则表达式，主要是靠如下三个类来实现</p>
+<ul>
+<li><code>QRegularExpression</code>提供了一个可以用于匹配的正则表达式</li>
+<li><code>QRegularExpressionMatch</code>提供了一个匹配字符串的结果</li>
+<li><code>QRegularExpressionMatchIterator</code>提供了一个用于迭代结果的迭代器</li>
+</ul>
+<h1 id="匹配"><a href="#匹配" class="headerlink" title="匹配"></a>匹配</h1><p>我们可以在构造的时候设定模式串和一些选项，例如是否大小写敏感，<code>.</code>是否匹配换行符等等。</p>
+<p>我们可以使用<code>match</code>方法来对一个<code>QString</code>进行匹配。注意，<code>match</code>的匹配仅仅匹配一次。遇到符合的串就不再匹配了。区分它和<code>globalMath</code>。</p>
+<pre><code class="C++">#include &lt;QRegularExpression&gt;
+int main(int argc, char *argv[])
+&#123;
+    QRegularExpression reg(R&quot;(\bmov\b)&quot;);
+    QString str(&quot;mov rax, rbp&quot;);
+    QRegularExpressionMatch matched = reg.match(str);
+    return 0;
+&#125;
+</code></pre>
+<p>可以使用<code>hasMathed</code>来判断正则表达式是否被匹配。</p>
+<pre><code class="C++">    QRegularExpressionMatch matched = reg.match(str);
+    qDebug() &lt;&lt; matched.hasMatch();
+</code></pre>
+<p>可以得到一个<code>QRegularExpressionMatch</code>。那我们如何获得具体的结果呢？</p>
+<h1 id="捕获组"><a href="#捕获组" class="headerlink" title="捕获组"></a>捕获组</h1><p>我们将用<code>()</code>扩起来的表达式称为一个捕获组。就像这样<code>(hello|world)</code>。</p>
+<p>又或者是多个捕获组的组合<code>(hello|world)(.)?</code>。在这个表达式里有两个捕获组，一个是<code>(hello|world)</code>，一个是<code>(.)</code>。</p>
+<p>我们会对捕获组进行编号，在展开讨论之前，需要说明的是，编号为0的捕获组，指的是正则表达式整体，这一规则在支持捕获组的语言中，基本上都是适用的。我们可以很轻松的验证这一点。</p>
+<p>对于捕获组的编号， 是从左向右的。比如<code>(\d&#123;4&#125;)-(\d&#123;2&#125;)-(\d&#123;2&#125;)</code>。的四个捕获组</p>
+<ol>
+<li><code>\d&#123;4&#125;)-(\d&#123;2&#125;)-(\d&#123;2&#125;)</code></li>
+<li><code>(\d&#123;4&#125;)</code></li>
+<li><code>(\d&#123;2&#125;)</code></li>
+<li><code>(\d&#123;2&#125;)</code></li>
+</ol>
+<p>如果包含捕获组的嵌套关系，依旧是这样。例如<code>(\d&#123;4&#125;)-(\d&#123;2&#125;-(\d\d))</code>。则</p>
+<table>
+<thead>
+<tr>
+<th>编号</th>
+<th>命名</th>
+<th>捕获组</th>
+<th>匹配内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td></td>
+<td>(\d{4})-(\d{2}-(\d\d))</td>
+<td>2008-12-31</td>
+</tr>
+<tr>
+<td>1</td>
+<td></td>
+<td>(\d{4})</td>
+<td>2008</td>
+</tr>
+<tr>
+<td>2</td>
+<td></td>
+<td>(\d{2}-(\d\d))</td>
+<td>12-31</td>
+</tr>
+<tr>
+<td>3</td>
+<td></td>
+<td>(\d\d)</td>
+<td>31</td>
+</tr>
+</tbody></table>
+<p>在Qt中，我们可以使用<code>captured</code> 这个方法来返回捕获组捕获的 （匹配的）字符串。</p>
+<pre><code class="C++">    QRegularExpression reg(R&quot;((\d&#123;4&#125;)-(\d&#123;2&#125;)-(\d&#123;2&#125;))&quot;);
+    QString str = &quot;2022-10-26&quot;;
+    QRegularExpressionMatch matched = reg.match(str);
+    qDebug() &lt;&lt; matched.hasMatch();
+    qDebug() &lt;&lt; matched.captured(0);
+    qDebug() &lt;&lt; matched.captured(1);
+    qDebug() &lt;&lt; matched.captured(2);
+    qDebug() &lt;&lt; matched.captured(3);
+</code></pre>
+<p>当然，每个捕获组都有匹配的内容。当这个正则表达式被匹配后，每个捕获组的匹配的内容是唯一的。</p>
+<p>Qt中可以使用<code>captured</code>来获得捕获组捕获的内容。</p>
+<pre><code class="C++">#include &lt;QRegularExpression&gt;
+#include &lt;QDebug&gt;
+int main(int argc, char *argv[])
+&#123;
+    QRegularExpression reg(R&quot;((\d&#123;4&#125;)-(\d&#123;2&#125;)-(\d&#123;2&#125;))&quot;);
+    QString str = &quot;Today is 2022-10-26&quot;;
+    QRegularExpressionMatch matched = reg.match(str);
+    qDebug() &lt;&lt; matched.captured(0);
+    qDebug() &lt;&lt; matched.captured(1);
+    qDebug() &lt;&lt; matched.captured(2);
+    qDebug() &lt;&lt; matched.captured(3);
+    return 0;
+&#125;
+</code></pre>
+<pre><code>&quot;2022-10-26&quot;
+&quot;2022&quot;
+&quot;10&quot;
+&quot;26&quot;
+</code></pre>
+<p>你也可以用</p>
+<ul>
+<li><p><code>capturedLength(int nth=0)</code>	获得捕获的字符串的长度</p>
+</li>
+<li><p><code>capturedStart(int nth=0)</code>  获得捕获的字符串相起始位置对于整个字符的下标</p>
+</li>
+<li><p><code>capturedEnd(nth=0)</code>  获得捕获的字符串相结束位置对于整个字符的下表。</p>
+</li>
+</ul>
+<p>等函数来获取捕获的相关信息，其中nth为第n个捕获组。</p>
+<p>详情请参阅：<a target="_blank" rel="noopener" href="https://doc.qt.io/qt-6/qregularexpressionmatch.html#capturedStart">Q正则表达式匹配类 |Qt 酷睿 6.4.0</a></p>
+<pre><code>    qDebug() &lt;&lt; matched.capturedLength();
+    qDebug() &lt;&lt; matched.capturedStart();
+    qDebug() &lt;&lt; matched.capturedEnd();
+    qDebug() &lt;&lt; matched.capturedLength(1);
+    qDebug() &lt;&lt; matched.capturedStart(1);
+    qDebug() &lt;&lt; matched.capturedEnd(1);
+</code></pre>
+<pre><code>10
+9
+19
+4
+9
+13
+</code></pre>
+<h1 id="全局匹配"><a href="#全局匹配" class="headerlink" title="全局匹配"></a>全局匹配</h1><p>使用<code>match</code>匹配，是非全局的。举一个例子。<code>I say hello and you say hello too</code> 匹配hello。</p>
+<ul>
+<li><code>math</code> -&gt; <code>I say hello and you say hello too</code></li>
+<li><code>globalMath</code> -&gt; <code>I say *hello* and you say *hello* too</code></li>
+</ul>
+<p>可以看见，全局匹配会匹配所有符合条件按的字串。</p>
+<h2 id="获取全局匹配的结果"><a href="#获取全局匹配的结果" class="headerlink" title="获取全局匹配的结果"></a>获取全局匹配的结果</h2><p><code>QRegularExpressionMatchIterator</code>是一个JAVA风格的迭代器，用于迭代匹配后的结果。</p>
+<p>使用<code>next</code>方法获得<code>QRegularExpressionMatch</code>，我们便可以进行其他操作。</p>
+<pre><code class="C++">#include &lt;QRegularExpression&gt;
+#include &lt;QDebug&gt;
+int main(int argc, char *argv[])
+&#123;
+    QRegularExpression reg(R&quot;(hello\w?)&quot;);
+    QString s(&quot;I say hello and you say helloo too&quot;);
+    QRegularExpressionMatchIterator it = reg.globalMatch(s);
+    int i = 0;
+    while(it.hasNext()) &#123;
+        ++i;
+        auto tmp = it.next();
+        qDebug() &lt;&lt; QString(&quot;第%1个匹配结果: &quot;).arg(i) &lt;&lt; Qt::endl
+                 &lt;&lt; tmp.captured(0) &lt;&lt; Qt::endl
+                 &lt;&lt; QString(&quot;len: %1&quot;).arg(tmp.capturedLength()) &lt;&lt; Qt::endl
+                 &lt;&lt; QString(&quot;start index: %1&quot;).arg(tmp.capturedStart());
+    &#125;
+    return 0;
+&#125;
+</code></pre>
+<pre><code>&quot;第1个匹配结果: &quot; 
+&quot;hello&quot; 
+&quot;len: 5&quot; 
+&quot;start index: 6&quot;
+&quot;第2个匹配结果: &quot; 
+&quot;helloo&quot; 
+&quot;len: 6&quot; 
+&quot;start index: 24&quot;
+</code></pre>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        <span class="icon">
+            <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
+        </span>
+        
+        
+        <span class="tag">
+            
+            <a href="/tags/C/" style="color: #ffa2c4">
+                C++
+            </a>
+        </span>
+        
+        <span class="tag">
+            
+            <a href="/tags/Qt/" style="color: #00a596">
+                Qt
+            </a>
+        </span>
+        
+        <span class="tag">
+            
+            <a href="/tags/正则表达式/" style="color: #ff7d73">
+                正则表达式
+            </a>
+        </span>
+        
+    </div>
+    <a href="/2022/10/26/Qt正则表达式/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post">
+    <a href="/2022/10/24/QProcess/">
+        <h2 class="post-title">QProcess</h2>
+    </a>
+    <div class="category-and-date">
+        
+        <span class="date">
+            <span class="icon">
+                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
+            </span>
+            2022/10/24
+        </span>
+    </div>
+    <div class="excerpt">
+        <div class="content" v-pre>
+            
+            <h1 id="QProcess"><a href="#QProcess" class="headerlink" title="QProcess"></a>QProcess</h1><p><code>QProcess</code>用于启动一个进程。其构造函数指定了一个父亲。并无其他的重载。</p>
+<p>我们可以使用start来启动进程，并传递一些参数。</p>
+<pre><code class="C++">#include &lt;QProcess&gt;
+int main(int argc, char *argv[])
+&#123;
+    QProcess p;
+    p.start(&quot;notepad.exe&quot;);
+    p.waitForFinished();
+    auto s = p.readAllStandardOutput();
+    qDebug() &lt;&lt; s;
+    return 0;
+&#125;
+</code></pre>
+<p>启动notepad进程，此时我们可以看见Windos上的记事本被被启动。</p>
+
+            
+        </div>
+    </div>
+    <div class="post-tags">
+        
+        <span class="icon">
+            <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
+        </span>
+        
+        
+        <span class="tag">
+            
+            <a href="/tags/GUI/" style="color: #03a9f4">
+                GUI
+            </a>
+        </span>
+        
+        <span class="tag">
+            
+            <a href="/tags/C/" style="color: #ff7d73">
+                C++
+            </a>
+        </span>
+        
+        <span class="tag">
+            
+            <a href="/tags/Qt/" style="color: #00a596">
+                Qt
+            </a>
+        </span>
+        
+    </div>
+    <a href="/2022/10/24/QProcess/" class="go-post">阅读全文</a>
+</div>
+
+<div class="post">
     <a href="/2022/10/22/Qt-2D绘图/">
         <h2 class="post-title">Qt-2D绘图</h2>
     </a>
@@ -617,14 +894,14 @@ private:
         
         <span class="tag">
             
-            <a href="/tags/C/" style="color: #00bcd4">
+            <a href="/tags/C/" style="color: #03a9f4">
                 C++
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/Qt/" style="color: #ffa2c4">
+            <a href="/tags/Qt/" style="color: #03a9f4">
                 Qt
             </a>
         </span>
@@ -954,14 +1231,14 @@ main:
         
         <span class="tag">
             
-            <a href="/tags/x64-asm/" style="color: #00a596">
+            <a href="/tags/x64-asm/" style="color: #ffa2c4">
                 x64_asm
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/asm/" style="color: #ff7d73">
+            <a href="/tags/asm/" style="color: #03a9f4">
                 asm
             </a>
         </span>
@@ -1179,14 +1456,14 @@ circle.asm:17: undefined reference to `pi&#39;
         
         <span class="tag">
             
-            <a href="/tags/x64-asm/" style="color: #ffa2c4">
+            <a href="/tags/x64-asm/" style="color: #00a596">
                 x64_asm
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/asm/" style="color: #ffa2c4">
+            <a href="/tags/asm/" style="color: #ff7d73">
                 asm
             </a>
         </span>
@@ -1295,7 +1572,7 @@ rsp is 23cfdfe0
         
         <span class="tag">
             
-            <a href="/tags/asm/" style="color: #ff7d73">
+            <a href="/tags/asm/" style="color: #ffa2c4">
                 asm
             </a>
         </span>
@@ -1468,14 +1745,14 @@ main:
         
         <span class="tag">
             
-            <a href="/tags/x64-asm/" style="color: #00bcd4">
+            <a href="/tags/x64-asm/" style="color: #ff7d73">
                 x64_asm
             </a>
         </span>
         
         <span class="tag">
             
-            <a href="/tags/asm/" style="color: #ffa2c4">
+            <a href="/tags/asm/" style="color: #00bcd4">
                 asm
             </a>
         </span>
@@ -1521,7 +1798,7 @@ main:
         
         <span class="tag">
             
-            <a href="/tags/asm/" style="color: #03a9f4">
+            <a href="/tags/asm/" style="color: #00a596">
                 asm
             </a>
         </span>
@@ -1752,295 +2029,13 @@ main:
         
         <span class="tag">
             
-            <a href="/tags/asm/" style="color: #00bcd4">
+            <a href="/tags/asm/" style="color: #ffa2c4">
                 asm
             </a>
         </span>
         
     </div>
     <a href="/2022/10/13/x64-asm整数的运算/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post">
-    <a href="/2022/10/02/Rust指针/">
-        <h2 class="post-title">Rust Raw-Ptr</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
-            </span>
-            2022/10/2
-        </span>
-    </div>
-    <div class="excerpt">
-        <div class="content" v-pre>
-            
-            <h1 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h1><p>提到指针，就一定避免不了谈到引用。因为引用时指针的封装。引用总能指向一个有效的对象，并在指向一个动态对象的时候有着大小的保证。引用的好处有如下几点</p>
-<ul>
-<li>总能保证引用有效数据</li>
-<li>引用与usize大小的倍数对其</li>
-<li>引用可以为动态类型大小提供上述保障</li>
-</ul>
-<p>我们可以使用{:p}的格式来表示要打印指针</p>
-<pre><code class="rust">    let a = 10;
-    println!(&quot;&#123;:p&#125;&quot;,&amp;a);
-</code></pre>
-<p>可以看见&amp;a这里被当作了一个指针。</p>
-<p>同样的，还能取得数组的首地址。</p>
-<pre><code class="rust">    let nums = [10; 5];
-    println!(&quot;&#123;:p&#125;&quot;,&amp;nums);
-</code></pre>
-<p>本应是引用，却有了取地址的意思。一定程度上，把引用和指针一视同仁，把引用看作封装后的指针。</p>
-<p>现在再来看解引用操作。</p>
-<pre><code class="rust">    let a = 10;
-    let ra = &amp;10;
-    println!(&quot;&#123;&#125;&quot;,*ra);
-</code></pre>
-<p>恍然大悟了！虽然ra可以自动解引用，也可以手动解引用。这不就是C吗？取地址和解引用。</p>
-<h1 id="指针"><a href="#指针" class="headerlink" title="指针"></a>指针</h1><p>rust更倾向于把指针封装起来，毕竟为了安全嘛。原始指针我们叫做<code>raw-ptr</code>。</p>
-<p>什么时<code>raw-ptr</code>呢？就是一个引用呗。那肯定也支持指针算数操作。比如加法运算。</p>
-<pre><code class="rust">    let a = 10;
-    let ra = &amp;10;
-    let b = ra + 1;
-    println!(&quot;&#123;b&#125;&quot;);
-</code></pre>
-<p>很不幸，b是11。因为标准库为我们实现了&amp;i32 i32的Add trait。这样操作就相当于两个i32相加。</p>
-<h2 id="raw指针类型"><a href="#raw指针类型" class="headerlink" title="raw指针类型"></a>raw指针类型</h2><p>众所周知C&#x2F;C++中有<code>T*</code>类型，例如<code>int *; double *</code>等。Rust同样的也提供了这样的类型。写法和C&#x2F;C++颇有不同。</p>
-<pre><code class="rust">    let a = 10;
-    let pa: * const i32 = &amp;a;
-    println!(&quot;&#123;:p&#125;&quot;,pa);
-    let pa = &amp;a as * const i32;
-    println!(&quot;&#123;:p&#125;&quot;,pa);
-</code></pre>
-<p>Rust中的raw-ptr分为<code>const</code>, <code>mut</code>两种性质。意思为指向的对象不可变，指向的对象可变。</p>
-<p>对raw-ptr执行解引用操作需要在unsafe中进行。</p>
-<pre><code class="rust">    let a = 10;
-    let pa: * const i32 = &amp;a;
-    unsafe &#123;
-        // *pa = 20; //error
-    &#125;
-    println!(&quot;&#123;:p&#125;&quot;,pa);
-    let pa = &amp;a as * const i32 as * mut i32;
-    unsafe &#123;
-        *pa = 20;
-    &#125;
-    assert_eq!(20, a);
-    println!(&quot;&#123;:p&#125;&quot;,pa);
-</code></pre>
-<p>从一个&amp;T来到*mut T需要额外的转换，要先转换为<code>*const</code>,再转换为<code>*mut</code>。但是可以从&amp;mut T直接转换为一个<code>*mut</code>指针。</p>
-<pre><code class="rust">    let mut a = 10;
-    let pa = &amp;mut a as *mut i32;
-</code></pre>
-<h2 id="raw指针会破坏rust的借用和所有权规则"><a href="#raw指针会破坏rust的借用和所有权规则" class="headerlink" title="raw指针会破坏rust的借用和所有权规则"></a>raw指针会破坏rust的借用和所有权规则</h2><p>你可能看见了a是一个非mut的变量，却经过*mut指针之手改变为20，使用的时候要注意。rust的不可变性，也不是那么的不可变啊。</p>
-<p>这样太容易带来歧义了。按照rust的说法，非mut的，就是不可变，维度指针打破了这种规则。如果指针操作的一个变量可能改变，请生命为mut避免带来歧义。</p>
-<h2 id="mut隐式的转换为-const"><a href="#mut隐式的转换为-const" class="headerlink" title="*mut隐式的转换为*const"></a>*mut隐式的转换为*const</h2><pre><code class="rust">   let p: *mut i32 = ptr::null_mut();
-   let q: *const i32 = p; //隐式转换
-</code></pre>
-<h1 id="空指针null"><a href="#空指针null" class="headerlink" title="空指针null"></a>空指针null</h1><p>大多数的C&#x2F;C++错误，空指针是罪魁祸首。rust在safe中没有提供空指针。而是使用Option的None枚举来代表空语义。</p>
-<p>现在设计到的raw-ptr,讨论空指针是不可避免的。</p>
-<h2 id="ptr-null"><a href="#ptr-null" class="headerlink" title="ptr::null()"></a>ptr::null()</h2><p>但是null这个关键字并没有被rust引入。如果你想获得一个空指针，可以用<code>ptr::null()</code></p>
-<pre><code class="rust">let p: * const i32 = ptr::null();
-</code></pre>
-<p>单纯的对空指针解引用则是一个未定义的行为。在windows上可能会得到一个error,在linux上可能会段错误。</p>
-<pre><code class="rust">    unsafe &#123;
-        println!(&quot;&#123;&#125;&quot;,*p);
-    &#125;
-</code></pre>
-<p>用<code>ptr_null()</code>获得的指针是不可变的(指向的对象)。</p>
-<pre><code class="rust">    let mut p: * const i32 = ptr::null();
-    let a = 10;
-    p = &amp;a as *const i32;
-    unsafe &#123;
-        *p = 20; //error
-    &#125;
-</code></pre>
-<h2 id="ptr-mut-null"><a href="#ptr-mut-null" class="headerlink" title="ptr::mut_null()"></a>ptr::mut_null()</h2><p>同样是获得指针，但是是可变的(指向的对象)</p>
-<pre><code class="rust">    let mut p: * mut i32 = ptr::null_mut();
-    let mut a = 10;
-    p = &amp;a as *const i32 as *mut i32;
-    unsafe &#123;
-        *p = 20; //ok
-    &#125;
-</code></pre>
-<h2 id="is-null"><a href="#is-null" class="headerlink" title="is_null()"></a>is_null()</h2><p>你可以使用is_null来判断一个指针是否为空。</p>
-<pre><code class="rust">    let p: * const i32 = ptr::null();
-    assert!(p.is_null());
-</code></pre>
-<h1 id="使用raw-ptr迭代容器"><a href="#使用raw-ptr迭代容器" class="headerlink" title="使用raw-ptr迭代容器"></a>使用raw-ptr迭代容器</h1><p>rust肯定不推荐使用raw-ptr来迭代容器。毕竟标准库已经为我们提供了那么多用于迭代的方法。rust也内置了<code>for in</code>来进行迭代。如果不是为学习&#x2F;系统编程。没人会这样做。对raw-ptr的操作要放在unsafe里，这是不安全的。但最主要的是——不要有现成的工具不用而跑去当猴子。</p>
-<h2 id="迭代"><a href="#迭代" class="headerlink" title="迭代"></a>迭代</h2><p>例如用raw-ptr迭代一个C风格个字符串。</p>
-<pre><code class="rust">static c_string: [u8; 8] = [97,98,99,100,101,102,103,b&#39;\0&#39;];
-fn main() &#123;
-    let mut curr = &amp;c_string as *const u8;
-    unsafe &#123;
-        while *curr != b&#39;\0&#39; &#123;
-            print!(&quot;&#123;&#125; &quot;,*curr as char);
-            curr = curr.add(1);
-        &#125;
-    &#125;
-&#125;
-</code></pre>
-<p>rust对于裸指针的+操作，并没有直接用加号。而是提供了一个add()方法。类似的，还提供了一个名为sub()方法，代替-。</p>
-<h2 id="回文字符串"><a href="#回文字符串" class="headerlink" title="回文字符串"></a>回文字符串</h2><p>给定一个String，判断这个String是否是回文。假定String中的字符全为英文字母。</p>
-<pre><code class="rust">fn main() &#123;
-    let s = String::from(&quot;helloolleh&quot;);
-    println!(&quot;&#123;&#125;&quot;,is_palindrome(&amp;s));
-&#125;
-
-//判断一个s: &amp;str是否是回文
-fn is_palindrome(s: &amp;str) -&gt; bool &#123;
-    let mut first = s.as_ptr();
-    unsafe &#123;
-        let mut last = s.as_ptr().add(s.len()-1);
-        while first &lt; last &#123;
-            if *first != *last &#123;
-                return false;
-            &#125;
-            first = first.add(1);
-            last = last.sub(1);
-        &#125;
-    &#125;
-    true
-&#125;
-</code></pre>
-<h1 id="unsafe链表"><a href="#unsafe链表" class="headerlink" title="unsafe链表"></a>unsafe链表</h1>
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        <span class="icon">
-            <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-        </span>
-        
-        
-        <span class="tag">
-            
-            <a href="/tags/Rust/" style="color: #00a596">
-                Rust
-            </a>
-        </span>
-        
-        <span class="tag">
-            
-            <a href="/tags/Unsafe-Rust/" style="color: #00bcd4">
-                Unsafe Rust
-            </a>
-        </span>
-        
-        <span class="tag">
-            
-            <a href="/tags/Effective-Rust/" style="color: #ff7d73">
-                Effective Rust
-            </a>
-        </span>
-        
-    </div>
-    <a href="/2022/10/02/Rust指针/" class="go-post">阅读全文</a>
-</div>
-
-<div class="post">
-    <a href="/2022/10/01/区别-mut-mut-mut-mut/">
-        <h2 class="post-title">区别&amp; Mut; Mut &amp;; Mut &amp; Mut</h2>
-    </a>
-    <div class="category-and-date">
-        
-        <span class="date">
-            <span class="icon">
-                <svg class="fa-icon"><use xlink:href="#calendar-solid"></use></svg>
-            </span>
-            2022/10/1
-        </span>
-    </div>
-    <div class="excerpt">
-        <div class="content" v-pre>
-            
-            <p>这里讨论的问题就像C++中的<code>const *</code>,<code>* const</code>,<code>const * const</code>一样，你完全可以类比。</p>
-<pre><code class="rust">#[allow(unused)]
-fn work_2() &#123;
-    let mut a = 10;
-    &#123;
-        let b = 20;
-        let ref_a = &amp;a; // -&gt; &amp;i32
-        ref_a = &amp;b;            //将引用指向b不可以
-        let mut mut_ref_a = &amp;a; //mut &amp;i32
-        *mut_ref_a = 20;       //更改变量本身，不可以
-        mut_ref_a = &amp;b;        //将引用指向b，可以
-    &#125;
-    let ref_mut_a = &amp;mut a; // -&gt; &amp;mut i32
-    *ref_mut_a = 20;  //更改变量本身的值，可以
-&#125;
-</code></pre>
-<ul>
-<li>&amp; mut代表着对一个变量的可变引用，引用的变量是可变的，但是引用本身是不可变的，也就是说当我确定引用一个变量的时候，就不能再引用其他变量了。</li>
-<li>mut &amp;代表着引用本身是可变的，即这个引用既可以引用a，又可以引用b，但是引用的变量是不可变的。</li>
-<li>&amp; mut &amp; 即代表着上述两者的结合，引用本身是可变的，并且引用的变量也是可变的。</li>
-</ul>
-<pre><code class="error">jan@jan:~/code/rust/option_$ cargo run
-   Compiling option_ v0.1.0 (/home/jan/code/rust/option_)
-error[E0384]: cannot assign twice to immutable variable `ref_a`
-  --&gt; src/main.rs:24:9
-   |
-23 |         let ref_a = &amp;a; // -&gt; &amp;i32
-   |             -----
-   |             |
-   |             first assignment to `ref_a`
-   |             help: consider making this binding mutable: `mut ref_a`
-24 |         ref_a = &amp;b;            //将引用指向b不可以
-   |         ^^^^^^^^^^ cannot assign twice to immutable variable
- 
-error[E0594]: cannot assign to `*mut_ref_a`, which is behind a `&amp;` reference
-  --&gt; src/main.rs:26:9
-   |
-25 |         let mut mut_ref_a = &amp;a; //mut &amp;i32
-   |                             -- help: consider changing this to be a mutable reference: `&amp;mut a`
-26 |         *mut_ref_a = 20;       //更改变量本身，不可以
-   |         ^^^^^^^^^^^^^^^ `mut_ref_a` is a `&amp;` reference, so the data it refers to cannot be written
- 
-Some errors have detailed explanations: E0384, E0594.
-For more information about an error, try `rustc --explain E0384`.
-error: could not compile `option_` due to 2 previous errors
-</code></pre>
-<p>mut &amp;可以用来充当指针的位置，例如输出一个Box+Option的链表。</p>
-<p>为了简便，不实现Display Trait,而是用一个方法</p>
-<pre><code class="rust">impl &lt;T:Display&gt; LinkedList&lt;T&gt; &#123;
-    pub fn display(&amp;self) &#123;
-        let mut curr = &amp;self.head; //curr: mut &amp;Link
-        while let Some(node) = curr &#123;
-            println!(&quot;&#123;&#125;&quot;,node.data);
-            curr = &amp;node.next;
-        &#125;
-    &#125;
-&#125;
-</code></pre>
-
-            
-        </div>
-    </div>
-    <div class="post-tags">
-        
-        <span class="icon">
-            <svg class="fa-icon"><use xlink:href="#tags-solid"></use></svg>
-        </span>
-        
-        
-        <span class="tag">
-            
-            <a href="/tags/Rust/" style="color: #00bcd4">
-                Rust
-            </a>
-        </span>
-        
-        <span class="tag">
-            
-            <a href="/tags/Effective-Rust/" style="color: #03a9f4">
-                Effective Rust
-            </a>
-        </span>
-        
-    </div>
-    <a href="/2022/10/01/区别-mut-mut-mut-mut/" class="go-post">阅读全文</a>
 </div>
 
              
